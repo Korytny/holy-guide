@@ -1,5 +1,4 @@
-
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useState, useMemo } from 'react';
 import { supabase } from '../integrations/supabase/client';
 import { AuthState, UserProfile } from '../types';
 import { getUserProfile } from '../services/api';
@@ -56,19 +55,12 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   };
 
   useEffect(() => {
-    // Initialize auth state
     const initAuth = async () => {
       try {
-        // Set up auth state listener FIRST
         const { data: { subscription } } = supabase.auth.onAuthStateChange(
           (event, session) => {
-            console.log('Auth state changed:', event);
-            
             if (event === 'SIGNED_IN' || event === 'TOKEN_REFRESHED') {
-              // Only update on signin or token refresh
-              setTimeout(() => {
-                refreshProfile();
-              }, 0);
+              refreshProfile();
             } else if (event === 'SIGNED_OUT') {
               setAuth({
                 isAuthenticated: false,
@@ -79,7 +71,6 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }
         );
 
-        // THEN check for existing session
         const { data: { session } } = await supabase.auth.getSession();
         
         if (session) {
@@ -108,8 +99,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     initAuth();
   }, []);
 
+  const contextValue = useMemo(() => ({ 
+    auth, 
+    refreshProfile 
+  }), [auth, refreshProfile]);
+  
   return (
-    <AuthContext.Provider value={{ auth, refreshProfile }}>
+    <AuthContext.Provider value={contextValue}>
       {children}
     </AuthContext.Provider>
   );

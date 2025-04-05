@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Search } from 'lucide-react';
 import { useLanguage } from '../context/LanguageContext';
 
@@ -12,9 +12,17 @@ const SearchBar: React.FC<SearchBarProps> = ({ onSearch, placeholder }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { t } = useLanguage();
   
+  useEffect(() => {
+    if (searchTerm.length === 0 || searchTerm.length > 2) {
+      const timer = setTimeout(() => {
+        onSearch(searchTerm);
+      }, 500);
+      return () => clearTimeout(timer);
+    }
+  }, [searchTerm, onSearch]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSearch(searchTerm);
   };
   
   return (

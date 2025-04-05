@@ -41,6 +41,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "about_city": "About the City",
     "city_not_found": "City not found",
     "explore_on_map": "Explore on Map",
+    "route_on_map_title": "Route on Map",
     
     // Favorites
     "added_to_favorites": "Added to Favorites",
@@ -62,7 +63,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "Place not found",
     "route_not_found": "Route not found",
     "event_not_found": "Event not found",
-    "back_to_city": "Back to City"
+    "no_description_available": "No description available",
+    "back_to_city": "Back to City",
+    "places_on_route": "Places on Route",
+    "related_events": "Related Events",
+    "cities_title": "Sacred places of India",
+    "cities_subtitle": "Discover the spiritual heart of India through its most sacred cities",
+    "search_placeholder": "Search cities..."
   },
   ru: {
     // General
@@ -91,6 +98,8 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "about_city": "О городе",
     "city_not_found": "Город не найден",
     "explore_on_map": "Исследовать на карте",
+    "location": "Местоположение",
+    "route_on_map_title": "Маршрут на карте",
     
     // Favorites
     "added_to_favorites": "Добавлено в избранное",
@@ -112,7 +121,12 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "Место не найдено",
     "route_not_found": "Маршрут не найден",
     "event_not_found": "Событие не найдено",
-    "back_to_city": "Назад к городу"
+    "back_to_city": "Назад к городу",
+    "places_on_route": "Места на маршруте",
+    "related_events": "Связанные события",
+    "cities_title": "Священные места Индии",
+    "cities_subtitle": "Откройте для себя духовное сердце Индии через её самые священные города",
+    "search_placeholder": "Поиск городов..."
   },
   hi: {
     // General
@@ -141,6 +155,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "about_city": "शहर के बारे में",
     "city_not_found": "शहर नहीं मिला",
     "explore_on_map": "नक्शे पर खोजें",
+    "location": "स्थान",
     
     // Favorites
     "added_to_favorites": "पसंदीदा में जोड़ा गया",
@@ -162,7 +177,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "स्थान नहीं मिला",
     "route_not_found": "मार्ग नहीं मिला",
     "event_not_found": "कार्यक्रम नहीं मिला",
-    "back_to_city": "शहर पर वापस जाएं"
+    "no_description_available": "कोई विवरण उपलब्ध नहीं है",
+    "back_to_city": "शहर पर वापस जाएं",
+    "places_on_route": "मार्ग पर स्थान",
+    "related_events": "संबंधित कार्यक्रम",
+    "cities_title": "भारत के पवित्र स्थान",
+    "cities_subtitle": "भारत की आध्यात्मिक हृदयस्थली को उसके सबसे पवित्र शहरों के माध्यम से खोजें",
+    "search_placeholder": "शहर खोजें..."
   }
 };
 

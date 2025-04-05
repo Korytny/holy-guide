@@ -13,7 +13,22 @@ const CityCard: React.FC<CityCardProps> = ({ city }) => {
   const { language, t } = useLanguage();
   
   const cityName = getLocalizedText(city.name, language);
-  const cityDescription = getLocalizedText(city.description, language);
+  
+  console.log('City info structure:', city.info);
+  
+  // Get info fields for current language, limit to 3 items
+  const infoFields = city.info
+    ? Object.entries(city.info)
+        .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key))
+        .slice(0, 3)
+        .map(([key, value]) => {
+          const displayKey = ['en', 'ru', 'hi'].includes(key) ? '' : key;
+          const textValue = typeof value === 'object'
+            ? getLocalizedText(value, language)
+            : String(value);
+          return { key: displayKey, value: textValue };
+        })
+    : [];
   
   return (
     <Link to={`/cities/${city.id}`} className="block">
@@ -28,13 +43,18 @@ const CityCard: React.FC<CityCardProps> = ({ city }) => {
         </div>
         <div className="india-card-content">
           <h3 className="text-lg font-medium mb-1">{cityName}</h3>
-          <p className="text-sm text-gray-600 line-clamp-2">
-            {cityDescription.substring(0, 100)}
-            {cityDescription.length > 100 ? '...' : ''}
-          </p>
-          <button className="mt-3 text-sm text-saffron font-medium hover:underline">
-            {t('explore')} →
-          </button>
+          <div className="text-sm text-gray-600 h-[4.5rem] overflow-hidden space-y-1">
+            {infoFields.length > 0 ? (
+              infoFields.map((field, i) => (
+                <div key={i} className="line-clamp-3">
+                  {field.key && <span className="font-medium">{field.key} </span>}
+                  {field.value}
+                </div>
+              ))
+            ) : (
+              <p className="text-gray-500">No additional information</p>
+            )}
+          </div>
         </div>
       </div>
     </Link>

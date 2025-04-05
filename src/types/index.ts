@@ -2,18 +2,34 @@ export type Language = "ru" | "en" | "hi";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
 
-export interface City {
+export type LocalizedText = { [key in Language]?: string };
+
+export interface CityFromDB {
   id: string;
-  name: string | { [key in Language]?: string };
-  description: string | { [key in Language]?: string };
-  imageUrl: string;
+  name: Json;
+  image_url?: string;
   country: string;
-  // Database fields
   events_count?: number;
   routes_count?: number;
   spots_count?: number;
-  info?: any;
+  info?: Json;
+  images?: Json;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface City {
+  id: string;
+  name: LocalizedText;
+  imageUrl: string;
+  country: string;
+  eventsCount?: number;
+  routesCount?: number;
+  spotsCount?: number;
+  info?: Record<string, any>;
   images?: any;
+  createdAt: Date;
+  updatedAt: Date;
 }
 
 export interface Place {

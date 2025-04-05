@@ -34,7 +34,7 @@ const Navbar = () => {
     }
   };
   
-  console.log("Auth state in Navbar:", auth);
+  // Removed debug logging to prevent unnecessary re-renders
   
   return (
     <div className="bg-white shadow-sm border-b">

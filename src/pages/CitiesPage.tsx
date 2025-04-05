@@ -1,63 +1,87 @@
 import { useEffect, useState } from 'react';
-import { getCities } from '../services/api';
-import { City } from '../types';
+import { getCities } from '../services/citiesApi';
+import { City, Language } from '../types';
 import CityCard from '../components/CityCard';
 import SearchBar from '../components/SearchBar';
-import FilterSection from '../components/FilterSection';
 import Layout from '../components/Layout';
+import { useLanguage } from '../context/LanguageContext';
+
 const CitiesPage = () => {
+  const { t } = useLanguage();
   const [cities, setCities] = useState<City[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
-  const [filter, setFilter] = useState<any>({});
+  const [allCities, setAllCities] = useState<City[]>([]);
+
   useEffect(() => {
-    const fetchCities = async () => {
+    const fetchAllCities = async () => {
       setIsLoading(true);
-      const citiesData = await getCities(searchTerm, filter);
+      const citiesData = await getCities();
+      setAllCities(citiesData);
       setCities(citiesData);
       setIsLoading(false);
     };
-    fetchCities();
-  }, [searchTerm, filter]);
-  return <Layout>
+    fetchAllCities();
+  }, []);
+
+  useEffect(() => {
+    if (!searchTerm) {
+      setCities(allCities);
+      return;
+    }
+
+    const lowerSearchTerm = searchTerm.toLowerCase();
+    const results = allCities.filter(city => {
+      // Check name in all languages
+      return Object.values(city.name).some(
+        name => name?.toLowerCase().includes(lowerSearchTerm)
+      );
+    });
+    
+    setCities(results);
+  }, [searchTerm, allCities]);
+
+  return (
+    <Layout>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-purple-50 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-8">
-            <h1 className="text-3xl font-bold text-gray-900">Sacred placed of India</h1>
+            <h1 className="text-3xl font-bold text-gray-900">{t('cities_title')}</h1>
             <p className="mt-4 text-lg text-gray-600">
-              Discover the spiritual heart of India through its most sacred cities
+              {t('cities_subtitle')}
             </p>
           </div>
           
-          <div className="flex flex-col lg:flex-row gap-6 mb-8">
-            <div className="lg:w-2/3 w-full">
-              <SearchBar placeholder="Search cities..." onSearch={term => setSearchTerm(term)} />
-            </div>
-            <div className="lg:w-1/3 w-full">
-              <FilterSection filters={[{
-              name: 'country',
-              label: 'Country',
-              options: ['India', 'Nepal', 'Sri Lanka']
-            }, {
-              name: 'type',
-              label: 'Type',
-              options: ['Sacred', 'Historical', 'Cultural']
-            }]} onFilterChange={setFilter} />
+          <div className="flex justify-center mb-8">
+            <div className="w-full max-w-2xl">
+              <SearchBar placeholder={t('search_placeholder')} onSearch={term => setSearchTerm(term)} />
             </div>
           </div>
 
-          {isLoading ? <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[...Array(6)].map((_, i) => <div key={i} className="bg-white rounded-lg h-72 animate-pulse shadow-md"></div>)}
-            </div> : <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {cities.map(city => <CityCard key={city.id} city={city} />)}
+          {isLoading ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {[...Array(6)].map((_, i) => (
+                <div key={i} className="bg-white rounded-lg h-72 animate-pulse shadow-md"></div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {cities.map(city => (
+                <CityCard key={city.id} city={city} />
+              ))}
               
-              {cities.length === 0 && !isLoading && <div className="col-span-3 text-center py-10">
-                  <h3 className="text-lg font-medium text-gray-900">No cities found</h3>
-                  <p className="mt-2 text-gray-500">Try adjusting your search or filter criteria</p>
-                </div>}
-            </div>}
+              {cities.length === 0 && !isLoading && (
+                <div className="col-span-3 text-center py-10">
+                  <h3 className="text-lg font-medium text-gray-900">{t('no_cities_found')}</h3>
+                  <p className="mt-2 text-gray-500">{t('try_adjusting_search')}</p>
+                </div>
+              )}
+            </div>
+          )}
         </div>
       </div>
-    </Layout>;
+    </Layout>
+  );
 };
+
 export default CitiesPage;
