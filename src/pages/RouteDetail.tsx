@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getRouteById, getPlaceById, getEventById } from '../services/api';
+import { getRouteById, getPlacesByRouteId, getEventsByRouteId } from '../services/api';
 import { Route, Place, Event } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,13 +25,17 @@ const RouteDetail = () => {
       
       setLoading(true);
       try {
+        // Load the route details
         const routeData = await getRouteById(id);
         setRoute(routeData);
         
-        // This is a mock implementation - in a real app, you would fetch related places and events
-        // For demo purposes, we'll simulate empty arrays
-        setPlaces([]);
-        setEvents([]);
+        // Load related places
+        const placesData = await getPlacesByRouteId(id);
+        setPlaces(placesData);
+        
+        // Load related events
+        const eventsData = await getEventsByRouteId(id);
+        setEvents(eventsData);
       } catch (error) {
         console.error('Failed to load route data:', error);
       } finally {
@@ -70,15 +74,15 @@ const RouteDetail = () => {
     );
   }
   
-  // For demo purposes, we'll use empty locations since we don't have real place data
+  // Extract map locations from the related places
   const mapLocations = places.map(place => ({
     latitude: place.location.latitude,
     longitude: place.location.longitude,
-    name: place.name,
+    name: getLocalizedText(place.name, language),
   }));
   
-  const routeName = route ? getLocalizedText(route.name, language) : '';
-  const routeDescription = route ? getLocalizedText(route.description, language) : '';
+  const routeName = getLocalizedText(route.name, language);
+  const routeDescription = route.description ? getLocalizedText(route.description, language) : '';
   
   return (
     <div className="app-container py-6">
