@@ -1,12 +1,16 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language, UserProfile } from '../types';
+import { getLocalizedText } from '../utils/languageUtils';
 
-// Helper functions to transform database objects to our app models
+// Helper function to transform database objects to our app models
 const transformCity = (dbCity: any): City => ({
   id: dbCity.id,
-  name: typeof dbCity.name === 'object' ? dbCity.name : { en: dbCity.name || '' },
-  description: dbCity.info?.description || '',
+  name: typeof dbCity.name === 'object' 
+    ? dbCity.name 
+    : { en: dbCity.name || '' },
+  description: typeof dbCity.info?.description === 'object' 
+    ? dbCity.info.description 
+    : { en: dbCity.info?.description || '' },
   imageUrl: Array.isArray(dbCity.images) && dbCity.images.length > 0 
     ? dbCity.images[0] 
     : dbCity.images?.main || 'https://via.placeholder.com/300',
@@ -20,8 +24,12 @@ const transformCity = (dbCity: any): City => ({
 
 const transformPlace = (dbPlace: any): Place => ({
   id: dbPlace.id,
-  name: typeof dbPlace.name === 'object' ? dbPlace.name : { en: dbPlace.name || '' },
-  description: dbPlace.info?.description || '',
+  name: typeof dbPlace.name === 'object' 
+    ? dbPlace.name 
+    : { en: dbPlace.name || '' },
+  description: typeof dbPlace.info?.description === 'object' 
+    ? dbPlace.info.description 
+    : { en: dbPlace.info?.description || '' },
   imageUrl: Array.isArray(dbPlace.images) && dbPlace.images.length > 0 
     ? dbPlace.images[0] 
     : dbPlace.images?.main || 'https://via.placeholder.com/300',
@@ -41,8 +49,12 @@ const transformPlace = (dbPlace: any): Place => ({
 
 const transformRoute = (dbRoute: any): Route => ({
   id: dbRoute.id,
-  name: typeof dbRoute.name === 'object' ? dbRoute.name : { en: dbRoute.name || '' },
-  description: dbRoute.info?.description || '',
+  name: typeof dbRoute.name === 'object' 
+    ? dbRoute.name 
+    : { en: dbRoute.name || '' },
+  description: typeof dbRoute.info?.description === 'object' 
+    ? dbRoute.info.description 
+    : { en: dbRoute.info?.description || '' },
   imageUrl: Array.isArray(dbRoute.images) && dbRoute.images.length > 0 
     ? dbRoute.images[0] 
     : dbRoute.images?.main || 'https://via.placeholder.com/300',
@@ -55,8 +67,12 @@ const transformRoute = (dbRoute: any): Route => ({
 
 const transformEvent = (dbEvent: any): Event => ({
   id: dbEvent.id,
-  name: typeof dbEvent.name === 'object' ? dbEvent.name : { en: dbEvent.name || '' },
-  description: dbEvent.info?.description || '',
+  name: typeof dbEvent.name === 'object' 
+    ? dbEvent.name 
+    : { en: dbEvent.name || '' },
+  description: typeof dbEvent.info?.description === 'object' 
+    ? dbEvent.info.description 
+    : { en: dbEvent.info?.description || '' },
   imageUrl: Array.isArray(dbEvent.images) && dbEvent.images.length > 0 
     ? dbEvent.images[0] 
     : dbEvent.images?.main || 'https://via.placeholder.com/300',
@@ -523,7 +539,7 @@ export const getUserProfile = async () => {
 };
 
 // User authentication and profile functions
-export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
+export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string, cities_like?: string[] }) => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
     
