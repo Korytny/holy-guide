@@ -609,3 +609,73 @@ export const signOut = async () => {
     throw error;
   }
 };
+
+// Get routes related to a place
+export const getRoutesByPlaceId = async (placeId: string) => {
+  try {
+    // First get the route IDs from the spot_route join table
+    const { data: relationData, error: relationError } = await supabase
+      .from('spot_route')
+      .select('route_id')
+      .eq('spot_id', placeId);
+    
+    if (relationError || !relationData || relationData.length === 0) {
+      console.log('No related routes found or error:', relationError);
+      return [];
+    }
+    
+    // Extract the route IDs
+    const routeIds = relationData.map(rel => rel.route_id);
+    
+    // Now get the actual route data
+    const { data: routesData, error: routesError } = await supabase
+      .from('routes')
+      .select('*')
+      .in('id', routeIds);
+    
+    if (routesError) {
+      console.error('Error fetching related routes:', routesError);
+      return [];
+    }
+    
+    return routesData ? routesData.map(transformRoute) : [];
+  } catch (error) {
+    console.error('Error in getRoutesByPlaceId:', error);
+    return [];
+  }
+};
+
+// Get events related to a place
+export const getEventsByPlaceId = async (placeId: string) => {
+  try {
+    // First get the event IDs from the spot_event join table
+    const { data: relationData, error: relationError } = await supabase
+      .from('spot_event')
+      .select('event_id')
+      .eq('spot_id', placeId);
+    
+    if (relationError || !relationData || relationData.length === 0) {
+      console.log('No related events found or error:', relationError);
+      return [];
+    }
+    
+    // Extract the event IDs
+    const eventIds = relationData.map(rel => rel.event_id);
+    
+    // Now get the actual event data
+    const { data: eventsData, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .in('id', eventIds);
+    
+    if (eventsError) {
+      console.error('Error fetching related events:', eventsError);
+      return [];
+    }
+    
+    return eventsData ? eventsData.map(transformEvent) : [];
+  } catch (error) {
+    console.error('Error in getEventsByPlaceId:', error);
+    return [];
+  }
+};

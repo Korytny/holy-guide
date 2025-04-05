@@ -267,7 +267,6 @@ export type Database = {
         Row: {
           city: string | null
           cityeng_old: string | null
-          coordinates: Json | null
           created_at: string | null
           id: string
           id_old: number | null
@@ -280,7 +279,6 @@ export type Database = {
         Insert: {
           city?: string | null
           cityeng_old?: string | null
-          coordinates?: Json | null
           created_at?: string | null
           id?: string
           id_old?: number | null
@@ -293,7 +291,6 @@ export type Database = {
         Update: {
           city?: string | null
           cityeng_old?: string | null
-          coordinates?: Json | null
           created_at?: string | null
           id?: string
           id_old?: number | null

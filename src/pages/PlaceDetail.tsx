@@ -1,6 +1,7 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getPlaceById, getRouteById, getEventById } from '../services/api';
+import { getPlaceById, getRoutesByPlaceId, getEventsByPlaceId } from '../services/api';
 import { Place, Route, Event } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -24,13 +25,17 @@ const PlaceDetail = () => {
       
       setLoading(true);
       try {
+        // Load the place details
         const placeData = await getPlaceById(id);
         setPlace(placeData);
         
-        // This is a mock implementation - in a real app, you would fetch related routes and events
-        // For demo purposes, we'll simulate empty arrays
-        setRelatedRoutes([]);
-        setRelatedEvents([]);
+        // Load related routes
+        const routesData = await getRoutesByPlaceId(id);
+        setRelatedRoutes(routesData);
+        
+        // Load related events
+        const eventsData = await getEventsByPlaceId(id);
+        setRelatedEvents(eventsData);
       } catch (error) {
         console.error('Failed to load place data:', error);
       } finally {
