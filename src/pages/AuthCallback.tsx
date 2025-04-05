@@ -27,7 +27,7 @@ const AuthCallback = () => {
           console.error("No code found in URL");
           setErrorMessage('No authentication code found in URL');
           setIsProcessing(false);
-          throw new Error('No code found in URL');
+          return;
         }
 
         console.log("Found auth code, exchanging for session...");
@@ -39,7 +39,7 @@ const AuthCallback = () => {
           console.error("Error exchanging code for session:", error);
           setErrorMessage(error.message);
           setIsProcessing(false);
-          throw error;
+          return;
         }
 
         console.log("Session established successfully:", !!data.session);

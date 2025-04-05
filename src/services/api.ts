@@ -1,4 +1,3 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language, Json, UserProfile } from '../types';
 
@@ -80,7 +79,6 @@ export const getCities = async (search?: string, filters?: Record<string, any>) 
     }
     
     if (filters) {
-      // Apply any additional filters
       Object.entries(filters).forEach(([key, value]) => {
         if (value) {
           query = query.eq(key, value);
@@ -167,7 +165,6 @@ export const getPlaceById = async (id: string) => {
 // Get routes by city ID
 export const getRoutesByCityId = async (cityId: string) => {
   try {
-    // This might need adjustment based on your actual database structure
     const { data, error } = await supabase
       .from('routes')
       .select('*')
@@ -209,7 +206,6 @@ export const getRouteById = async (id: string) => {
 // Get events by city ID
 export const getEventsByCityId = async (cityId: string) => {
   try {
-    // This might need adjustment based on your actual database structure
     const { data, error } = await supabase
       .from('events')
       .select('*')
@@ -257,7 +253,6 @@ export const getTranslations = async (language: Language) => {
 // Search functionality
 export const search = async (term: string, type: 'cities' | 'spots' | 'routes' | 'events') => {
   try {
-    // Adjust the search query based on the database structure
     let tableName = type;
     if (type === 'spots') {
       tableName = 'spots'; // Use 'spots' table for places
@@ -303,14 +298,12 @@ export const getUserProfile = async () => {
     }
     
     try {
-      // Attempt to get the user profile
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, full_name, avatar_url, updated_at')
+        .select('*')
         .eq('id', session.user.id)
-        .maybeSingle();  // Use maybeSingle instead of single to avoid errors
+        .maybeSingle();
       
-      // If profile exists, return it
       if (data) {
         return {
           id: data.id,
@@ -320,15 +313,41 @@ export const getUserProfile = async () => {
         };
       }
       
-      // If no profile exists, create one
       if (error || !data) {
         console.log('Profile not found, creating new profile');
-        return createUserProfile(session.user.id, session.user.user_metadata);
+        
+        try {
+          const { data: newProfile, error: insertError } = await supabase
+            .rpc('create_user_profile', { 
+              user_id: session.user.id,
+              user_full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
+              user_avatar_url: session.user.user_metadata.avatar_url || null
+            });
+          
+          if (insertError) throw insertError;
+          
+          const { data: createdProfile } = await supabase
+            .from('profiles')
+            .select('*')
+            .eq('id', session.user.id)
+            .single();
+          
+          if (createdProfile) {
+            return {
+              id: createdProfile.id,
+              fullName: createdProfile.full_name,
+              avatarUrl: createdProfile.avatar_url,
+              updatedAt: createdProfile.updated_at
+            };
+          }
+        } catch (rpcError) {
+          console.error('Error using RPC to create profile:', rpcError);
+          throw rpcError;
+        }
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
-      // Try to create a profile as a fallback
-      return createUserProfile(session.user.id, session.user.user_metadata);
+      throw error;
     }
   } catch (error) {
     console.error('Error in getUserProfile:', error);
@@ -336,63 +355,6 @@ export const getUserProfile = async () => {
   }
 };
 
-// Create a user profile
-const createUserProfile = async (userId: string, userMetadata: any) => {
-  try {
-    const fullName = userMetadata?.full_name || userMetadata?.name || userMetadata?.email || 'User';
-    const avatarUrl = userMetadata?.avatar_url || null;
-    
-    // First check if profile already exists to avoid duplicates
-    const { data: existingProfile } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', userId)
-      .maybeSingle();
-      
-    if (existingProfile) {
-      return {
-        id: existingProfile.id,
-        fullName: existingProfile.full_name,
-        avatarUrl: existingProfile.avatar_url,
-        updatedAt: existingProfile.updated_at
-      };
-    }
-    
-    // If no profile exists, insert a new one
-    const { data, error } = await supabase
-      .from('profiles')
-      .insert([
-        { 
-          id: userId,
-          full_name: fullName,
-          avatar_url: avatarUrl 
-        }
-      ])
-      .select()
-      .maybeSingle();
-      
-    if (error) {
-      console.error('Error creating user profile:', error);
-      return null;
-    }
-    
-    if (data) {
-      return {
-        id: data.id,
-        fullName: data.full_name,
-        avatarUrl: data.avatar_url,
-        updatedAt: data.updated_at
-      };
-    }
-    
-    return null;
-  } catch (error) {
-    console.error('Error in createUserProfile:', error);
-    return null;
-  }
-};
-
-// Function to update user profile
 export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
