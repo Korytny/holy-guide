@@ -14,12 +14,26 @@ serve(async (req) => {
   }
 
   try {
+    // Get the authorization header
+    const authHeader = req.headers.get("Authorization");
+    
+    if (!authHeader) {
+      return new Response(
+        JSON.stringify({ error: "Missing Authorization header" }),
+        {
+          status: 401,
+          headers: { ...corsHeaders, "Content-Type": "application/json" },
+        }
+      );
+    }
+
     const supabaseClient = createClient(
+      // These environment variables are set automatically by Supabase
       Deno.env.get("SUPABASE_URL") ?? "",
       Deno.env.get("SUPABASE_ANON_KEY") ?? "",
       {
         global: {
-          headers: { Authorization: req.headers.get("Authorization")! },
+          headers: { Authorization: authHeader },
         },
       }
     );
@@ -31,7 +45,7 @@ serve(async (req) => {
 
     if (!user) {
       return new Response(
-        JSON.stringify({ error: "Unauthorized" }),
+        JSON.stringify({ error: "Unauthorized: Invalid token" }),
         {
           status: 401,
           headers: { ...corsHeaders, "Content-Type": "application/json" },
@@ -53,15 +67,20 @@ serve(async (req) => {
       );
     }
 
-    // Insert the profile
-    const { data, error } = await supabaseClient
+    // Insert the profile using the service role client for bypassing RLS
+    const serviceRoleClient = createClient(
+      Deno.env.get("SUPABASE_URL") ?? "",
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ?? ""
+    );
+
+    const { data, error } = await serviceRoleClient
       .from("profiles")
       .insert([
         {
           id: user_id,
           full_name: full_name,
           avatar_url: avatar_url,
-        },
+        }
       ])
       .select("*")
       .single();
