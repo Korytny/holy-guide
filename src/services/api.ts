@@ -1,6 +1,6 @@
 
 import { supabase } from '../integrations/supabase/client';
-import { City, Place, Route, Event, Language, Json, UserProfile } from '../types';
+import { City, Place, Route, Event, Language, UserProfile } from '../types';
 
 // Helper functions to transform database objects to our app models
 const transformCity = (dbCity: any): City => ({
@@ -320,7 +320,7 @@ export const getUserProfile = async () => {
         console.log('Profile not found, creating new profile');
         
         try {
-          // Call the RPC function to create a user profile with proper RLS
+          // Call the edge function with proper authorization
           const { data: createResult, error: funcError } = await supabase.functions.invoke(
             'create-profile', 
             {
@@ -328,6 +328,9 @@ export const getUserProfile = async () => {
                 user_id: session.user.id,
                 full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
                 avatar_url: session.user.user_metadata.avatar_url || null
+              },
+              headers: {
+                Authorization: `Bearer ${session.access_token}`
               }
             }
           );
