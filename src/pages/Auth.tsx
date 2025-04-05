@@ -21,7 +21,11 @@ const Auth = () => {
 
   const handleGoogleSignIn = async () => {
     try {
+      console.log("Google sign-in button clicked");
       await signInWithGoogle();
+      console.log("Sign-in with Google initiated successfully");
+      
+      // No need to redirect here - the OAuth flow will handle the redirect
     } catch (error) {
       console.error('Error signing in with Google:', error);
       toast({

@@ -9,11 +9,33 @@ import {
   MenubarItem, 
   MenubarTrigger 
 } from '@/components/ui/menubar';
-import { User } from 'lucide-react';
+import { LogOut, User } from 'lucide-react';
+import { signOut } from '../services/api';
+import { useToast } from '@/hooks/use-toast';
 
 const Navbar = () => {
-  const { auth } = useAuth();
+  const { auth, refreshProfile } = useAuth();
   const navigate = useNavigate();
+  const { toast } = useToast();
+
+  const handleSignOut = async () => {
+    try {
+      await signOut();
+      toast({
+        title: "Выход выполнен",
+        description: "Вы успешно вышли из своего аккаунта.",
+      });
+      await refreshProfile();
+      navigate('/cities');
+    } catch (error) {
+      console.error('Error signing out:', error);
+      toast({
+        title: "Ошибка",
+        description: "Не удалось выйти из аккаунта",
+        variant: "destructive"
+      });
+    }
+  };
 
   return (
     <div className="bg-white shadow-sm border-b">
@@ -41,6 +63,10 @@ const Navbar = () => {
                   <MenubarContent>
                     <MenubarItem onClick={() => navigate('/profile')}>
                       Мой профиль
+                    </MenubarItem>
+                    <MenubarItem onClick={handleSignOut} className="text-red-600">
+                      <LogOut size={16} className="mr-2" />
+                      Выйти
                     </MenubarItem>
                   </MenubarContent>
                 </MenubarMenu>

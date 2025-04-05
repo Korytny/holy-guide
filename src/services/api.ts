@@ -223,7 +223,7 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
   }
   
   const { data, error } = await supabase
-    .from(tableName as any) // Type cast to avoid TS errors
+    .from(tableName)
     .select('*')
     .textSearch('name', term);
   
@@ -303,17 +303,23 @@ export const updateUserProfile = async (updates: { full_name?: string, avatar_ur
 };
 
 export const signInWithGoogle = async () => {
-  const { error } = await supabase.auth.signInWithOAuth({
+  console.log('Attempting to sign in with Google...');
+  
+  const { data, error } = await supabase.auth.signInWithOAuth({
     provider: 'google',
     options: {
       redirectTo: `${window.location.origin}/auth/callback`
     }
   });
   
+  console.log('Sign in attempt result:', { data, error });
+  
   if (error) {
     console.error('Error signing in with Google:', error);
     throw error;
   }
+  
+  return data;
 };
 
 export const signOut = async () => {
