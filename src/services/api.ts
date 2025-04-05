@@ -250,35 +250,81 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
 
 // New functions for user authentication and profile
 export const getUserProfile = async () => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) {
-    return null;
-  }
-  
-  // Type the response properly
-  const { data, error } = await supabase
-    .from('profiles')
-    .select('id, full_name, avatar_url, updated_at')
-    .eq('id', session.user.id)
-    .single();
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
     
-  if (error) {
-    console.error('Error fetching user profile:', error);
+    if (!session) {
+      return null;
+    }
+    
+    // Type the response properly
+    const { data, error } = await supabase
+      .from('profiles')
+      .select('id, full_name, avatar_url, updated_at')
+      .eq('id', session.user.id)
+      .single();
+      
+    if (error) {
+      // Profile doesn't exist, create it
+      if (error.code === 'PGRST116') {
+        console.log('Profile not found, creating new profile');
+        return createUserProfile(session.user.id, session.user.user_metadata);
+      }
+      
+      console.error('Error fetching user profile:', error);
+      return null;
+    }
+    
+    if (!data) {
+      return null;
+    }
+    
+    // Transform the data to match our UserProfile type
+    return {
+      id: data.id,
+      fullName: data.full_name,
+      avatarUrl: data.avatar_url,
+      updatedAt: data.updated_at
+    };
+  } catch (error) {
+    console.error('Error in getUserProfile:', error);
     return null;
   }
-  
-  if (!data) {
+};
+
+// New function to create a user profile when it doesn't exist
+const createUserProfile = async (userId: string, userMetadata: any) => {
+  try {
+    const fullName = userMetadata?.full_name || userMetadata?.name || null;
+    const avatarUrl = userMetadata?.avatar_url || null;
+    
+    const { data, error } = await supabase
+      .from('profiles')
+      .insert([
+        { 
+          id: userId,
+          full_name: fullName,
+          avatar_url: avatarUrl 
+        }
+      ])
+      .select('id, full_name, avatar_url, updated_at')
+      .single();
+      
+    if (error) {
+      console.error('Error creating user profile:', error);
+      return null;
+    }
+    
+    return {
+      id: data.id,
+      fullName: data.full_name,
+      avatarUrl: data.avatar_url,
+      updatedAt: data.updated_at
+    };
+  } catch (error) {
+    console.error('Error in createUserProfile:', error);
     return null;
   }
-  
-  // Transform the data to match our UserProfile type
-  return {
-    id: data.id,
-    fullName: data.full_name,
-    avatarUrl: data.avatar_url,
-    updatedAt: data.updated_at
-  };
 };
 
 // Function to update user profile

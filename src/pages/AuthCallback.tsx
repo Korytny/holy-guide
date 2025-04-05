@@ -3,11 +3,13 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
 
 const AuthCallback = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { refreshProfile } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
 
   useEffect(() => {
@@ -38,6 +40,9 @@ const AuthCallback = () => {
 
         console.log("Session established successfully:", !!data.session);
 
+        // After successful authentication, refresh the user profile
+        await refreshProfile();
+
         toast({
           title: 'Добро пожаловать!',
           description: 'Вы успешно вошли в систему.',
@@ -61,7 +66,7 @@ const AuthCallback = () => {
     };
 
     handleAuthCallback();
-  }, [navigate, toast]);
+  }, [navigate, toast, refreshProfile]);
 
   return (
     <Layout hideNavbar>
