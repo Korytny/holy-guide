@@ -3,10 +3,13 @@ import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { Language } from '../types';
-import { Globe } from 'lucide-react';
+import { Globe, User } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { useAuth } from '../context/AuthContext';
 
 const LanguageSelection = () => {
   const { setLanguage } = useLanguage();
+  const { auth } = useAuth();
   const navigate = useNavigate();
   
   const languages = [
@@ -50,6 +53,17 @@ const LanguageSelection = () => {
               ))}
             </div>
           </div>
+        </div>
+        
+        <div className="mt-6 flex justify-center">
+          <Button 
+            variant="ghost" 
+            onClick={() => navigate(auth.isAuthenticated ? '/profile' : '/auth')}
+            className="flex items-center gap-2"
+          >
+            <User size={16} />
+            {auth.isAuthenticated ? 'View Profile' : 'Sign In'}
+          </Button>
         </div>
       </div>
     </div>

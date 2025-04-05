@@ -71,3 +71,16 @@ export interface LanguageText {
     [lang in Language]: string;
   };
 }
+
+export interface UserProfile {
+  id: string;
+  fullName: string | null;
+  avatarUrl: string | null;
+  updatedAt: string;
+}
+
+export interface AuthState {
+  isAuthenticated: boolean;
+  isLoading: boolean;
+  user: UserProfile | null;
+}

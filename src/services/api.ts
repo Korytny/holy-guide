@@ -46,7 +46,7 @@ const transformRoute = (dbRoute: any): Route => ({
   imageUrl: Array.isArray(dbRoute.images) && dbRoute.images.length > 0 
     ? dbRoute.images[0] 
     : dbRoute.images?.main || 'https://via.placeholder.com/300',
-  cityId: dbRoute.cityId || '',  // We may need to fetch this separately
+  cityId: dbRoute.cityId || '',
   placeIds: [], // We'll need to fetch related spots separately
   eventIds: [], // We'll need to fetch related events separately
   info: dbRoute.info,
@@ -208,20 +208,24 @@ export const getEventById = async (id: string) => {
   return data ? transformEvent(data) : null;
 };
 
-// Get translations by language
+// Get translations - This function will need to be updated based on how translations are stored
 export const getTranslations = async (language: Language) => {
-  // Since there's no translations table, we might need to implement this differently
-  // For now, return an empty object
   console.log('Getting translations for language:', language);
   return {};
 };
 
 // Search functionality
 export const search = async (term: string, type: 'cities' | 'spots' | 'routes' | 'events') => {
+  // Adjust the search query based on the database structure
+  let tableName = type;
+  if (type === 'spots') {
+    tableName = 'spots'; // Use 'spots' table for places
+  }
+  
   const { data, error } = await supabase
-    .from(type)
+    .from(tableName)
     .select('*')
-    .or(`name.ilike.%${term}%,info.ilike.%${term}%`);
+    .textSearch('name', term);
   
   if (error) {
     console.error(`Error searching ${type}:`, error);
@@ -239,5 +243,75 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
       return (data || []).map(transformEvent);
     default:
       return [];
+  }
+};
+
+// New functions for user authentication and profile
+export const getUserProfile = async () => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    return null;
+  }
+  
+  const { data, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', session.user.id)
+    .single();
+    
+  if (error) {
+    console.error('Error fetching user profile:', error);
+    return null;
+  }
+  
+  return {
+    id: data.id,
+    fullName: data.full_name,
+    avatarUrl: data.avatar_url,
+    updatedAt: data.updated_at
+  };
+};
+
+export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  
+  if (!session) {
+    throw new Error('Not authenticated');
+  }
+  
+  const { error } = await supabase
+    .from('profiles')
+    .update(updates)
+    .eq('id', session.user.id);
+    
+  if (error) {
+    console.error('Error updating profile:', error);
+    throw error;
+  }
+  
+  return true;
+};
+
+export const signInWithGoogle = async () => {
+  const { error } = await supabase.auth.signInWithOAuth({
+    provider: 'google',
+    options: {
+      redirectTo: `${window.location.origin}/auth/callback`
+    }
+  });
+  
+  if (error) {
+    console.error('Error signing in with Google:', error);
+    throw error;
+  }
+};
+
+export const signOut = async () => {
+  const { error } = await supabase.auth.signOut();
+  
+  if (error) {
+    console.error('Error signing out:', error);
+    throw error;
   }
 };

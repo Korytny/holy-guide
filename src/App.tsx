@@ -5,6 +5,7 @@ import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { LanguageProvider } from "./context/LanguageContext";
+import { AuthProvider } from "./context/AuthContext";
 
 // Pages
 import LanguageSelection from "./pages/LanguageSelection";
@@ -14,28 +15,36 @@ import PlaceDetail from "./pages/PlaceDetail";
 import RouteDetail from "./pages/RouteDetail";
 import EventDetail from "./pages/EventDetail";
 import NotFound from "./pages/NotFound";
+import Auth from "./pages/Auth";
+import AuthCallback from "./pages/AuthCallback";
+import Profile from "./pages/Profile";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <LanguageProvider>
-      <TooltipProvider>
-        <Toaster />
-        <Sonner />
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<LanguageSelection />} />
-            <Route path="/cities" element={<CitiesPage />} />
-            <Route path="/cities/:id" element={<CityDetail />} />
-            <Route path="/places/:id" element={<PlaceDetail />} />
-            <Route path="/routes/:id" element={<RouteDetail />} />
-            <Route path="/events/:id" element={<EventDetail />} />
-            <Route path="*" element={<NotFound />} />
-          </Routes>
-        </BrowserRouter>
-      </TooltipProvider>
-    </LanguageProvider>
+    <AuthProvider>
+      <LanguageProvider>
+        <TooltipProvider>
+          <Toaster />
+          <Sonner />
+          <BrowserRouter>
+            <Routes>
+              <Route path="/" element={<LanguageSelection />} />
+              <Route path="/cities" element={<CitiesPage />} />
+              <Route path="/cities/:id" element={<CityDetail />} />
+              <Route path="/places/:id" element={<PlaceDetail />} />
+              <Route path="/routes/:id" element={<RouteDetail />} />
+              <Route path="/events/:id" element={<EventDetail />} />
+              <Route path="/auth" element={<Auth />} />
+              <Route path="/auth/callback" element={<AuthCallback />} />
+              <Route path="/profile" element={<Profile />} />
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </BrowserRouter>
+        </TooltipProvider>
+      </LanguageProvider>
+    </AuthProvider>
   </QueryClientProvider>
 );
 
