@@ -1,26 +1,25 @@
-
 import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language, UserProfile } from '../types';
 
 // Helper functions to transform database objects to our app models
 const transformCity = (dbCity: any): City => ({
   id: dbCity.id,
-  name: typeof dbCity.name === 'string' ? dbCity.name : dbCity.name?.en || '',
+  name: typeof dbCity.name === 'object' ? dbCity.name : { en: dbCity.name || '' },
   description: dbCity.info?.description?.en || '',
   imageUrl: Array.isArray(dbCity.images) && dbCity.images.length > 0 
     ? dbCity.images[0] 
     : dbCity.images?.main || 'https://via.placeholder.com/300',
   country: dbCity.country || '',
-  events_count: dbCity.events_count,
-  routes_count: dbCity.routes_count,
-  spots_count: dbCity.spots_count,
-  info: dbCity.info,
-  images: dbCity.images
+  events_count: dbCity.events_count || 0,
+  routes_count: dbCity.routes_count || 0,
+  spots_count: dbCity.spots_count || 0,
+  info: dbCity.info || {},
+  images: dbCity.images || {}
 });
 
 const transformPlace = (dbPlace: any): Place => ({
   id: dbPlace.id,
-  name: typeof dbPlace.name === 'string' ? dbPlace.name : dbPlace.name?.en || '',
+  name: typeof dbPlace.name === 'object' ? dbPlace.name : { en: dbPlace.name || '' },
   description: dbPlace.info?.description?.en || '',
   imageUrl: Array.isArray(dbPlace.images) && dbPlace.images.length > 0 
     ? dbPlace.images[0] 
@@ -31,9 +30,9 @@ const transformPlace = (dbPlace: any): Place => ({
     longitude: dbPlace.coordinates?.lng || 0
   },
   city: dbPlace.city,
-  coordinates: dbPlace.coordinates,
-  info: dbPlace.info,
-  images: dbPlace.images,
+  coordinates: dbPlace.coordinates || {},
+  info: dbPlace.info || {},
+  images: dbPlace.images || {},
   type: dbPlace.type,
   point: dbPlace.point,
   created_at: dbPlace.created_at
@@ -41,32 +40,32 @@ const transformPlace = (dbPlace: any): Place => ({
 
 const transformRoute = (dbRoute: any): Route => ({
   id: dbRoute.id,
-  name: typeof dbRoute.name === 'string' ? dbRoute.name : dbRoute.name?.en || '',
+  name: typeof dbRoute.name === 'object' ? dbRoute.name : { en: dbRoute.name || '' },
   description: dbRoute.info?.description?.en || '',
   imageUrl: Array.isArray(dbRoute.images) && dbRoute.images.length > 0 
     ? dbRoute.images[0] 
     : dbRoute.images?.main || 'https://via.placeholder.com/300',
   cityId: dbRoute.cityId || '',
-  placeIds: [], // We'll need to fetch related spots separately
-  eventIds: [], // We'll need to fetch related events separately
-  info: dbRoute.info,
-  images: dbRoute.images
+  placeIds: dbRoute.spots || [],
+  eventIds: dbRoute.events || [],
+  info: dbRoute.info || {},
+  images: dbRoute.images || {}
 });
 
 const transformEvent = (dbEvent: any): Event => ({
   id: dbEvent.id,
-  name: typeof dbEvent.name === 'string' ? dbEvent.name : dbEvent.name?.en || '',
+  name: typeof dbEvent.name === 'object' ? dbEvent.name : { en: dbEvent.name || '' },
   description: dbEvent.info?.description?.en || '',
   imageUrl: Array.isArray(dbEvent.images) && dbEvent.images.length > 0 
     ? dbEvent.images[0] 
     : dbEvent.images?.main || 'https://via.placeholder.com/300',
-  cityId: '', // We may need to fetch this separately
-  placeIds: [], // We'll need to fetch related spots separately
-  routeIds: [], // We'll need to fetch related routes separately
+  cityId: dbEvent.cityId || '',
+  placeIds: dbEvent.spots || [],
+  routeIds: dbEvent.routes || [],
   date: dbEvent.time,
   time: dbEvent.time,
-  info: dbEvent.info,
-  images: dbEvent.images,
+  info: dbEvent.info || {},
+  images: dbEvent.images || {},
   type: dbEvent.type
 });
 
@@ -291,7 +290,152 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
   }
 };
 
-// User authentication and profile functions
+// Add city to favorites
+export const addCityToFavorites = async (cityId: string) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
+    
+    // Get current favorites
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('cities_like')
+      .eq('id', session.user.id)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching profile:', fetchError);
+      throw fetchError;
+    }
+    
+    // Update favorites - add city if not already there
+    const currentLikes = profile?.cities_like || [];
+    
+    if (!currentLikes.includes(cityId)) {
+      const { error: updateError } = await supabase
+        .from('profiles')
+        .update({ cities_like: [...currentLikes, cityId] })
+        .eq('id', session.user.id);
+        
+      if (updateError) {
+        console.error('Error updating favorites:', updateError);
+        throw updateError;
+      }
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in addCityToFavorites:', error);
+    throw error;
+  }
+};
+
+// Remove city from favorites
+export const removeCityFromFavorites = async (cityId: string) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
+    
+    // Get current favorites
+    const { data: profile, error: fetchError } = await supabase
+      .from('profiles')
+      .select('cities_like')
+      .eq('id', session.user.id)
+      .single();
+      
+    if (fetchError) {
+      console.error('Error fetching profile:', fetchError);
+      throw fetchError;
+    }
+    
+    // Update favorites - remove city
+    const currentLikes = profile?.cities_like || [];
+    const updatedLikes = currentLikes.filter(id => id !== cityId);
+    
+    const { error: updateError } = await supabase
+      .from('profiles')
+      .update({ cities_like: updatedLikes })
+      .eq('id', session.user.id);
+      
+    if (updateError) {
+      console.error('Error updating favorites:', updateError);
+      throw updateError;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in removeCityFromFavorites:', error);
+    throw error;
+  }
+};
+
+// Check if city is in user's favorites
+export const isCityFavorite = async (cityId: string): Promise<boolean> => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      return false;
+    }
+    
+    const { data: profile, error } = await supabase
+      .from('profiles')
+      .select('cities_like')
+      .eq('id', session.user.id)
+      .single();
+      
+    if (error || !profile) {
+      return false;
+    }
+    
+    const currentLikes = profile.cities_like || [];
+    return currentLikes.includes(cityId);
+  } catch (error) {
+    console.error('Error in isCityFavorite:', error);
+    return false;
+  }
+};
+
+// Create user profile function
+export const createUserProfile = async (userData: {
+  user_id: string;
+  full_name?: string;
+  avatar_url?: string;
+}) => {
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
+    
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
+    
+    // Call create-profile function with authorization
+    const { data, error } = await supabase.functions.invoke(
+      'create-profile', 
+      {
+        body: userData,
+        headers: {
+          Authorization: `Bearer ${session.access_token}`
+        }
+      }
+    );
+    
+    if (error) throw error;
+    
+    return data;
+  } catch (error) {
+    console.error('Error creating profile:', error);
+    throw error;
+  }
+};
+
+// Update the getUserProfile function to use the new approach
 export const getUserProfile = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -312,7 +456,8 @@ export const getUserProfile = async () => {
           id: data.id,
           fullName: data.full_name,
           avatarUrl: data.avatar_url,
-          updatedAt: data.updated_at
+          updatedAt: data.updated_at,
+          cities_like: data.cities_like || []
         };
       }
       
@@ -320,22 +465,12 @@ export const getUserProfile = async () => {
         console.log('Profile not found, creating new profile');
         
         try {
-          // Call the edge function with proper authorization
-          const { data: createResult, error: funcError } = await supabase.functions.invoke(
-            'create-profile', 
-            {
-              body: { 
-                user_id: session.user.id,
-                full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
-                avatar_url: session.user.user_metadata.avatar_url || null
-              },
-              headers: {
-                Authorization: `Bearer ${session.access_token}`
-              }
-            }
-          );
-          
-          if (funcError) throw funcError;
+          // Use the createUserProfile function
+          await createUserProfile({
+            user_id: session.user.id,
+            full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
+            avatar_url: session.user.user_metadata.avatar_url || null
+          });
           
           const { data: createdProfile } = await supabase
             .from('profiles')
@@ -348,7 +483,8 @@ export const getUserProfile = async () => {
               id: createdProfile.id,
               fullName: createdProfile.full_name,
               avatarUrl: createdProfile.avatar_url,
-              updatedAt: createdProfile.updated_at
+              updatedAt: createdProfile.updated_at,
+              cities_like: createdProfile.cities_like || []
             };
           }
         } catch (rpcError) {
@@ -366,6 +502,7 @@ export const getUserProfile = async () => {
   }
 };
 
+// User authentication and profile functions
 export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
   try {
     const { data: { session } } = await supabase.auth.getSession();

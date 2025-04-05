@@ -5,7 +5,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 
 export interface City {
   id: string;
-  name: string;
+  name: string | { [key in Language]?: string };
   description: string;
   imageUrl: string;
   country: string;
@@ -13,13 +13,13 @@ export interface City {
   events_count?: number;
   routes_count?: number;
   spots_count?: number;
-  info?: Json;
-  images?: Json;
+  info?: any;
+  images?: any;
 }
 
 export interface Place {
   id: string;
-  name: string;
+  name: string | { [key in Language]?: string };
   description: string;
   imageUrl: string;
   cityId: string;
@@ -29,9 +29,9 @@ export interface Place {
   };
   // Database fields
   city?: string;
-  coordinates?: Json;
-  info?: Json;
-  images?: Json;
+  coordinates?: any;
+  info?: any;
+  images?: any;
   type?: number;
   point?: unknown;
   created_at?: string;
@@ -39,20 +39,20 @@ export interface Place {
 
 export interface Route {
   id: string;
-  name: string;
+  name: string | { [key in Language]?: string };
   description: string;
   imageUrl: string;
   cityId: string;
   placeIds: string[];
   eventIds: string[];
   // Database fields
-  info?: Json;
-  images?: Json;
+  info?: any;
+  images?: any;
 }
 
 export interface Event {
   id: string;
-  name: string;
+  name: string | { [key in Language]?: string };
   description: string;
   imageUrl: string;
   cityId: string;
@@ -61,8 +61,8 @@ export interface Event {
   date?: string;
   // Database fields
   time?: string;
-  info?: Json;
-  images?: Json;
+  info?: any;
+  images?: any;
   type?: boolean;
 }
 
@@ -77,6 +77,7 @@ export interface UserProfile {
   fullName: string | null;
   avatarUrl: string | null;
   updatedAt: string;
+  cities_like?: string[];
 }
 
 export interface AuthState {
