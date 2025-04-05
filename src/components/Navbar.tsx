@@ -1,3 +1,4 @@
+
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -5,67 +6,80 @@ import { MenubarMenu, Menubar, MenubarContent, MenubarItem, MenubarTrigger } fro
 import { LogOut, User } from 'lucide-react';
 import { signOut } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
+import { useLanguage } from '../context/LanguageContext';
+import LanguageSwitcher from './LanguageSwitcher';
+
 const Navbar = () => {
-  const {
-    auth,
-    refreshProfile
-  } = useAuth();
+  const { auth, refreshProfile } = useAuth();
+  const { t } = useLanguage();
   const navigate = useNavigate();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
+  
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
-        title: "Выход выполнен",
-        description: "Вы успешно вышли из своего аккаунта."
+        title: t("signed_out"),
+        description: t("signed_out_successfully")
       });
       await refreshProfile();
       navigate('/cities');
     } catch (error) {
       console.error('Error signing out:', error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось выйти из аккаунта",
+        title: t("error"),
+        description: t("failed_to_sign_out"),
         variant: "destructive"
       });
     }
   };
+  
   console.log("Auth state in Navbar:", auth);
-  return <div className="bg-white shadow-sm border-b">
+  
+  return (
+    <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
-            <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/cities')}>Wander guide</h1>
+            <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/cities')}>
+              Wander guide
+            </h1>
           </div>
           
-          <div className="flex items-center">
-            {auth.isAuthenticated ? <Menubar className="border-none">
+          <div className="flex items-center space-x-4">
+            <LanguageSwitcher />
+            
+            {auth.isAuthenticated ? (
+              <Menubar className="border-none">
                 <MenubarMenu>
                   <MenubarTrigger className="cursor-pointer">
                     <div className="flex items-center gap-2">
                       <User size={20} />
-                      <span>Профиль</span>
+                      <span>{t("profile")}</span>
                     </div>
                   </MenubarTrigger>
                   <MenubarContent>
                     <MenubarItem onClick={() => navigate('/profile')}>
-                      Мой профиль
+                      {t("my_profile")}
                     </MenubarItem>
                     <MenubarItem onClick={handleSignOut} className="text-red-600">
                       <LogOut size={16} className="mr-2" />
-                      Выйти
+                      {t("sign_out")}
                     </MenubarItem>
                   </MenubarContent>
                 </MenubarMenu>
-              </Menubar> : <Button variant="ghost" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
+              </Menubar>
+            ) : (
+              <Button variant="ghost" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
                 <User size={16} />
-                Войти
-              </Button>}
+                {t("sign_in")}
+              </Button>
+            )}
           </div>
         </div>
       </div>
-    </div>;
+    </div>
+  );
 };
+
 export default Navbar;
