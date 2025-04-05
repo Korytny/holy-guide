@@ -1,6 +1,74 @@
 
 import { supabase } from '../integrations/supabase/client';
-import { City, Place, Route, Event, Language } from '../types';
+import { City, Place, Route, Event, Language, Json } from '../types';
+
+// Helper functions to transform database objects to our app models
+const transformCity = (dbCity: any): City => ({
+  id: dbCity.id,
+  name: typeof dbCity.name === 'string' ? dbCity.name : dbCity.name?.en || '',
+  description: dbCity.info?.description?.en || '',
+  imageUrl: Array.isArray(dbCity.images) && dbCity.images.length > 0 
+    ? dbCity.images[0] 
+    : dbCity.images?.main || 'https://via.placeholder.com/300',
+  country: dbCity.country || '',
+  events_count: dbCity.events_count,
+  routes_count: dbCity.routes_count,
+  spots_count: dbCity.spots_count,
+  info: dbCity.info,
+  images: dbCity.images
+});
+
+const transformPlace = (dbPlace: any): Place => ({
+  id: dbPlace.id,
+  name: typeof dbPlace.name === 'string' ? dbPlace.name : dbPlace.name?.en || '',
+  description: dbPlace.info?.description?.en || '',
+  imageUrl: Array.isArray(dbPlace.images) && dbPlace.images.length > 0 
+    ? dbPlace.images[0] 
+    : dbPlace.images?.main || 'https://via.placeholder.com/300',
+  cityId: dbPlace.city || '',
+  location: {
+    latitude: dbPlace.coordinates?.lat || 0,
+    longitude: dbPlace.coordinates?.lng || 0
+  },
+  city: dbPlace.city,
+  coordinates: dbPlace.coordinates,
+  info: dbPlace.info,
+  images: dbPlace.images,
+  type: dbPlace.type,
+  point: dbPlace.point,
+  created_at: dbPlace.created_at
+});
+
+const transformRoute = (dbRoute: any): Route => ({
+  id: dbRoute.id,
+  name: typeof dbRoute.name === 'string' ? dbRoute.name : dbRoute.name?.en || '',
+  description: dbRoute.info?.description?.en || '',
+  imageUrl: Array.isArray(dbRoute.images) && dbRoute.images.length > 0 
+    ? dbRoute.images[0] 
+    : dbRoute.images?.main || 'https://via.placeholder.com/300',
+  cityId: dbRoute.cityId || '',  // We may need to fetch this separately
+  placeIds: [], // We'll need to fetch related spots separately
+  eventIds: [], // We'll need to fetch related events separately
+  info: dbRoute.info,
+  images: dbRoute.images
+});
+
+const transformEvent = (dbEvent: any): Event => ({
+  id: dbEvent.id,
+  name: typeof dbEvent.name === 'string' ? dbEvent.name : dbEvent.name?.en || '',
+  description: dbEvent.info?.description?.en || '',
+  imageUrl: Array.isArray(dbEvent.images) && dbEvent.images.length > 0 
+    ? dbEvent.images[0] 
+    : dbEvent.images?.main || 'https://via.placeholder.com/300',
+  cityId: '', // We may need to fetch this separately
+  placeIds: [], // We'll need to fetch related spots separately
+  routeIds: [], // We'll need to fetch related routes separately
+  date: dbEvent.time,
+  time: dbEvent.time,
+  info: dbEvent.info,
+  images: dbEvent.images,
+  type: dbEvent.type
+});
 
 // Get all cities with optional filters
 export const getCities = async (search?: string, filters?: any) => {
@@ -26,7 +94,7 @@ export const getCities = async (search?: string, filters?: any) => {
     return [];
   }
   
-  return data as City[];
+  return (data || []).map(transformCity) as City[];
 };
 
 // Get city by ID
@@ -42,7 +110,7 @@ export const getCityById = async (id: string) => {
     return null;
   }
   
-  return data as City;
+  return data ? transformCity(data) : null;
 };
 
 // Get places by city ID
@@ -57,7 +125,7 @@ export const getPlacesByCityId = async (cityId: string) => {
     return [];
   }
   
-  return data as Place[];
+  return (data || []).map(transformPlace) as Place[];
 };
 
 // Get place by ID
@@ -73,11 +141,12 @@ export const getPlaceById = async (id: string) => {
     return null;
   }
   
-  return data as Place;
+  return data ? transformPlace(data) : null;
 };
 
 // Get routes by city ID
 export const getRoutesByCityId = async (cityId: string) => {
+  // This might need adjustment based on your actual database structure
   const { data, error } = await supabase
     .from('routes')
     .select('*')
@@ -88,7 +157,7 @@ export const getRoutesByCityId = async (cityId: string) => {
     return [];
   }
   
-  return data as Route[];
+  return (data || []).map(transformRoute) as Route[];
 };
 
 // Get route by ID
@@ -104,11 +173,12 @@ export const getRouteById = async (id: string) => {
     return null;
   }
   
-  return data as Route;
+  return data ? transformRoute(data) : null;
 };
 
 // Get events by city ID
 export const getEventsByCityId = async (cityId: string) => {
+  // This might need adjustment based on your actual database structure
   const { data, error } = await supabase
     .from('events')
     .select('*')
@@ -119,7 +189,7 @@ export const getEventsByCityId = async (cityId: string) => {
     return [];
   }
   
-  return data as Event[];
+  return (data || []).map(transformEvent) as Event[];
 };
 
 // Get event by ID
@@ -135,41 +205,39 @@ export const getEventById = async (id: string) => {
     return null;
   }
   
-  return data as Event;
+  return data ? transformEvent(data) : null;
 };
 
 // Get translations by language
 export const getTranslations = async (language: Language) => {
-  const { data, error } = await supabase
-    .from('translations')
-    .select('*')
-    .eq('language', language);
-  
-  if (error) {
-    console.error('Error fetching translations:', error);
-    return {};
-  }
-  
-  // Transform array to object for easy lookup
-  const translations = data.reduce((acc, item) => {
-    acc[item.key] = item.value;
-    return acc;
-  }, {} as Record<string, string>);
-  
-  return translations;
+  // Since there's no translations table, we might need to implement this differently
+  // For now, return an empty object
+  console.log('Getting translations for language:', language);
+  return {};
 };
 
 // Search functionality
-export const search = async (term: string, type: 'cities' | 'places' | 'routes' | 'events') => {
+export const search = async (term: string, type: 'cities' | 'spots' | 'routes' | 'events') => {
   const { data, error } = await supabase
     .from(type)
     .select('*')
-    .or(`name.ilike.%${term}%,description.ilike.%${term}%`);
+    .or(`name.ilike.%${term}%,info.ilike.%${term}%`);
   
   if (error) {
     console.error(`Error searching ${type}:`, error);
     return [];
   }
   
-  return data;
+  switch (type) {
+    case 'cities':
+      return (data || []).map(transformCity);
+    case 'spots':
+      return (data || []).map(transformPlace);
+    case 'routes':
+      return (data || []).map(transformRoute);
+    case 'events':
+      return (data || []).map(transformEvent);
+    default:
+      return [];
+  }
 };
