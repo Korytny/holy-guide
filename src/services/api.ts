@@ -1,6 +1,6 @@
 
 import { supabase } from '../integrations/supabase/client';
-import { City, Place, Route, Event, Language, Json } from '../types';
+import { City, Place, Route, Event, Language, Json, UserProfile } from '../types';
 
 // Helper functions to transform database objects to our app models
 const transformCity = (dbCity: any): City => ({
@@ -223,7 +223,7 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
   }
   
   const { data, error } = await supabase
-    .from(tableName)
+    .from(tableName as any) // Type cast to avoid TS errors
     .select('*')
     .textSearch('name', term);
   
@@ -254,9 +254,10 @@ export const getUserProfile = async () => {
     return null;
   }
   
+  // Type the response properly
   const { data, error } = await supabase
     .from('profiles')
-    .select('*')
+    .select('id, full_name, avatar_url, updated_at')
     .eq('id', session.user.id)
     .single();
     
@@ -265,6 +266,11 @@ export const getUserProfile = async () => {
     return null;
   }
   
+  if (!data) {
+    return null;
+  }
+  
+  // Transform the data to match our UserProfile type
   return {
     id: data.id,
     fullName: data.full_name,
@@ -273,6 +279,7 @@ export const getUserProfile = async () => {
   };
 };
 
+// Function to update user profile
 export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
   const { data: { session } } = await supabase.auth.getSession();
   
