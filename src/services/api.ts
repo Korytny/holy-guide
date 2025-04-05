@@ -34,7 +34,12 @@ const transformPlace = (dbPlace: any): Place => ({
     ? dbPlace.images[0] 
     : dbPlace.images?.main || 'https://via.placeholder.com/300',
   cityId: dbPlace.city || '',
-  location: {
+  location: dbPlace.point ? {
+    // Extract coordinates from the geometry point
+    latitude: dbPlace.point.coordinates[1],  // Y coordinate (latitude)
+    longitude: dbPlace.point.coordinates[0]  // X coordinate (longitude)
+  } : {
+    // Fallback to coordinates object if point is not available
     latitude: dbPlace.coordinates?.lat || 0,
     longitude: dbPlace.coordinates?.lng || 0
   },

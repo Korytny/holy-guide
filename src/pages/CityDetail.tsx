@@ -148,7 +148,9 @@ const CityDetail = () => {
   }));
   
   const cityName = city ? getLocalizedText(city.name, language) : '';
-  const cityDescription = city ? getLocalizedText(city.info?.description, language, t('no_description_available')) : '';
+  const cityDescription = city?.info?.description 
+    ? getLocalizedText(city.info.description, language, t('no_description_available')) 
+    : t('no_description_available');
   
   return (
     <div className="app-container py-6">
