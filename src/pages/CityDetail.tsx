@@ -1,10 +1,11 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
   getCityById, 
   getPlacesByCityId, 
-  getRoutesByCityId, 
-  getEventsByCityId,
+  getRoutesRelatedToCityPlaces, 
+  getEventsRelatedToCityPlaces,
   addCityToFavorites,
   removeCityFromFavorites,
   isCityFavorite 
@@ -44,14 +45,16 @@ const CityDetail = () => {
         const cityData = await getCityById(id);
         setCity(cityData);
         
-        // Load related data
+        // Load places in the city
         const placesData = await getPlacesByCityId(id);
         setPlaces(placesData);
         
-        const routesData = await getRoutesByCityId(id);
+        // Load routes related to places in the city
+        const routesData = await getRoutesRelatedToCityPlaces(id);
         setRoutes(routesData);
         
-        const eventsData = await getEventsByCityId(id);
+        // Load events related to places in the city
+        const eventsData = await getEventsRelatedToCityPlaces(id);
         setEvents(eventsData);
 
         // Check if city is in favorites

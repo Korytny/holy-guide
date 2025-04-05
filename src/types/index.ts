@@ -1,4 +1,3 @@
-
 export type Language = "ru" | "en" | "hi";
 
 export type Json = string | number | boolean | null | { [key: string]: Json | undefined } | Json[];
@@ -35,6 +34,9 @@ export interface Place {
   type?: number;
   point?: unknown;
   created_at?: string;
+  // Added new properties to avoid circular references
+  events?: string[];
+  routes?: string[];
 }
 
 export interface Route {
@@ -48,6 +50,9 @@ export interface Route {
   // Database fields
   info?: any;
   images?: any;
+  // Added new properties to avoid circular references
+  places?: Place[];
+  events?: Event[];
 }
 
 export interface Event {
@@ -64,6 +69,9 @@ export interface Event {
   info?: any;
   images?: any;
   type?: boolean;
+  // Added new properties to avoid circular references
+  places?: Place[];
+  routes?: Route[];
 }
 
 export interface LanguageText {

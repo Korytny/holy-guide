@@ -49,7 +49,10 @@ const transformPlace = (dbPlace: any): Place => ({
   images: dbPlace.images || {},
   type: dbPlace.type,
   point: dbPlace.point,
-  created_at: dbPlace.created_at
+  created_at: dbPlace.created_at,
+  // Prevent circular references by not including fully populated routes and events
+  events: dbPlace.events || [],
+  routes: dbPlace.routes || []
 });
 
 const transformRoute = (dbRoute: any): Route => ({
@@ -67,7 +70,10 @@ const transformRoute = (dbRoute: any): Route => ({
   placeIds: dbRoute.spots || [],
   eventIds: dbRoute.events || [],
   info: dbRoute.info || {},
-  images: dbRoute.images || {}
+  images: dbRoute.images || {},
+  // Prevent circular references
+  places: [],
+  events: []
 });
 
 const transformEvent = (dbEvent: any): Event => ({
@@ -88,7 +94,10 @@ const transformEvent = (dbEvent: any): Event => ({
   time: dbEvent.time,
   info: dbEvent.info || {},
   images: dbEvent.images || {},
-  type: dbEvent.type
+  type: dbEvent.type,
+  // Prevent circular references
+  places: [],
+  routes: []
 });
 
 // Get all cities with optional filters
@@ -816,6 +825,96 @@ export const getRoutesByEventId = async (eventId: string) => {
     return routesData ? routesData.map(transformRoute) : [];
   } catch (error) {
     console.error('Error in getRoutesByEventId:', error);
+    return [];
+  }
+};
+
+// Get all routes related to places in a city
+export const getRoutesRelatedToCityPlaces = async (cityId: string) => {
+  try {
+    // First get all places that belong to the city
+    const places = await getPlacesByCityId(cityId);
+    
+    if (!places.length) {
+      return [];
+    }
+    
+    // Get all place IDs
+    const placeIds = places.map(place => place.id);
+    
+    // Find all spot_route relations for these places
+    const { data: relationData, error: relationError } = await supabase
+      .from('spot_route')
+      .select('route_id')
+      .in('spot_id', placeIds);
+    
+    if (relationError || !relationData || relationData.length === 0) {
+      console.log('No routes related to city places found:', relationError);
+      return [];
+    }
+    
+    // Extract the route IDs (with duplicates removed)
+    const routeIds = [...new Set(relationData.map(rel => rel.route_id))];
+    
+    // Now get the actual route data
+    const { data: routesData, error: routesError } = await supabase
+      .from('routes')
+      .select('*')
+      .in('id', routeIds);
+    
+    if (routesError) {
+      console.error('Error fetching routes related to city places:', routesError);
+      return [];
+    }
+    
+    return routesData ? routesData.map(transformRoute) : [];
+  } catch (error) {
+    console.error('Error in getRoutesRelatedToCityPlaces:', error);
+    return [];
+  }
+};
+
+// Get all events related to places in a city
+export const getEventsRelatedToCityPlaces = async (cityId: string) => {
+  try {
+    // First get all places that belong to the city
+    const places = await getPlacesByCityId(cityId);
+    
+    if (!places.length) {
+      return [];
+    }
+    
+    // Get all place IDs
+    const placeIds = places.map(place => place.id);
+    
+    // Find all spot_event relations for these places
+    const { data: relationData, error: relationError } = await supabase
+      .from('spot_event')
+      .select('event_id')
+      .in('spot_id', placeIds);
+    
+    if (relationError || !relationData || relationData.length === 0) {
+      console.log('No events related to city places found:', relationError);
+      return [];
+    }
+    
+    // Extract the event IDs (with duplicates removed)
+    const eventIds = [...new Set(relationData.map(rel => rel.event_id))];
+    
+    // Now get the actual event data
+    const { data: eventsData, error: eventsError } = await supabase
+      .from('events')
+      .select('*')
+      .in('id', eventIds);
+    
+    if (eventsError) {
+      console.error('Error fetching events related to city places:', eventsError);
+      return [];
+    }
+    
+    return eventsData ? eventsData.map(transformEvent) : [];
+  } catch (error) {
+    console.error('Error in getEventsRelatedToCityPlaces:', error);
     return [];
   }
 };
