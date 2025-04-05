@@ -9,6 +9,7 @@ import PlaceCard from '../components/PlaceCard';
 import RouteCard from '../components/RouteCard';
 import MapView from '../components/MapView';
 import { ArrowLeft, Calendar } from 'lucide-react';
+import { getLocalizedText } from '../utils/languageUtils';
 
 const EventDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,7 @@ const EventDetail = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   
   useEffect(() => {
     const loadEventData = async () => {
@@ -76,23 +77,26 @@ const EventDetail = () => {
     name: place.name,
   }));
   
+  const eventName = event ? getLocalizedText(event.name, language) : '';
+  const eventDescription = event ? getLocalizedText(event.description, language) : '';
+  
   return (
     <div className="app-container py-6">
-      <Link to={`/cities/${event.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+      <Link to={`/cities/${event?.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
         <ArrowLeft size={18} className="mr-2" />
         {t('back_to_city')}
       </Link>
       
       <div className="relative mb-8">
         <img 
-          src={event.imageUrl} 
-          alt={event.name}
+          src={event?.imageUrl} 
+          alt={eventName}
           className="w-full h-64 object-cover rounded-xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
         <div className="absolute bottom-0 left-0 p-6">
-          <h1 className="text-3xl font-bold text-white mb-2">{event.name}</h1>
-          {event.date && (
+          <h1 className="text-3xl font-bold text-white mb-2">{eventName}</h1>
+          {event?.date && (
             <div className="flex items-center text-white/90 bg-black/30 px-3 py-1 rounded-full inline-flex">
               <Calendar size={16} className="mr-2" />
               <span>{new Date(event.date).toLocaleDateString()}</span>
@@ -103,7 +107,7 @@ const EventDetail = () => {
       
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-3">{t('about_event')}</h2>
-        <p className="text-gray-700 leading-relaxed">{event.description}</p>
+        <p className="text-gray-700 leading-relaxed">{eventDescription}</p>
       </div>
       
       {places.length > 0 && (

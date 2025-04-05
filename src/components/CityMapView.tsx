@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useLanguage } from '../context/LanguageContext';
+import { getLocalizedText } from '../utils/languageUtils';
 
 interface Location {
   latitude: number;
   longitude: number;
-  name?: string;
+  name?: string | { [key: string]: string };
   description?: string;
 }
 
@@ -26,7 +27,7 @@ const CityMapView: React.FC<CityMapViewProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   
   // Calculate center if not provided
   const calculateCenter = (): [number, number] => {
@@ -84,6 +85,7 @@ const CityMapView: React.FC<CityMapViewProps> = ({
     // Add markers for each location
     locations.forEach(location => {
       const { latitude, longitude, name, description } = location;
+      const localizedName = name ? getLocalizedText(name, language) : undefined;
       
       // Create marker element
       const el = document.createElement('div');
@@ -95,11 +97,11 @@ const CityMapView: React.FC<CityMapViewProps> = ({
       el.style.cursor = 'pointer';
       
       // Add popup if name exists
-      if (name) {
+      if (localizedName) {
         const popup = new mapboxgl.Popup({ offset: 25, maxWidth: '300px' })
           .setHTML(`
             <div>
-              <h3 class="font-medium text-base">${name}</h3>
+              <h3 class="font-medium text-base">${localizedName}</h3>
               ${description ? `<p class="text-sm mt-1">${description}</p>` : ''}
             </div>
           `);
@@ -122,7 +124,7 @@ const CityMapView: React.FC<CityMapViewProps> = ({
         map.current = null;
       }
     };
-  }, [mapboxToken, locations, zoom]);
+  }, [mapboxToken, locations, zoom, language]);
   
   return (
     <div className="rounded-lg overflow-hidden shadow-md bg-white h-[400px] w-full">

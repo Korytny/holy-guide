@@ -1,3 +1,4 @@
+
 import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language, UserProfile } from '../types';
 
@@ -5,7 +6,7 @@ import { City, Place, Route, Event, Language, UserProfile } from '../types';
 const transformCity = (dbCity: any): City => ({
   id: dbCity.id,
   name: typeof dbCity.name === 'object' ? dbCity.name : { en: dbCity.name || '' },
-  description: dbCity.info?.description?.en || '',
+  description: dbCity.info?.description || '',
   imageUrl: Array.isArray(dbCity.images) && dbCity.images.length > 0 
     ? dbCity.images[0] 
     : dbCity.images?.main || 'https://via.placeholder.com/300',
@@ -20,7 +21,7 @@ const transformCity = (dbCity: any): City => ({
 const transformPlace = (dbPlace: any): Place => ({
   id: dbPlace.id,
   name: typeof dbPlace.name === 'object' ? dbPlace.name : { en: dbPlace.name || '' },
-  description: dbPlace.info?.description?.en || '',
+  description: dbPlace.info?.description || '',
   imageUrl: Array.isArray(dbPlace.images) && dbPlace.images.length > 0 
     ? dbPlace.images[0] 
     : dbPlace.images?.main || 'https://via.placeholder.com/300',
@@ -41,11 +42,11 @@ const transformPlace = (dbPlace: any): Place => ({
 const transformRoute = (dbRoute: any): Route => ({
   id: dbRoute.id,
   name: typeof dbRoute.name === 'object' ? dbRoute.name : { en: dbRoute.name || '' },
-  description: dbRoute.info?.description?.en || '',
+  description: dbRoute.info?.description || '',
   imageUrl: Array.isArray(dbRoute.images) && dbRoute.images.length > 0 
     ? dbRoute.images[0] 
     : dbRoute.images?.main || 'https://via.placeholder.com/300',
-  cityId: dbRoute.cityId || '',
+  cityId: dbRoute.city || '',
   placeIds: dbRoute.spots || [],
   eventIds: dbRoute.events || [],
   info: dbRoute.info || {},
@@ -55,11 +56,11 @@ const transformRoute = (dbRoute: any): Route => ({
 const transformEvent = (dbEvent: any): Event => ({
   id: dbEvent.id,
   name: typeof dbEvent.name === 'object' ? dbEvent.name : { en: dbEvent.name || '' },
-  description: dbEvent.info?.description?.en || '',
+  description: dbEvent.info?.description || '',
   imageUrl: Array.isArray(dbEvent.images) && dbEvent.images.length > 0 
     ? dbEvent.images[0] 
     : dbEvent.images?.main || 'https://via.placeholder.com/300',
-  cityId: dbEvent.cityId || '',
+  cityId: dbEvent.city || '',
   placeIds: dbEvent.spots || [],
   routeIds: dbEvent.routes || [],
   date: dbEvent.time,
@@ -170,7 +171,7 @@ export const getRoutesByCityId = async (cityId: string) => {
     const { data, error } = await supabase
       .from('routes')
       .select('*')
-      .eq('cityId', cityId);
+      .eq('city', cityId);
     
     if (error) {
       console.error('Error fetching routes:', error);
@@ -211,7 +212,7 @@ export const getEventsByCityId = async (cityId: string) => {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .eq('cityId', cityId);
+      .eq('city', cityId);
     
     if (error) {
       console.error('Error fetching events:', error);
@@ -299,12 +300,12 @@ export const addCityToFavorites = async (cityId: string) => {
       throw new Error('Not authenticated');
     }
     
-    // Get current favorites
+    // First check if the cities_like column exists, if not, create it
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
-      .select('cities_like')
+      .select('*')
       .eq('id', session.user.id)
-      .single();
+      .maybeSingle();
       
     if (fetchError) {
       console.error('Error fetching profile:', fetchError);
@@ -312,12 +313,19 @@ export const addCityToFavorites = async (cityId: string) => {
     }
     
     // Update favorites - add city if not already there
-    const currentLikes = profile?.cities_like || [];
+    let currentLikes = profile?.cities_like || [];
+    
+    // If the column doesn't exist in the record, make sure it's an array
+    if (!Array.isArray(currentLikes)) {
+      currentLikes = [];
+    }
     
     if (!currentLikes.includes(cityId)) {
       const { error: updateError } = await supabase
         .from('profiles')
-        .update({ cities_like: [...currentLikes, cityId] })
+        .update({ 
+          cities_like: [...currentLikes, cityId] 
+        })
         .eq('id', session.user.id);
         
       if (updateError) {
@@ -345,9 +353,9 @@ export const removeCityFromFavorites = async (cityId: string) => {
     // Get current favorites
     const { data: profile, error: fetchError } = await supabase
       .from('profiles')
-      .select('cities_like')
+      .select('*')
       .eq('id', session.user.id)
-      .single();
+      .maybeSingle();
       
     if (fetchError) {
       console.error('Error fetching profile:', fetchError);
@@ -355,7 +363,13 @@ export const removeCityFromFavorites = async (cityId: string) => {
     }
     
     // Update favorites - remove city
-    const currentLikes = profile?.cities_like || [];
+    let currentLikes = profile?.cities_like || [];
+    
+    // If the column doesn't exist in the record, just return
+    if (!Array.isArray(currentLikes)) {
+      return true;
+    }
+    
     const updatedLikes = currentLikes.filter(id => id !== cityId);
     
     const { error: updateError } = await supabase
@@ -386,15 +400,21 @@ export const isCityFavorite = async (cityId: string): Promise<boolean> => {
     
     const { data: profile, error } = await supabase
       .from('profiles')
-      .select('cities_like')
+      .select('*')
       .eq('id', session.user.id)
-      .single();
+      .maybeSingle();
       
     if (error || !profile) {
       return false;
     }
     
     const currentLikes = profile.cities_like || [];
+    
+    // If the column doesn't exist in the record, return false
+    if (!Array.isArray(currentLikes)) {
+      return false;
+    }
+    
     return currentLikes.includes(cityId);
   } catch (error) {
     console.error('Error in isCityFavorite:', error);

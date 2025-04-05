@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPlaceById, getRouteById, getEventById } from '../services/api';
@@ -9,6 +8,7 @@ import RouteCard from '../components/RouteCard';
 import EventCard from '../components/EventCard';
 import MapView from '../components/MapView';
 import { ArrowLeft, MapPin } from 'lucide-react';
+import { getLocalizedText } from '../utils/languageUtils';
 
 const PlaceDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +16,7 @@ const PlaceDetail = () => {
   const [relatedRoutes, setRelatedRoutes] = useState<Route[]>([]);
   const [relatedEvents, setRelatedEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   
   useEffect(() => {
     const loadPlaceData = async () => {
@@ -71,22 +71,25 @@ const PlaceDetail = () => {
     );
   }
   
+  const placeName = place ? getLocalizedText(place.name, language) : '';
+  const placeDescription = place ? getLocalizedText(place.description, language) : '';
+  
   return (
     <div className="app-container py-6">
-      <Link to={`/cities/${place.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+      <Link to={`/cities/${place?.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
         <ArrowLeft size={18} className="mr-2" />
         {t('back_to_city')}
       </Link>
       
       <div className="relative mb-8">
         <img 
-          src={place.imageUrl} 
-          alt={place.name}
+          src={place?.imageUrl} 
+          alt={placeName}
           className="w-full h-64 object-cover rounded-xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
         <div className="absolute bottom-0 left-0 p-6">
-          <h1 className="text-3xl font-bold text-white mb-2">{place.name}</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{placeName}</h1>
           <div className="flex items-center text-white/90">
             <MapPin size={16} className="mr-1" />
             <span>{t('sacred_place')}</span>
@@ -96,22 +99,24 @@ const PlaceDetail = () => {
       
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-3">{t('about_place')}</h2>
-        <p className="text-gray-700 leading-relaxed">{place.description}</p>
+        <p className="text-gray-700 leading-relaxed">{placeDescription}</p>
       </div>
       
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold mb-6">{t('location_on_map')}</h2>
-        <MapView 
-          locations={[{
-            latitude: place.location.latitude,
-            longitude: place.location.longitude,
-            name: place.name,
-            description: place.description.substring(0, 100)
-          }]}
-          center={[place.location.longitude, place.location.latitude]}
-          zoom={14}
-        />
-      </div>
+      {place && (
+        <div className="mb-8">
+          <h2 className="text-xl font-semibold mb-6">{t('location_on_map')}</h2>
+          <MapView 
+            locations={[{
+              latitude: place.location.latitude,
+              longitude: place.location.longitude,
+              name: place.name,
+              description: placeDescription.substring(0, 100)
+            }]}
+            center={[place.location.longitude, place.location.latitude]}
+            zoom={14}
+          />
+        </div>
+      )}
       
       <Tabs defaultValue="routes" className="w-full">
         <TabsList className="w-full flex mb-6">

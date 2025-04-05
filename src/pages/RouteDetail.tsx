@@ -9,6 +9,7 @@ import PlaceCard from '../components/PlaceCard';
 import EventCard from '../components/EventCard';
 import MapView from '../components/MapView';
 import { ArrowLeft } from 'lucide-react';
+import { getLocalizedText } from '../utils/languageUtils';
 
 const RouteDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,7 +17,7 @@ const RouteDetail = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
   
   useEffect(() => {
     const loadRouteData = async () => {
@@ -76,22 +77,25 @@ const RouteDetail = () => {
     name: place.name,
   }));
   
+  const routeName = route ? getLocalizedText(route.name, language) : '';
+  const routeDescription = route ? getLocalizedText(route.description, language) : '';
+  
   return (
     <div className="app-container py-6">
-      <Link to={`/cities/${route.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
+      <Link to={`/cities/${route?.cityId}`} className="inline-flex items-center text-gray-600 hover:text-gray-900 mb-6">
         <ArrowLeft size={18} className="mr-2" />
         {t('back_to_city')}
       </Link>
       
       <div className="relative mb-8">
         <img 
-          src={route.imageUrl} 
-          alt={route.name}
+          src={route?.imageUrl} 
+          alt={routeName}
           className="w-full h-64 object-cover rounded-xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
         <div className="absolute bottom-0 left-0 p-6">
-          <h1 className="text-3xl font-bold text-white mb-2">{route.name}</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{routeName}</h1>
           <div className="flex items-center text-white/90">
             <span className="text-sm">{t('spiritual_route')}</span>
           </div>
@@ -100,7 +104,7 @@ const RouteDetail = () => {
       
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-3">{t('about_route')}</h2>
-        <p className="text-gray-700 leading-relaxed">{route.description}</p>
+        <p className="text-gray-700 leading-relaxed">{routeDescription}</p>
       </div>
       
       {places.length > 0 && (

@@ -3,11 +3,12 @@ import React, { useEffect, useRef, useState } from 'react';
 import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useLanguage } from '../context/LanguageContext';
+import { getLocalizedText } from '../utils/languageUtils';
 
-interface Location {
+export interface Location {
   latitude: number;
   longitude: number;
-  name?: string;
+  name?: string | { [key: string]: string };
   description?: string;
 }
 
@@ -24,12 +25,10 @@ const MapView: React.FC<MapViewProps> = ({
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const map = useRef<mapboxgl.Map | null>(null);
-  const [mapboxToken, setMapboxToken] = useState<string>('');
-  const { t } = useLanguage();
+  const [mapboxToken, setMapboxToken] = useState<string>('pk.eyJ1Ijoia29yeXRueSIsImEiOiJjazM2OWk0aWgwaXNlM29wbmFxYmcybDA1In0.3bQx9mdXq9p3PTkxb8soeQ');
+  const { language, t } = useLanguage();
   
-  // This would be replaced with actual token management
-  // For now, we'll use local state to simulate token input
-  const [showTokenInput, setShowTokenInput] = useState(true);
+  const [showTokenInput, setShowTokenInput] = useState(false); // Changed to false since we have a default token
   
   const handleSubmitToken = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -56,6 +55,7 @@ const MapView: React.FC<MapViewProps> = ({
     // Add markers for each location
     locations.forEach(location => {
       const { latitude, longitude, name, description } = location;
+      const localizedName = name ? getLocalizedText(name, language) : undefined;
       
       // Create marker element
       const el = document.createElement('div');
@@ -66,10 +66,10 @@ const MapView: React.FC<MapViewProps> = ({
       el.style.backgroundSize = 'cover';
       
       // Add popup if name exists
-      if (name) {
+      if (localizedName) {
         const popup = new mapboxgl.Popup({ offset: 25 })
           .setHTML(`
-            <h3 class="font-medium text-base">${name}</h3>
+            <h3 class="font-medium text-base">${localizedName}</h3>
             ${description ? `<p class="text-sm">${description}</p>` : ''}
           `);
         
@@ -91,7 +91,7 @@ const MapView: React.FC<MapViewProps> = ({
         map.current = null;
       }
     };
-  }, [mapboxToken, showTokenInput, locations, center, zoom]);
+  }, [mapboxToken, showTokenInput, locations, center, zoom, language]);
   
   return (
     <div className="rounded-lg overflow-hidden shadow-md bg-white h-[400px] w-full">

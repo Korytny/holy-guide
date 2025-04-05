@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { 
@@ -22,6 +21,7 @@ import RouteCard from '../components/RouteCard';
 import EventCard from '../components/EventCard';
 import CityMapView from '../components/CityMapView';
 import { ArrowLeft, Heart, MapPin, Map, Route as RouteIcon, CalendarDays } from 'lucide-react';
+import { getLocalizedText } from '../utils/languageUtils';
 
 const CityDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -34,13 +34,6 @@ const CityDetail = () => {
   const { language, t } = useLanguage();
   const { auth } = useAuth();
   const { toast } = useToast();
-  
-  // Function to get the localized text based on the current language
-  const getLocalizedText = (textObj: any, defaultText: string = '') => {
-    if (!textObj) return defaultText;
-    if (typeof textObj === 'string') return textObj;
-    return textObj[language] || textObj['en'] || defaultText;
-  };
   
   useEffect(() => {
     const loadCityData = async () => {
@@ -92,14 +85,14 @@ const CityDetail = () => {
         setIsFavorite(false);
         toast({
           title: t('removed_from_favorites'),
-          description: getLocalizedText(city.name) + ' ' + t('removed_from_favorites_description')
+          description: getLocalizedText(city.name, language) + ' ' + t('removed_from_favorites_description')
         });
       } else {
         await addCityToFavorites(city.id);
         setIsFavorite(true);
         toast({
           title: t('added_to_favorites'),
-          description: getLocalizedText(city.name) + ' ' + t('added_to_favorites_description')
+          description: getLocalizedText(city.name, language) + ' ' + t('added_to_favorites_description')
         });
       }
     } catch (error) {
@@ -149,9 +142,13 @@ const CityDetail = () => {
   const mapLocations = places.map(place => ({
     latitude: place.location.latitude,
     longitude: place.location.longitude,
-    name: getLocalizedText(place.name),
-    description: getLocalizedText(place.info?.description, '').substring(0, 100) + '...',
+    name: place.name,
+    description: place.info?.description ? 
+      getLocalizedText(place.info.description, language, '').substring(0, 100) + '...' : '',
   }));
+  
+  const cityName = city ? getLocalizedText(city.name, language) : '';
+  const cityDescription = city ? getLocalizedText(city.info?.description, language, t('no_description_available')) : '';
   
   return (
     <div className="app-container py-6">
@@ -162,8 +159,8 @@ const CityDetail = () => {
       
       <div className="relative mb-8">
         <img 
-          src={city.imageUrl} 
-          alt={getLocalizedText(city.name)}
+          src={city?.imageUrl} 
+          alt={cityName}
           className="w-full h-64 object-cover rounded-xl"
         />
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
@@ -172,15 +169,15 @@ const CityDetail = () => {
         <div className="absolute top-4 right-4 flex gap-3">
           <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-3 py-1">
             <MapPin size={14} />
-            <span>{city.spots_count || 0}</span>
+            <span>{city?.spots_count || 0}</span>
           </Badge>
           <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-3 py-1">
             <RouteIcon size={14} />
-            <span>{city.routes_count || 0}</span>
+            <span>{city?.routes_count || 0}</span>
           </Badge>
           <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-3 py-1">
             <CalendarDays size={14} />
-            <span>{city.events_count || 0}</span>
+            <span>{city?.events_count || 0}</span>
           </Badge>
         </div>
         
@@ -195,10 +192,10 @@ const CityDetail = () => {
         </Button>
         
         <div className="absolute bottom-0 left-0 p-6">
-          <h1 className="text-3xl font-bold text-white mb-2">{getLocalizedText(city.name)}</h1>
+          <h1 className="text-3xl font-bold text-white mb-2">{cityName}</h1>
           <div className="flex items-center text-white/90">
             <MapPin size={16} className="mr-1" />
-            <span>{city.country}</span>
+            <span>{city?.country}</span>
           </div>
         </div>
       </div>
@@ -206,7 +203,7 @@ const CityDetail = () => {
       <div className="mb-8">
         <h2 className="text-xl font-semibold mb-3">{t('about_city')}</h2>
         <p className="text-gray-700 leading-relaxed">
-          {getLocalizedText(city.info?.description, t('no_description_available'))}
+          {cityDescription}
         </p>
       </div>
       

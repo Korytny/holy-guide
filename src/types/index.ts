@@ -6,7 +6,7 @@ export type Json = string | number | boolean | null | { [key: string]: Json | un
 export interface City {
   id: string;
   name: string | { [key in Language]?: string };
-  description: string;
+  description: string | { [key in Language]?: string };
   imageUrl: string;
   country: string;
   // Database fields
@@ -20,7 +20,7 @@ export interface City {
 export interface Place {
   id: string;
   name: string | { [key in Language]?: string };
-  description: string;
+  description: string | { [key in Language]?: string };
   imageUrl: string;
   cityId: string;
   location: {
@@ -40,7 +40,7 @@ export interface Place {
 export interface Route {
   id: string;
   name: string | { [key in Language]?: string };
-  description: string;
+  description: string | { [key in Language]?: string };
   imageUrl: string;
   cityId: string;
   placeIds: string[];
@@ -53,7 +53,7 @@ export interface Route {
 export interface Event {
   id: string;
   name: string | { [key in Language]?: string };
-  description: string;
+  description: string | { [key in Language]?: string };
   imageUrl: string;
   cityId: string;
   placeIds: string[];

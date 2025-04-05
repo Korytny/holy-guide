@@ -4,13 +4,17 @@ import { Link } from 'react-router-dom';
 import { Event } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Calendar } from 'lucide-react';
+import { getLocalizedText } from '../utils/languageUtils';
 
 interface EventCardProps {
   event: Event;
 }
 
 const EventCard: React.FC<EventCardProps> = ({ event }) => {
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
+  
+  const eventName = getLocalizedText(event.name, language);
+  const eventDescription = getLocalizedText(event.description, language);
   
   return (
     <Link to={`/events/${event.id}`} className="block">
@@ -18,7 +22,7 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
         <div className="relative">
           <img 
             src={event.imageUrl} 
-            alt={event.name} 
+            alt={eventName} 
             className="india-card-image"
           />
           <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
@@ -30,10 +34,10 @@ const EventCard: React.FC<EventCardProps> = ({ event }) => {
           )}
         </div>
         <div className="india-card-content">
-          <h3 className="text-lg font-medium mb-1">{event.name}</h3>
+          <h3 className="text-lg font-medium mb-1">{eventName}</h3>
           <p className="text-sm text-gray-600 line-clamp-2">
-            {event.description.substring(0, 100)}
-            {event.description.length > 100 ? '...' : ''}
+            {eventDescription.substring(0, 100)}
+            {eventDescription.length > 100 ? '...' : ''}
           </p>
           <button className="mt-3 text-sm text-indiaBurgundy font-medium hover:underline">
             {t('event_details')} →
