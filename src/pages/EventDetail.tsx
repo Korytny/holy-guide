@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { getEventById, getPlaceById, getRouteById } from '../services/api';
+import { getEventById, getPlacesByEventId, getRoutesByEventId } from '../services/api';
 import { Event, Place, Route } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
@@ -25,13 +25,17 @@ const EventDetail = () => {
       
       setLoading(true);
       try {
+        // Load the event details
         const eventData = await getEventById(id);
         setEvent(eventData);
         
-        // This is a mock implementation - in a real app, you would fetch related places and routes
-        // For demo purposes, we'll simulate empty arrays
-        setPlaces([]);
-        setRoutes([]);
+        // Load related places
+        const placesData = await getPlacesByEventId(id);
+        setPlaces(placesData);
+        
+        // Load related routes
+        const routesData = await getRoutesByEventId(id);
+        setRoutes(routesData);
       } catch (error) {
         console.error('Failed to load event data:', error);
       } finally {
@@ -70,15 +74,17 @@ const EventDetail = () => {
     );
   }
   
-  // For demo purposes, we'll use empty locations since we don't have real place data
+  // Extract map locations from the related places
   const mapLocations = places.map(place => ({
     latitude: place.location.latitude,
     longitude: place.location.longitude,
-    name: place.name,
+    name: getLocalizedText(place.name, language),
   }));
   
-  const eventName = event ? getLocalizedText(event.name, language) : '';
-  const eventDescription = event ? getLocalizedText(event.description, language) : '';
+  const eventName = getLocalizedText(event.name, language);
+  const eventDescription = event.info?.description 
+    ? getLocalizedText(event.info.description, language) 
+    : '';
   
   return (
     <div className="app-container py-6">
