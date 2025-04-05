@@ -1,29 +1,25 @@
-
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { 
-  MenubarMenu, 
-  Menubar, 
-  MenubarContent, 
-  MenubarItem, 
-  MenubarTrigger 
-} from '@/components/ui/menubar';
+import { MenubarMenu, Menubar, MenubarContent, MenubarItem, MenubarTrigger } from '@/components/ui/menubar';
 import { LogOut, User } from 'lucide-react';
 import { signOut } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
-
 const Navbar = () => {
-  const { auth, refreshProfile } = useAuth();
+  const {
+    auth,
+    refreshProfile
+  } = useAuth();
   const navigate = useNavigate();
-  const { toast } = useToast();
-
+  const {
+    toast
+  } = useToast();
   const handleSignOut = async () => {
     try {
       await signOut();
       toast({
         title: "Выход выполнен",
-        description: "Вы успешно вышли из своего аккаунта.",
+        description: "Вы успешно вышли из своего аккаунта."
       });
       await refreshProfile();
       navigate('/cities');
@@ -36,25 +32,16 @@ const Navbar = () => {
       });
     }
   };
-
   console.log("Auth state in Navbar:", auth);
-
-  return (
-    <div className="bg-white shadow-sm border-b">
+  return <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
           <div className="flex-shrink-0 flex items-center">
-            <h1 
-              className="text-xl font-bold cursor-pointer" 
-              onClick={() => navigate('/cities')}
-            >
-              Holy India Wanderer
-            </h1>
+            <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/cities')}>Wander guide</h1>
           </div>
           
           <div className="flex items-center">
-            {auth.isAuthenticated ? (
-              <Menubar className="border-none">
+            {auth.isAuthenticated ? <Menubar className="border-none">
                 <MenubarMenu>
                   <MenubarTrigger className="cursor-pointer">
                     <div className="flex items-center gap-2">
@@ -72,22 +59,13 @@ const Navbar = () => {
                     </MenubarItem>
                   </MenubarContent>
                 </MenubarMenu>
-              </Menubar>
-            ) : (
-              <Button
-                variant="ghost"
-                className="flex items-center gap-2"
-                onClick={() => navigate('/auth')}
-              >
+              </Menubar> : <Button variant="ghost" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
                 <User size={16} />
                 Войти
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default Navbar;
