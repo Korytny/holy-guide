@@ -94,7 +94,7 @@ export const getCities = async (search?: string, filters?: any) => {
     return [];
   }
   
-  return (data || []).map(transformCity) as City[];
+  return data ? data.map(transformCity) : [];
 };
 
 // Get city by ID
@@ -125,7 +125,7 @@ export const getPlacesByCityId = async (cityId: string) => {
     return [];
   }
   
-  return (data || []).map(transformPlace) as Place[];
+  return data ? data.map(transformPlace) : [];
 };
 
 // Get place by ID
@@ -157,7 +157,7 @@ export const getRoutesByCityId = async (cityId: string) => {
     return [];
   }
   
-  return (data || []).map(transformRoute) as Route[];
+  return data ? data.map(transformRoute) : [];
 };
 
 // Get route by ID
@@ -189,7 +189,7 @@ export const getEventsByCityId = async (cityId: string) => {
     return [];
   }
   
-  return (data || []).map(transformEvent) as Event[];
+  return data ? data.map(transformEvent) : [];
 };
 
 // Get event by ID
@@ -232,15 +232,17 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
     return [];
   }
   
+  if (!data) return [];
+  
   switch (type) {
     case 'cities':
-      return (data || []).map(transformCity);
+      return data.map(transformCity);
     case 'spots':
-      return (data || []).map(transformPlace);
+      return data.map(transformPlace);
     case 'routes':
-      return (data || []).map(transformRoute);
+      return data.map(transformRoute);
     case 'events':
-      return (data || []).map(transformEvent);
+      return data.map(transformEvent);
     default:
       return [];
   }
