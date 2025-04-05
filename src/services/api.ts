@@ -1,13 +1,6 @@
 
-import { createClient } from '@supabase/supabase-js';
+import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language } from '../types';
-
-// This will be replaced with actual Supabase credentials
-const supabaseUrl = 'https://your-supabase-project-url.supabase.co';
-const supabaseKey = 'your-supabase-anon-key';
-
-// Initialize Supabase client
-export const supabase = createClient(supabaseUrl, supabaseKey);
 
 // Get all cities with optional filters
 export const getCities = async (search?: string, filters?: any) => {
@@ -55,9 +48,9 @@ export const getCityById = async (id: string) => {
 // Get places by city ID
 export const getPlacesByCityId = async (cityId: string) => {
   const { data, error } = await supabase
-    .from('places')
+    .from('spots')
     .select('*')
-    .eq('cityId', cityId);
+    .eq('city', cityId);
   
   if (error) {
     console.error('Error fetching places:', error);
@@ -70,7 +63,7 @@ export const getPlacesByCityId = async (cityId: string) => {
 // Get place by ID
 export const getPlaceById = async (id: string) => {
   const { data, error } = await supabase
-    .from('places')
+    .from('spots')
     .select('*')
     .eq('id', id)
     .single();
