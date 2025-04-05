@@ -71,144 +71,184 @@ const transformEvent = (dbEvent: any): Event => ({
 });
 
 // Get all cities with optional filters
-export const getCities = async (search?: string, filters?: any) => {
-  let query = supabase.from('cities').select('*');
-  
-  if (search) {
-    query = query.ilike('name', `%${search}%`);
-  }
-  
-  if (filters) {
-    // Apply any additional filters
-    Object.entries(filters).forEach(([key, value]) => {
-      if (value) {
-        query = query.eq(key, value);
-      }
-    });
-  }
-  
-  const { data, error } = await query;
-  
-  if (error) {
-    console.error('Error fetching cities:', error);
+export const getCities = async (search?: string, filters?: Record<string, any>) => {
+  try {
+    let query = supabase.from('cities').select('*');
+    
+    if (search) {
+      query = query.ilike('name', `%${search}%`);
+    }
+    
+    if (filters) {
+      // Apply any additional filters
+      Object.entries(filters).forEach(([key, value]) => {
+        if (value) {
+          query = query.eq(key, value);
+        }
+      });
+    }
+    
+    const { data, error } = await query;
+    
+    if (error) {
+      console.error('Error fetching cities:', error);
+      return [];
+    }
+    
+    return data ? data.map(transformCity) : [];
+  } catch (error) {
+    console.error('Error in getCities:', error);
     return [];
   }
-  
-  return data ? data.map(transformCity) : [];
 };
 
 // Get city by ID
 export const getCityById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('cities')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching city:', error);
+  try {
+    const { data, error } = await supabase
+      .from('cities')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching city:', error);
+      return null;
+    }
+    
+    return data ? transformCity(data) : null;
+  } catch (error) {
+    console.error('Error in getCityById:', error);
     return null;
   }
-  
-  return data ? transformCity(data) : null;
 };
 
 // Get places by city ID
 export const getPlacesByCityId = async (cityId: string) => {
-  const { data, error } = await supabase
-    .from('spots')
-    .select('*')
-    .eq('city', cityId);
-  
-  if (error) {
-    console.error('Error fetching places:', error);
+  try {
+    const { data, error } = await supabase
+      .from('spots')
+      .select('*')
+      .eq('city', cityId);
+    
+    if (error) {
+      console.error('Error fetching places:', error);
+      return [];
+    }
+    
+    return data ? data.map(transformPlace) : [];
+  } catch (error) {
+    console.error('Error in getPlacesByCityId:', error);
     return [];
   }
-  
-  return data ? data.map(transformPlace) : [];
 };
 
 // Get place by ID
 export const getPlaceById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('spots')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching place:', error);
+  try {
+    const { data, error } = await supabase
+      .from('spots')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching place:', error);
+      return null;
+    }
+    
+    return data ? transformPlace(data) : null;
+  } catch (error) {
+    console.error('Error in getPlaceById:', error);
     return null;
   }
-  
-  return data ? transformPlace(data) : null;
 };
 
 // Get routes by city ID
 export const getRoutesByCityId = async (cityId: string) => {
-  // This might need adjustment based on your actual database structure
-  const { data, error } = await supabase
-    .from('routes')
-    .select('*')
-    .eq('cityId', cityId);
-  
-  if (error) {
-    console.error('Error fetching routes:', error);
+  try {
+    // This might need adjustment based on your actual database structure
+    const { data, error } = await supabase
+      .from('routes')
+      .select('*')
+      .eq('cityId', cityId);
+    
+    if (error) {
+      console.error('Error fetching routes:', error);
+      return [];
+    }
+    
+    return data ? data.map(transformRoute) : [];
+  } catch (error) {
+    console.error('Error in getRoutesByCityId:', error);
     return [];
   }
-  
-  return data ? data.map(transformRoute) : [];
 };
 
 // Get route by ID
 export const getRouteById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('routes')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching route:', error);
+  try {
+    const { data, error } = await supabase
+      .from('routes')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching route:', error);
+      return null;
+    }
+    
+    return data ? transformRoute(data) : null;
+  } catch (error) {
+    console.error('Error in getRouteById:', error);
     return null;
   }
-  
-  return data ? transformRoute(data) : null;
 };
 
 // Get events by city ID
 export const getEventsByCityId = async (cityId: string) => {
-  // This might need adjustment based on your actual database structure
-  const { data, error } = await supabase
-    .from('events')
-    .select('*')
-    .eq('cityId', cityId);
-  
-  if (error) {
-    console.error('Error fetching events:', error);
+  try {
+    // This might need adjustment based on your actual database structure
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('cityId', cityId);
+    
+    if (error) {
+      console.error('Error fetching events:', error);
+      return [];
+    }
+    
+    return data ? data.map(transformEvent) : [];
+  } catch (error) {
+    console.error('Error in getEventsByCityId:', error);
     return [];
   }
-  
-  return data ? data.map(transformEvent) : [];
 };
 
 // Get event by ID
 export const getEventById = async (id: string) => {
-  const { data, error } = await supabase
-    .from('events')
-    .select('*')
-    .eq('id', id)
-    .single();
-  
-  if (error) {
-    console.error('Error fetching event:', error);
+  try {
+    const { data, error } = await supabase
+      .from('events')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) {
+      console.error('Error fetching event:', error);
+      return null;
+    }
+    
+    return data ? transformEvent(data) : null;
+  } catch (error) {
+    console.error('Error in getEventById:', error);
     return null;
   }
-  
-  return data ? transformEvent(data) : null;
 };
 
-// Get translations - This function will need to be updated based on how translations are stored
+// Get translations
 export const getTranslations = async (language: Language) => {
   console.log('Getting translations for language:', language);
   return {};
@@ -216,39 +256,44 @@ export const getTranslations = async (language: Language) => {
 
 // Search functionality
 export const search = async (term: string, type: 'cities' | 'spots' | 'routes' | 'events') => {
-  // Adjust the search query based on the database structure
-  let tableName = type;
-  if (type === 'spots') {
-    tableName = 'spots'; // Use 'spots' table for places
-  }
-  
-  const { data, error } = await supabase
-    .from(tableName)
-    .select('*')
-    .textSearch('name', term);
-  
-  if (error) {
-    console.error(`Error searching ${type}:`, error);
-    return [];
-  }
-  
-  if (!data) return [];
-  
-  switch (type) {
-    case 'cities':
-      return data.map(transformCity);
-    case 'spots':
-      return data.map(transformPlace);
-    case 'routes':
-      return data.map(transformRoute);
-    case 'events':
-      return data.map(transformEvent);
-    default:
+  try {
+    // Adjust the search query based on the database structure
+    let tableName = type;
+    if (type === 'spots') {
+      tableName = 'spots'; // Use 'spots' table for places
+    }
+    
+    const { data, error } = await supabase
+      .from(tableName)
+      .select('*')
+      .textSearch('name', term);
+    
+    if (error) {
+      console.error(`Error searching ${type}:`, error);
       return [];
+    }
+    
+    if (!data) return [];
+    
+    switch (type) {
+      case 'cities':
+        return data.map(transformCity);
+      case 'spots':
+        return data.map(transformPlace);
+      case 'routes':
+        return data.map(transformRoute);
+      case 'events':
+        return data.map(transformEvent);
+      default:
+        return [];
+    }
+  } catch (error) {
+    console.error(`Error in search for ${type}:`, error);
+    return [];
   }
 };
 
-// New functions for user authentication and profile
+// User authentication and profile functions
 export const getUserProfile = async () => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
@@ -257,47 +302,63 @@ export const getUserProfile = async () => {
       return null;
     }
     
-    // Type the response properly
-    const { data, error } = await supabase
-      .from('profiles')
-      .select('id, full_name, avatar_url, updated_at')
-      .eq('id', session.user.id)
-      .single();
+    try {
+      // Attempt to get the user profile
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, full_name, avatar_url, updated_at')
+        .eq('id', session.user.id)
+        .maybeSingle();  // Use maybeSingle instead of single to avoid errors
       
-    if (error) {
-      // Profile doesn't exist, create it
-      if (error.code === 'PGRST116') {
+      // If profile exists, return it
+      if (data) {
+        return {
+          id: data.id,
+          fullName: data.full_name,
+          avatarUrl: data.avatar_url,
+          updatedAt: data.updated_at
+        };
+      }
+      
+      // If no profile exists, create one
+      if (error || !data) {
         console.log('Profile not found, creating new profile');
         return createUserProfile(session.user.id, session.user.user_metadata);
       }
-      
+    } catch (error) {
       console.error('Error fetching user profile:', error);
-      return null;
+      // Try to create a profile as a fallback
+      return createUserProfile(session.user.id, session.user.user_metadata);
     }
-    
-    if (!data) {
-      return null;
-    }
-    
-    // Transform the data to match our UserProfile type
-    return {
-      id: data.id,
-      fullName: data.full_name,
-      avatarUrl: data.avatar_url,
-      updatedAt: data.updated_at
-    };
   } catch (error) {
     console.error('Error in getUserProfile:', error);
     return null;
   }
 };
 
-// New function to create a user profile when it doesn't exist
+// Create a user profile
 const createUserProfile = async (userId: string, userMetadata: any) => {
   try {
-    const fullName = userMetadata?.full_name || userMetadata?.name || null;
+    const fullName = userMetadata?.full_name || userMetadata?.name || userMetadata?.email || 'User';
     const avatarUrl = userMetadata?.avatar_url || null;
     
+    // First check if profile already exists to avoid duplicates
+    const { data: existingProfile } = await supabase
+      .from('profiles')
+      .select('*')
+      .eq('id', userId)
+      .maybeSingle();
+      
+    if (existingProfile) {
+      return {
+        id: existingProfile.id,
+        fullName: existingProfile.full_name,
+        avatarUrl: existingProfile.avatar_url,
+        updatedAt: existingProfile.updated_at
+      };
+    }
+    
+    // If no profile exists, insert a new one
     const { data, error } = await supabase
       .from('profiles')
       .insert([
@@ -307,20 +368,24 @@ const createUserProfile = async (userId: string, userMetadata: any) => {
           avatar_url: avatarUrl 
         }
       ])
-      .select('id, full_name, avatar_url, updated_at')
-      .single();
+      .select()
+      .maybeSingle();
       
     if (error) {
       console.error('Error creating user profile:', error);
       return null;
     }
     
-    return {
-      id: data.id,
-      fullName: data.full_name,
-      avatarUrl: data.avatar_url,
-      updatedAt: data.updated_at
-    };
+    if (data) {
+      return {
+        id: data.id,
+        fullName: data.full_name,
+        avatarUrl: data.avatar_url,
+        updatedAt: data.updated_at
+      };
+    }
+    
+    return null;
   } catch (error) {
     console.error('Error in createUserProfile:', error);
     return null;
@@ -329,50 +394,67 @@ const createUserProfile = async (userId: string, userMetadata: any) => {
 
 // Function to update user profile
 export const updateUserProfile = async (updates: { full_name?: string, avatar_url?: string }) => {
-  const { data: { session } } = await supabase.auth.getSession();
-  
-  if (!session) {
-    throw new Error('Not authenticated');
-  }
-  
-  const { error } = await supabase
-    .from('profiles')
-    .update(updates)
-    .eq('id', session.user.id);
+  try {
+    const { data: { session } } = await supabase.auth.getSession();
     
-  if (error) {
-    console.error('Error updating profile:', error);
+    if (!session) {
+      throw new Error('Not authenticated');
+    }
+    
+    const { error } = await supabase
+      .from('profiles')
+      .update(updates)
+      .eq('id', session.user.id);
+      
+    if (error) {
+      console.error('Error updating profile:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in updateUserProfile:', error);
     throw error;
   }
-  
-  return true;
 };
 
 export const signInWithGoogle = async () => {
-  console.log('Attempting to sign in with Google...');
-  
-  const { data, error } = await supabase.auth.signInWithOAuth({
-    provider: 'google',
-    options: {
-      redirectTo: `${window.location.origin}/auth/callback`
+  try {
+    console.log('Attempting to sign in with Google...');
+    
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: {
+        redirectTo: `${window.location.origin}/auth/callback`
+      }
+    });
+    
+    console.log('Sign in attempt result:', { data, error });
+    
+    if (error) {
+      console.error('Error signing in with Google:', error);
+      throw error;
     }
-  });
-  
-  console.log('Sign in attempt result:', { data, error });
-  
-  if (error) {
-    console.error('Error signing in with Google:', error);
+    
+    return data;
+  } catch (error) {
+    console.error('Failed to sign in with Google:', error);
     throw error;
   }
-  
-  return data;
 };
 
 export const signOut = async () => {
-  const { error } = await supabase.auth.signOut();
-  
-  if (error) {
-    console.error('Error signing out:', error);
+  try {
+    const { error } = await supabase.auth.signOut();
+    
+    if (error) {
+      console.error('Error signing out:', error);
+      throw error;
+    }
+    
+    return true;
+  } catch (error) {
+    console.error('Error in signOut:', error);
     throw error;
   }
 };
