@@ -13,4 +13,5 @@ export interface Filter {
 export interface FilterSectionProps {
   filters: Filter[];
   onFilterChange: (filters: any) => void;
+  title?: string;
 }

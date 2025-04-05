@@ -1,3 +1,4 @@
+
 import { supabase } from '../integrations/supabase/client';
 import { City, Place, Route, Event, Language, Json, UserProfile } from '../types';
 
@@ -80,7 +81,9 @@ export const getCities = async (search?: string, filters?: Record<string, any>) 
     
     if (filters) {
       Object.entries(filters).forEach(([key, value]) => {
-        if (value) {
+        if (value && Array.isArray(value) && value.length > 0) {
+          query = query.in(key, value);
+        } else if (value && !Array.isArray(value)) {
           query = query.eq(key, value);
         }
       });
@@ -317,14 +320,19 @@ export const getUserProfile = async () => {
         console.log('Profile not found, creating new profile');
         
         try {
-          const { data: newProfile, error: insertError } = await supabase
-            .rpc('create_user_profile', { 
-              user_id: session.user.id,
-              user_full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
-              user_avatar_url: session.user.user_metadata.avatar_url || null
-            });
+          // Call the RPC function to create a user profile with proper RLS
+          const { data: createResult, error: funcError } = await supabase.functions.invoke(
+            'create-profile', 
+            {
+              body: { 
+                user_id: session.user.id,
+                full_name: session.user.user_metadata.full_name || session.user.user_metadata.name || 'User',
+                avatar_url: session.user.user_metadata.avatar_url || null
+              }
+            }
+          );
           
-          if (insertError) throw insertError;
+          if (funcError) throw funcError;
           
           const { data: createdProfile } = await supabase
             .from('profiles')
@@ -341,7 +349,7 @@ export const getUserProfile = async () => {
             };
           }
         } catch (rpcError) {
-          console.error('Error using RPC to create profile:', rpcError);
+          console.error('Error creating profile:', rpcError);
           throw rpcError;
         }
       }
