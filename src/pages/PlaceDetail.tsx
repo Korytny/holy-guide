@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getPlaceById, getRoutesByPlaceId, getEventsByPlaceId } from '../services/api';
@@ -125,10 +126,13 @@ const PlaceDetail = () => {
             <h2 className="text-xl font-semibold mb-6">{t('location')}</h2>
             <MapView 
               locations={[{
+                id: place.id,
                 latitude: place.location.latitude,
                 longitude: place.location.longitude,
                 name: place.name,
-                description: placeDescription.substring(0, 100)
+                description: place.description,
+                imageUrl: place.imageUrl,
+                type: place.type
               }]}
               center={[place.location.longitude, place.location.latitude]}
               zoom={14}

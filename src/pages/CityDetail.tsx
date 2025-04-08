@@ -273,7 +273,7 @@ const CityDetail: React.FC = (): JSX.Element => {
           </div>
           <CityMapView
             locations={mapLocations}
-            maintainZoom={true}
+            maintainZoom={false}
             key={mapLocations.length}
           />
         </div>

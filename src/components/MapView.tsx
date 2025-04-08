@@ -4,12 +4,18 @@ import mapboxgl from 'mapbox-gl';
 import 'mapbox-gl/dist/mapbox-gl.css';
 import { useLanguage } from '../context/LanguageContext';
 import { getLocalizedText } from '../utils/languageUtils';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
+import MapPopup from './MapPopup';
 
 export interface Location {
+  id?: string;
   latitude: number;
   longitude: number;
   name?: string | { [key: string]: string };
-  description?: string;
+  description?: string | { [key: string]: string };
+  imageUrl?: string;
+  type?: number;
 }
 
 interface MapViewProps {
@@ -52,35 +58,77 @@ const MapView: React.FC<MapViewProps> = ({
     // Add navigation controls
     map.current.addControl(new mapboxgl.NavigationControl(), 'top-right');
     
-    // Add markers for each location
-    locations.forEach(location => {
-      const { latitude, longitude, name, description } = location;
-      const localizedName = name ? getLocalizedText(name, language) : undefined;
-      
-      // Create marker element
-      const el = document.createElement('div');
-      el.className = 'marker';
-      el.style.backgroundImage = 'url(https://cdn-icons-png.flaticon.com/512/4874/4874738.png)';
-      el.style.width = '32px';
-      el.style.height = '32px';
-      el.style.backgroundSize = 'cover';
-      
-      // Add popup if name exists
-      if (localizedName) {
-        const popup = new mapboxgl.Popup({ offset: 25 })
-          .setHTML(`
-            <h3 class="font-medium text-base">${localizedName}</h3>
-            ${description ? `<p class="text-sm">${description}</p>` : ''}
-          `);
+    // Wait for map to load
+    map.current.on('load', () => {
+      // Add markers for each location
+      if (locations.length > 0) {
+        const bounds = new mapboxgl.LngLatBounds();
         
-        new mapboxgl.Marker(el)
-          .setLngLat([longitude, latitude])
-          .setPopup(popup)
-          .addTo(map.current);
-      } else {
-        new mapboxgl.Marker(el)
-          .setLngLat([longitude, latitude])
-          .addTo(map.current);
+        locations.forEach(location => {
+          const { latitude, longitude, name, description, imageUrl, id } = location;
+          const localizedName = name ? getLocalizedText(name, language) : undefined;
+          const localizedDesc = description ? getLocalizedText(description, language) : undefined;
+          
+          // Skip if no valid coordinates
+          if (!latitude || !longitude) return;
+          
+          // Extend map bounds
+          bounds.extend([longitude, latitude]);
+          
+          // Create marker element
+          const el = document.createElement('div');
+          el.className = 'marker';
+          el.style.backgroundImage = 'url(https://cdn-icons-png.flaticon.com/512/4874/4874738.png)';
+          el.style.width = '32px';
+          el.style.height = '32px';
+          el.style.backgroundSize = 'cover';
+          
+          if (id && localizedName) {
+            // Create popup container for React content
+            const popupContent = document.createElement('div');
+            const root = createRoot(popupContent);
+            
+            try {
+              root.render(
+                <BrowserRouter>
+                  <MapPopup
+                    name={localizedName}
+                    placeId={id}
+                    imageUrl={imageUrl}
+                    description={localizedDesc}
+                  />
+                </BrowserRouter>
+              );
+              
+              // Add marker with popup
+              new mapboxgl.Marker(el)
+                .setLngLat([longitude, latitude])
+                .setPopup(new mapboxgl.Popup({ offset: 25 }).setDOMContent(popupContent))
+                .addTo(map.current!);
+            } catch (error) {
+              console.error('Error rendering MapPopup:', error);
+              
+              // Fallback to simple popup if React rendering fails
+              new mapboxgl.Marker(el)
+                .setLngLat([longitude, latitude])
+                .setPopup(new mapboxgl.Popup({ offset: 25 }).setHTML(`<h3>${localizedName}</h3>`))
+                .addTo(map.current!);
+            }
+          } else {
+            // Simple marker without popup if no id or name
+            new mapboxgl.Marker(el)
+              .setLngLat([longitude, latitude])
+              .addTo(map.current!);
+          }
+        });
+        
+        // Fit map to bounds if we have locations
+        if (!bounds.isEmpty()) {
+          map.current.fitBounds(bounds, {
+            padding: 50,
+            maxZoom: 14
+          });
+        }
       }
     });
     

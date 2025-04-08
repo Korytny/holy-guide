@@ -51,8 +51,10 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
   useEffect(() => {
     if (!mapContainer.current) return;
 
+    const defaultCenter = center || [55.751244, 37.618423];
+    
     mapInstance.current = L.map(mapContainer.current, {
-      center: center || [55.751244, 37.618423],
+      center: defaultCenter,
       zoom,
     });
 
@@ -73,7 +75,19 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
     if (!mapInstance.current || !isMapReady) return;
 
     const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
-    const bounds = validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number]);
+    
+    // Clear previous markers
+    mapInstance.current.eachLayer(layer => {
+      if (layer instanceof L.Marker) {
+        mapInstance.current?.removeLayer(layer);
+      }
+    });
+    
+    if (validLocations.length === 0) return;
+    
+    const bounds = L.latLngBounds(
+      validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number])
+    );
 
     validLocations.forEach(location => {
       // Skip invalid locations
@@ -153,18 +167,16 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
       }
     });
 
-    if (bounds.length > 0 && !maintainZoom) {
-      mapInstance.current.fitBounds(bounds);
+    // Center map on markers if we have any and should adjust the view
+    if (bounds.isValid() && !maintainZoom) {
+      mapInstance.current.fitBounds(bounds, {
+        padding: [30, 30], // Add some padding
+        maxZoom: 15 // Limit maximum zoom level
+      });
     }
+    
     mapInstance.current.invalidateSize();
 
-    return () => {
-      mapInstance.current?.eachLayer(layer => {
-        if (layer instanceof L.Marker) {
-          mapInstance.current?.removeLayer(layer);
-        }
-      });
-    };
   }, [locations, language, isMapReady, maintainZoom]);
 
   return (

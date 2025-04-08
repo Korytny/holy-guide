@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
 import { getEventById, getPlacesByEventId, getRoutesByEventId } from '../services/api';
@@ -76,9 +77,13 @@ const EventDetail = () => {
   }
   
   const mapLocations = places.map(place => ({
+    id: place.id,
     latitude: place.location.latitude,
     longitude: place.location.longitude,
-    name: getLocalizedText(place.name, language),
+    name: place.name,
+    description: place.description,
+    imageUrl: place.imageUrl,
+    type: place.type
   }));
   
   const eventName = getLocalizedText(event.name, language);
