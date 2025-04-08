@@ -39,7 +39,7 @@ const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
         to={`/places/${placeId}`}
         className="text-xs text-blue-500 hover:underline block text-center"
       >
-        Подробнее →
+        View details →
       </Link>
     </div>
   );

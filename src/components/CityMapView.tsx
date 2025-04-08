@@ -8,7 +8,7 @@ import { useLanguage } from '../context/LanguageContext';
 import { getLocalizedText } from '../utils/languageUtils';
 import MapPopup from './MapPopup';
 
-interface MapLocation {
+interface Location {
   id: string;
   latitude: number;
   longitude: number;
@@ -19,15 +19,17 @@ interface MapLocation {
 }
 
 interface CityMapViewProps {
-  locations: MapLocation[];
+  locations: Location[];
   center?: [number, number];
   zoom?: number;
+  maintainZoom?: boolean;
 }
 
 const CityMapView: React.FC<CityMapViewProps> = memo(({
   locations = [],
   center,
-  zoom = 13
+  zoom = 13,
+  maintainZoom = false
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
@@ -107,8 +109,8 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
       
       // Process name and description for the popup
       const name = location.name ?
-        (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Место') :
-        'Место';
+        (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Place') :
+        'Place';
 
       const description = location.description ?
         (typeof location.description === 'string' ? location.description : getLocalizedText(location.description, language)) :
@@ -151,7 +153,7 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
       }
     });
 
-    if (bounds.length > 0) {
+    if (bounds.length > 0 && !maintainZoom) {
       mapInstance.current.fitBounds(bounds);
     }
     mapInstance.current.invalidateSize();
@@ -163,7 +165,7 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
         }
       });
     };
-  }, [locations, language, isMapReady]);
+  }, [locations, language, isMapReady, maintainZoom]);
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden relative">

@@ -34,10 +34,13 @@ import SearchBar from '../components/SearchBar';
 import { getLocalizedText } from '../utils/languageUtils';
 
 interface MapLocation {
+  id: number;
   latitude: number;
   longitude: number;
   name: string;
   description: string;
+  imageUrl: string;
+  type: string;
 }
 
 const CityDetail: React.FC = (): JSX.Element => {
@@ -175,12 +178,14 @@ const CityDetail: React.FC = (): JSX.Element => {
     );
   }
   
-  const mapLocations: MapLocation[] = places.map(place => ({
+  const mapLocations = places.map(place => ({
+    id: place.id,
     latitude: place.location.latitude,
     longitude: place.location.longitude,
-    name: getLocalizedText(place.name, language),
-    description: place.info?.description ? 
-      getLocalizedText(place.info.description, language, '').substring(0, 100) + '...' : '',
+    name: place.name,
+    description: place.description,
+    imageUrl: place.imageUrl,
+    type: place.type
   }));
   
   const cityName = getLocalizedText(city.name, language) || city.name.en;
