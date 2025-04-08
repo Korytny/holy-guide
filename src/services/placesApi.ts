@@ -1,6 +1,26 @@
 import { supabase } from '../integrations/supabase/client';
 import { transformPlace } from '@/services/apiUtils';
 
+export const fetchPlaceData = async (ids: string[]) => {
+  try {
+    const { data, error } = await supabase
+      .from('spots')
+      .select('*')
+      .in('id', ids);
+
+    if (error) {
+      console.error('Error fetching place data:', error);
+      return [];
+    }
+
+    return data ? data.map(transformPlace) : [];
+  } catch (error) {
+    console.error('Error in fetchPlaceData:', error);
+    return [];
+  }
+};
+
+
 export const getPlacesByCityId = async (cityId: string) => {
   try {
     const { data, error } = await supabase
@@ -82,6 +102,7 @@ export const getPlacesByEventId = async (eventId: string) => {
     if (joinError || !joinData?.length) {
       return [];
     }
+    // Remove this inner declaration
 
     // Then fetch full spot data
     const spotIds = joinData.map(item => item.spot_id);

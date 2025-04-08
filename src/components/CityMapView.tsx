@@ -1,128 +1,189 @@
-import React, { useEffect, useRef, useState, useCallback, memo } from 'react';
+import React, { useEffect, useRef, memo } from 'react';
+import L from 'leaflet';
+import 'leaflet/dist/leaflet.css';
+import { createRoot } from 'react-dom/client';
+import { BrowserRouter } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { getLocalizedText } from '../utils/languageUtils';
+import MapPopup from './MapPopup';
 
-interface Location {
+interface MapLocation {
+  id: string;
   latitude: number;
   longitude: number;
   name?: string | { [key: string]: string };
-  description?: string;
+  type?: number;
+  imageUrl?: string;
+  description?: string | { [key: string]: string };
 }
 
 interface CityMapViewProps {
-  locations: Location[];
+  locations: MapLocation[];
   center?: [number, number];
   zoom?: number;
-  maintainZoom?: boolean;
 }
 
-const CityMapView: React.FC<CityMapViewProps> = memo(({ 
-  locations, 
+const CityMapView: React.FC<CityMapViewProps> = memo(({
+  locations = [],
   center,
-  zoom = 12,
-  maintainZoom = true
+  zoom = 13
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
+  const mapInstance = useRef<L.Map | null>(null);
   const { language } = useLanguage();
+  const [isMapReady, setIsMapReady] = React.useState(false);
 
-  const calculateCenter = useCallback((): [number, number] => {
-    if (center) return center;
-    if (locations.length === 0) return [55.7558, 37.6176]; // Default to Moscow [lat, lng]
-    
-    if (locations.length === 1) {
-      return [locations[0].latitude, locations[0].longitude];
-    }
-    
-    const sumLat = locations.reduce((sum, loc) => sum + loc.latitude, 0);
-    const sumLng = locations.reduce((sum, loc) => sum + loc.longitude, 0);
-    
-    return [sumLat / locations.length, sumLng / locations.length];
-  }, [center, locations]);
-
-  const initMap = useCallback(async () => {
-    if (!mapContainer.current) return;
-    
-    const L = await import('leaflet');
-    await import('leaflet/dist/leaflet.css');
-    
-    const mapCenter = calculateCenter();
-    const map = L.map(mapContainer.current).setView(mapCenter, zoom);
-    
-    // Auto-fit bounds if there are multiple locations
-    if (locations.length > 1) {
-      const bounds = L.latLngBounds(
-        locations.map(loc => [loc.latitude, loc.longitude])
-      );
-      map.fitBounds(bounds, { padding: [50, 50] });
-    }
-    
-    // Initialize map with proper language support
-    const initMap = () => {
-      if (language === 'en' && process.env.NEXT_PUBLIC_MAPBOX_TOKEN) {
-        try {
-          // Use Mapbox Streets style with English labels
-          L.tileLayer(`https://api.mapbox.com/styles/v1/mapbox/streets-v11/tiles/{z}/{x}/{y}?access_token=${process.env.NEXT_PUBLIC_MAPBOX_TOKEN}`, {
-            attribution: '&copy; <a href="https://www.mapbox.com/about/maps/">Mapbox</a> &copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-            tileSize: 512,
-            zoomOffset: -1,
-            maxZoom: 18
-          }).addTo(map);
-          return;
-        } catch (e) {
-          console.warn('Mapbox failed to load, falling back to OSM');
-        }
-      }
-
-      // Fallback to OpenStreetMap
-      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-        attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>',
-        maxZoom: 18
-      }).addTo(map);
+  // Color mapping for location types
+  const getMarkerColor = (type?: number) => {
+    const colors: Record<number, string> = {
+      1: '#3b82f6', // Blue
+      2: '#ef4444', // Red
+      3: '#10b981', // Green
+      4: '#f59e0b', // Yellow
     };
+    return colors[type || 1] || '#4f46e5'; // Default indigo
+  };
 
-    initMap();
+  // Initialize map
+  useEffect(() => {
+    if (!mapContainer.current) return;
 
-    // Set language for any map elements
-    map.getContainer().setAttribute('lang', language);
-
-    locations.forEach(location => {
-      const { latitude, longitude, name, description } = location;
-      const localizedName = name ? getLocalizedText(name, language) : undefined;
-      
-      const marker = L.marker([latitude, longitude]);
-      
-      if (localizedName) {
-        marker.bindPopup(`
-          <div>
-            <h3 class="font-medium">${localizedName}</h3>
-            ${description ? `<p class="text-sm">${description}</p>` : ''}
-          </div>
-        `);
-      }
-      
-      marker.addTo(map);
+    mapInstance.current = L.map(mapContainer.current, {
+      center: center || [55.751244, 37.618423],
+      zoom,
     });
 
-    return () => map.remove();
-  }, [calculateCenter, language, locations, zoom]);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+    }).addTo(mapInstance.current);
 
-  useEffect(() => {
-    const cleanupPromise = initMap();
+    setIsMapReady(true);
+
     return () => {
-      cleanupPromise.then(cleanup => cleanup && cleanup());
+      mapInstance.current?.remove();
+      mapInstance.current = null;
     };
-  }, [initMap]);
+  }, []);
+
+  // Add markers
+  useEffect(() => {
+    if (!mapInstance.current || !isMapReady) return;
+
+    const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
+    const bounds = validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number]);
+
+    validLocations.forEach(location => {
+      const marker = L.marker([location.latitude, location.longitude], {
+        icon: L.divIcon({
+          className: 'custom-marker',
+          html: `<div style="
+            background-color: ${getMarkerColor(location.type)};
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            border: 2px solid white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+          "></div>`,
+          iconSize: [24, 24],
+          iconAnchor: [12, 12],
+          popupAnchor: [0, -12]
+        })
+      }).addTo(mapInstance.current!);
+
+      // Skip invalid locations but allow popups for those with coordinates
+      if (!location?.latitude || !location?.longitude) {
+        console.warn('Invalid location coordinates:', location);
+        return;
+      }
+      const locationId = location.id;
+      
+      const name = location.name ?
+        (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Место') :
+        'Место';
+
+      if (!name) {
+        console.warn('Location missing name:', location);
+        return;
+      }
+      
+      if (!location.id) {
+        console.warn('Location missing ID, cannot create proper link:', location);
+        return;
+      }
+
+      const popupContent = document.createElement('div');
+      popupContent.className = 'popup-container';
+      popupContent.style.minWidth = '150px';
+      
+      const root = createRoot(popupContent);
+      console.log('Full location data structure:', JSON.parse(JSON.stringify(location)));
+      console.log('Available location keys:', Object.keys(location));
+      console.log('Data verification:', {
+        hasName: !!location.name,
+        hasImage: 'imageUrl' in location,
+        hasDescription: 'description' in location,
+        imageUrl: location.imageUrl,
+        description: location.description,
+        rawDescriptionType: typeof location.description,
+        rawDescriptionContent: location.description
+      });
+      
+      try {
+        console.log('Popup props:', {
+          name,
+          locationId,
+          imageUrl: location.imageUrl,
+          description: location.description
+        });
+        
+        root.render(
+          <BrowserRouter>
+            <MapPopup
+             name={name}
+             placeId={location.id}
+             imageUrl={location.imageUrl}
+           />
+          </BrowserRouter>
+        );
+        
+        marker.bindPopup(popupContent, {
+          minWidth: 150,
+          className: 'custom-popup'
+        });
+      } catch (error) {
+        console.error('Popup render error:', error);
+      }
+    });
+
+    if (bounds.length > 0) {
+      mapInstance.current.fitBounds(bounds);
+    }
+    mapInstance.current.invalidateSize();
+
+    return () => {
+      mapInstance.current?.eachLayer(layer => {
+        if (layer instanceof L.Marker) {
+          mapInstance.current?.removeLayer(layer);
+        }
+      });
+    };
+  }, [locations, language, isMapReady]);
 
   return (
-    <div className="rounded-lg overflow-hidden shadow-md bg-white h-[400px] w-full">
+    <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
       <div ref={mapContainer} className="h-full w-full" />
+      {!isMapReady && (
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
+          <p>Loading map...</p>
+        </div>
+      )}
     </div>
   );
-}, (prevProps, nextProps) => {
-  // Only re-render if locations array length changes or center/zoom changes
-  return prevProps.locations.length === nextProps.locations.length &&
-         prevProps.center === nextProps.center &&
-         prevProps.zoom === nextProps.zoom;
 });
 
 export default CityMapView;

@@ -55,6 +55,26 @@ export interface Place {
   routes?: string[];
 }
 
+export interface MapLocation extends Partial<Place> {
+  id: string;
+  name: string | { [key in Language]?: string };
+  location: {
+    latitude: number;
+    longitude: number;
+  };
+  // Database fields
+  city?: string;
+  coordinates?: any;
+  info?: any;
+  images?: any;
+  type?: number;
+  point?: unknown;
+  created_at?: string;
+  // Added new properties to avoid circular references
+  events?: string[];
+  routes?: string[];
+}
+
 export interface Route {
   id: string;
   name: string | { [key in Language]?: string };
