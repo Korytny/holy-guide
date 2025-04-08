@@ -10,11 +10,6 @@ interface MapPopupProps {
 }
 
 const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
-  if (!placeId) {
-    console.error('Missing placeId in MapPopup');
-    return null;
-  }
-
   return (
     <div className="p-2 w-56 max-w-full">
       {imageUrl ? (
