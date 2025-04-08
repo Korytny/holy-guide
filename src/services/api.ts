@@ -1,3 +1,4 @@
+
 import { supabase } from '../integrations/supabase/client';
 import { Language, UserProfile } from '../types';
 import { getEventById, getEventsByPlaceId, getEventsByRouteId } from './eventsApi';

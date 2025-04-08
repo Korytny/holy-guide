@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Link } from 'react-router-dom';
 
@@ -5,28 +6,34 @@ interface MapPopupProps {
   name: string;
   placeId: string;
   imageUrl?: string;
+  description?: string;
 }
 
-const MapPopup = ({ name, placeId, imageUrl }: MapPopupProps) => {
+const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
   if (!placeId) {
     console.error('Missing placeId in MapPopup');
     return null;
   }
+
   return (
-    <div className="p-2 w-48">
+    <div className="p-2 w-56 max-w-full">
       {imageUrl ? (
         <img
           src={imageUrl}
           alt={name}
-          className="w-full h-24 object-cover rounded mb-2"
+          className="w-full h-32 object-cover rounded mb-2"
         />
       ) : (
-        <div className="bg-gray-100 h-24 mb-2 flex items-center justify-center">
+        <div className="bg-gray-100 h-32 mb-2 flex items-center justify-center rounded">
           <span className="text-xs text-gray-500">No image</span>
         </div>
       )}
       
-      <h3 className="font-medium text-sm mb-2 text-center">{name}</h3>
+      <h3 className="font-medium text-sm mb-1 text-center">{name}</h3>
+      
+      {description && (
+        <p className="text-xs text-gray-600 mb-2 line-clamp-2">{description}</p>
+      )}
       
       <Link
         to={`/places/${placeId}`}

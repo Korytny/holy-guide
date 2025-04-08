@@ -1,3 +1,4 @@
+
 import React, { useEffect, useRef, memo } from 'react';
 import L from 'leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -73,6 +74,13 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
     const bounds = validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number]);
 
     validLocations.forEach(location => {
+      // Skip invalid locations
+      if (!location?.latitude || !location?.longitude) {
+        console.warn('Invalid location coordinates:', location);
+        return;
+      }
+
+      // Create marker
       const marker = L.marker([location.latitude, location.longitude], {
         icon: L.divIcon({
           className: 'custom-marker',
@@ -94,65 +102,48 @@ const CityMapView: React.FC<CityMapViewProps> = memo(({
           popupAnchor: [0, -12]
         })
       }).addTo(mapInstance.current!);
-
-      // Skip invalid locations but allow popups for those with coordinates
-      if (!location?.latitude || !location?.longitude) {
-        console.warn('Invalid location coordinates:', location);
-        return;
-      }
+      
       const locationId = location.id;
       
+      // Process name and description for the popup
       const name = location.name ?
         (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Место') :
         'Место';
+
+      const description = location.description ?
+        (typeof location.description === 'string' ? location.description : getLocalizedText(location.description, language)) :
+        '';
 
       if (!name) {
         console.warn('Location missing name:', location);
         return;
       }
       
-      if (!location.id) {
+      if (!locationId) {
         console.warn('Location missing ID, cannot create proper link:', location);
         return;
       }
 
+      // Create popup content
       const popupContent = document.createElement('div');
       popupContent.className = 'popup-container';
-      popupContent.style.minWidth = '150px';
       
       const root = createRoot(popupContent);
-      console.log('Full location data structure:', JSON.parse(JSON.stringify(location)));
-      console.log('Available location keys:', Object.keys(location));
-      console.log('Data verification:', {
-        hasName: !!location.name,
-        hasImage: 'imageUrl' in location,
-        hasDescription: 'description' in location,
-        imageUrl: location.imageUrl,
-        description: location.description,
-        rawDescriptionType: typeof location.description,
-        rawDescriptionContent: location.description
-      });
       
       try {
-        console.log('Popup props:', {
-          name,
-          locationId,
-          imageUrl: location.imageUrl,
-          description: location.description
-        });
-        
         root.render(
           <BrowserRouter>
             <MapPopup
-             name={name}
-             placeId={location.id}
-             imageUrl={location.imageUrl}
-           />
+              name={name}
+              placeId={locationId}
+              imageUrl={location.imageUrl}
+              description={description}
+            />
           </BrowserRouter>
         );
         
         marker.bindPopup(popupContent, {
-          minWidth: 150,
+          minWidth: 200,
           className: 'custom-popup'
         });
       } catch (error) {
