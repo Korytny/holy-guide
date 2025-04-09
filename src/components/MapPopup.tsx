@@ -31,11 +31,15 @@ const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
       )}
       
       <Link
-        to={`/places/${placeId}`}
-        className="text-xs text-blue-500 hover:underline block text-center"
-      >
-        View details →
-      </Link>
+       to={`/places/${placeId}`}
+       className="text-xs text-blue-500 hover:underline block text-center"
+       onClick={(e) => {
+         e.preventDefault();
+         window.location.href = `/places/${placeId}`;
+       }}
+     >
+       View details →
+     </Link>
     </div>
   );
 };
