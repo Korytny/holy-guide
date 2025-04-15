@@ -18,21 +18,54 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     // General
     "explore": "Explore",
     "back_to_cities": "Back to Cities",
+    "back_to_home": "Back to Home",
     "error": "Error",
-    "loading": "Loading",
+    "error_title": "Error",
+    "loading": "Loading...",
+    "please_wait": "Please wait...",
+    "no_description_available": "No description available",
+    "back_to_city": "Back to City",
+    "sacred_place": "Sacred Place",
+    "no_image_available": "No image available", // Added
     
+    // Place Types (Added)
+    "place_type_temple": "Temple",
+    "place_type_samadhi": "Samadhi",
+    "place_type_kunda": "Kunda",
+    "place_type_sacred_site": "Sacred Site",
+
     // Authentication
     "sign_in": "Sign In",
+    "signin": "Sign In", // Alias
     "sign_out": "Sign Out",
     "signed_out": "Signed Out",
     "signed_out_successfully": "You have been successfully signed out.",
+    "signed_out_title": "Signed Out",
+    "signed_out_success_desc": "You have successfully signed out of your account.",
     "failed_to_sign_out": "Failed to sign out",
+    "signout_failed_desc": "Failed to sign out. Please try again.",
     "login_required": "Login Required",
     "login_to_save_favorites": "Please login to save favorites",
+    "auth_error_title": "Authentication Error",
+    "google_signin_failed_desc": "Failed to sign in via Google",
+    "welcome_title": "Welcome to Holy India Wanderer",
+    "welcome_back_title": "Welcome back!",
+    "signin_prompt": "Sign in to access your profile",
+    "connecting": "Connecting...",
+    "continue_with_google": "Continue with Google",
+    "no_auth_code_found": "No authentication code found in URL",
+    "signed_in_successfully_desc": "You have successfully signed in.",
+    "profile_load_failed_desc": "Failed to load user profile",
+    "signin_failed_desc": "Failed to sign in",
+    "redirecting_to_signin": "Redirecting to sign in page...",
+    "completing_auth": "Completing Authentication",
+    "please_wait_signing_in": "Please wait while we sign you in...",
     
     // Profile
     "profile": "Profile",
     "my_profile": "My Profile",
+    "your_profile": "Your Profile",
+    "welcome": "Welcome!",
     
     // Cities
     "sacred_places": "Sacred Places",
@@ -42,15 +75,20 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "city_not_found": "City not found",
     "explore_on_map": "Explore on Map",
     "route_on_map_title": "Route on Map",
+    "cities_title": "Sacred places of India",
+    "cities_subtitle": "Discover the spiritual heart of India through its most sacred cities",
+    "search_placeholder": "Search cities...",
+    "search_places_placeholder": "Search places in this city...",
     
     // Favorites
-    "added_to_favorites": "Added to Favorites",
-    "removed_from_favorites": "Removed from Favorites",
+    "add_to_favorites": "Add to Favorites",
+    "remove_from_favorites": "Remove from Favorites",
     "added_to_favorites_description": "was added to your favorites",
     "removed_from_favorites_description": "was removed from your favorites",
     "error_updating_favorites": "Error updating favorites",
     
     // Places, Routes and Events
+    "location": "Location",
     "no_places_found": "No places found",
     "no_routes_found": "No routes found",
     "no_events_found": "No events found",
@@ -63,33 +101,62 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "Place not found",
     "route_not_found": "Route not found",
     "event_not_found": "Event not found",
-    "no_description_available": "No description available",
-    "back_to_city": "Back to City",
     "places_on_route": "Places on Route",
     "related_events": "Related Events",
-    "cities_title": "Sacred places of India",
-    "cities_subtitle": "Discover the spiritual heart of India through its most sacred cities",
-    "search_placeholder": "Search cities..."
+    "spiritual_route": "Spiritual Route", 
   },
   ru: {
     // General
     "explore": "Исследовать",
     "back_to_cities": "Назад к городам",
+    "back_to_home": "На главную",
     "error": "Ошибка",
-    "loading": "Загрузка",
+    "error_title": "Ошибка",
+    "loading": "Загрузка...",
+    "please_wait": "Пожалуйста, подождите...",
+    "no_description_available": "Описание недоступно",
+    "back_to_city": "Назад к городу",
+    "sacred_place": "Священное место",
+    "no_image_available": "Нет изображения", // Added
     
+    // Place Types (Added)
+    "place_type_temple": "Храм",
+    "place_type_samadhi": "Самадхи",
+    "place_type_kunda": "Кунда",
+    "place_type_sacred_site": "Святое место", // Общий термин для типа 4
+
     // Authentication
     "sign_in": "Войти",
+    "signin": "Вход", // Alias
     "sign_out": "Выйти",
     "signed_out": "Выход выполнен",
     "signed_out_successfully": "Вы успешно вышли из своего аккаунта.",
+    "signed_out_title": "Выход выполнен",
+    "signed_out_success_desc": "Вы успешно вышли из вашего аккаунта.",
     "failed_to_sign_out": "Не удалось выйти из аккаунта",
-    "login_required": "Требуется авторизация",
+    "signout_failed_desc": "Не удалось выйти из аккаунта. Пожалуйста, попробуйте снова.",
+    "login_required": "Требуется вход",
     "login_to_save_favorites": "Пожалуйста, войдите, чтобы сохранять избранное",
-    
+    "auth_error_title": "Ошибка аутентификации",
+    "google_signin_failed_desc": "Не удалось войти через Google",
+    "welcome_title": "Добро пожаловать в Holy India Wanderer",
+    "welcome_back_title": "С возвращением!",
+    "signin_prompt": "Войдите, чтобы получить доступ к своему профилю",
+    "connecting": "Подключение...",
+    "continue_with_google": "Продолжить с Google",
+    "no_auth_code_found": "Код аутентификации не найден в URL",
+    "signed_in_successfully_desc": "Вы успешно вошли в систему.",
+    "profile_load_failed_desc": "Не удалось загрузить профиль пользователя",
+    "signin_failed_desc": "Не удалось войти в систему",
+    "redirecting_to_signin": "Перенаправление на страницу входа...",
+    "completing_auth": "Завершение аутентификации",
+    "please_wait_signing_in": "Пожалуйста, подождите, пока мы входим в систему...",
+
     // Profile
     "profile": "Профиль",
     "my_profile": "Мой профиль",
+    "your_profile": "Ваш профиль",
+    "welcome": "Добро пожаловать!",
     
     // Cities
     "sacred_places": "Священные места",
@@ -98,17 +165,21 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "about_city": "О городе",
     "city_not_found": "Город не найден",
     "explore_on_map": "Исследовать на карте",
-    "location": "Местоположение",
     "route_on_map_title": "Маршрут на карте",
-    
+    "cities_title": "Священные места Индии",
+    "cities_subtitle": "Откройте для себя духовное сердце Индии через её самые священные города",
+    "search_placeholder": "Поиск городов...",
+    "search_places_placeholder": "Искать места в этом городе...",
+
     // Favorites
-    "added_to_favorites": "Добавлено в избранное",
-    "removed_from_favorites": "Удалено из избранного",
+    "add_to_favorites": "Добавить в избранное",
+    "remove_from_favorites": "Удалить из избранного",
     "added_to_favorites_description": "добавлен в избранное",
     "removed_from_favorites_description": "удален из избранного",
     "error_updating_favorites": "Ошибка при обновлении избранного",
     
     // Places, Routes and Events
+    "location": "Местоположение",
     "no_places_found": "Места не найдены",
     "no_routes_found": "Маршруты не найдены",
     "no_events_found": "События не найдены",
@@ -121,32 +192,62 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "Место не найдено",
     "route_not_found": "Маршрут не найден",
     "event_not_found": "Событие не найдено",
-    "back_to_city": "Назад к городу",
     "places_on_route": "Места на маршруте",
     "related_events": "Связанные события",
-    "cities_title": "Священные места Индии",
-    "cities_subtitle": "Откройте для себя духовное сердце Индии через её самые священные города",
-    "search_placeholder": "Поиск городов..."
+    "spiritual_route": "Духовный маршрут",
   },
   hi: {
     // General
     "explore": "खोजें",
     "back_to_cities": "शहरों पर वापस जाएं",
+    "back_to_home": "होम पर वापस जाएं",
     "error": "त्रुटि",
-    "loading": "लोड हो रहा है",
+    "error_title": "त्रुटि",
+    "loading": "लोड हो रहा है...",
+    "please_wait": "कृपया प्रतीक्षा करें...",
+    "no_description_available": "कोई विवरण उपलब्ध नहीं है",
+    "back_to_city": "शहर पर वापस जाएं",
+    "sacred_place": "पवित्र स्थान",
+    "no_image_available": "कोई छवि उपलब्ध नहीं है", // Added
+
+    // Place Types (Added)
+    "place_type_temple": "मंदिर",
+    "place_type_samadhi": "समाधि",
+    "place_type_kunda": "कुंड",
+    "place_type_sacred_site": "पवित्र स्थल",
     
     // Authentication
     "sign_in": "साइन इन करें",
+    "signin": "साइन इन", // Alias
     "sign_out": "साइन आउट करें",
     "signed_out": "साइन आउट किया गया",
     "signed_out_successfully": "आप सफलतापूर्वक साइन आउट हो गए हैं।",
+    "signed_out_title": "साइन आउट किया गया",
+    "signed_out_success_desc": "आप सफलतापूर्वक अपने खाते से बाहर निकल गए हैं।",
     "failed_to_sign_out": "साइन आउट करने में विफल",
+    "signout_failed_desc": "साइन आउट करने में विफल। कृपया पुन: प्रयास करें।",
     "login_required": "लॉगिन आवश्यक है",
     "login_to_save_favorites": "पसंदीदा सहेजने के लिए कृपया लॉगिन करें",
-    
+    "auth_error_title": "प्रमाणीकरण त्रुटि",
+    "google_signin_failed_desc": "Google के माध्यम से साइन इन करने में विफल",
+    "welcome_title": "होली इंडिया वांडरर में आपका स्वागत है",
+    "welcome_back_title": "वापसी पर स्वागत है!",
+    "signin_prompt": "अपनी प्रोफ़ाइल तक पहुँचने के लिए साइन इन करें",
+    "connecting": "कनेक्ट हो रहा है...",
+    "continue_with_google": "Google के साथ जारी रखें",
+    "no_auth_code_found": "URL में कोई प्रमाणीकरण कोड नहीं मिला",
+    "signed_in_successfully_desc": "आपने सफलतापूर्वक साइन इन कर लिया है।",
+    "profile_load_failed_desc": "उपयोगकर्ता प्रोफ़ाइल लोड करने में विफल",
+    "signin_failed_desc": "साइन इन करने में विफल",
+    "redirecting_to_signin": "साइन इन पेज पर रीडायरेक्ट किया जा रहा है...",
+    "completing_auth": "प्रमाणीकरण पूरा किया जा रहा है",
+    "please_wait_signing_in": "कृपया प्रतीक्षा करें जब तक हम आपको साइन इन करते हैं...",
+
     // Profile
     "profile": "प्रोफ़ाइल",
     "my_profile": "मेरी प्रोफ़ाइल",
+    "your_profile": "आपकी प्रोफ़ाइल",
+    "welcome": "स्वागत है!",
     
     // Cities
     "sacred_places": "पवित्र स्थान",
@@ -155,16 +256,21 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "about_city": "शहर के बारे में",
     "city_not_found": "शहर नहीं मिला",
     "explore_on_map": "नक्शे पर खोजें",
-    "location": "स्थान",
+    "route_on_map_title": "नक्शे पर मार्ग",
+    "cities_title": "भारत के पवित्र स्थान",
+    "cities_subtitle": "भारत की आध्यात्मिक हृदयस्थली को उसके सबसे पवित्र शहरों के माध्यम से खोजें",
+    "search_placeholder": "शहर खोजें...",
+    "search_places_placeholder": "इस शहर में स्थान खोजें...",
     
     // Favorites
-    "added_to_favorites": "पसंदीदा में जोड़ा गया",
-    "removed_from_favorites": "पसंदीदा से हटाया गया",
+    "add_to_favorites": "पसंदीदा में जोड़ें",
+    "remove_from_favorites": "पसंदीदा से हटाएं",
     "added_to_favorites_description": "आपके पसंदीदा में जोड़ा गया",
     "removed_from_favorites_description": "आपके पसंदीदा से हटाया गया",
     "error_updating_favorites": "पसंदीदा अपडेट करने में त्रुटि",
     
     // Places, Routes and Events
+    "location": "स्थान",
     "no_places_found": "कोई स्थान नहीं मिला",
     "no_routes_found": "कोई मार्ग नहीं मिला",
     "no_events_found": "कोई कार्यक्रम नहीं मिला",
@@ -177,13 +283,9 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "place_not_found": "स्थान नहीं मिला",
     "route_not_found": "मार्ग नहीं मिला",
     "event_not_found": "कार्यक्रम नहीं मिला",
-    "no_description_available": "कोई विवरण उपलब्ध नहीं है",
-    "back_to_city": "शहर पर वापस जाएं",
     "places_on_route": "मार्ग पर स्थान",
     "related_events": "संबंधित कार्यक्रम",
-    "cities_title": "भारत के पवित्र स्थान",
-    "cities_subtitle": "भारत की आध्यात्मिक हृदयस्थली को उसके सबसे पवित्र शहरों के माध्यम से खोजें",
-    "search_placeholder": "शहर खोजें..."
+    "spiritual_route": "आध्यात्मिक मार्ग",
   }
 };
 
@@ -203,7 +305,7 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
     return savedLanguage || defaultLanguage;
   });
   
-  const [translations, setTranslations] = useState<Record<string, string>>(baseTranslations[language] || {});
+  const [translations, setTranslations] = useState<Record<string, string>>(baseTranslations[language] || baseTranslations.en);
   const [isLoading, setIsLoading] = useState(true);
   
   useEffect(() => {
@@ -213,14 +315,18 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
         // Load base translations immediately
         setTranslations(baseTranslations[language] || baseTranslations.en);
         
-        // Try to load additional translations from API
-        const apiTranslations = await getTranslations(language);
-        setTranslations(prev => ({
-          ...prev,
-          ...apiTranslations
-        }));
+        // Try to load additional translations from API (if any)
+        // const apiTranslations = await getTranslations(language);
+        // setTranslations(prev => ({
+        //   ...prev,
+        //   ...apiTranslations
+        // }));
       } catch (error) {
         console.error('Failed to load translations:', error);
+        // Fallback to English if selected language fails
+        if (language !== 'en') {
+          setTranslations(baseTranslations.en);
+        }
       } finally {
         setIsLoading(false);
       }
@@ -232,12 +338,12 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
   }, [language]);
   
   const t = (key: string): string => {
-    return translations[key] || baseTranslations.en[key] || key;
+    return translations[key] || baseTranslations.en[key] || key; // Fallback chain: selected -> english -> key itself
   };
   
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, isLoading }}>
-      {children}
+      {!isLoading ? children : <div>Loading translations...</div>} 
     </LanguageContext.Provider>
   );
 };

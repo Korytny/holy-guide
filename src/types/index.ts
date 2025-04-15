@@ -122,6 +122,9 @@ export interface UserProfile {
   avatarUrl: string | null;
   updatedAt: string;
   cities_like?: string[];
+  routes_like?: string[];
+  events_like?: string[];
+  places_like?: string[]; // Added
 }
 
 export interface AuthState {

@@ -7,11 +7,13 @@ import { Button } from "@/components/ui/button";
 import { signOut } from "../services/api";
 import { useToast } from "@/hooks/use-toast";
 import Layout from "../components/Layout";
+import { useLanguage } from "../context/LanguageContext"; // Added import
 
 const Profile = () => {
   const { auth } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { t } = useLanguage(); // Added hook
 
   useEffect(() => {
     // Redirect to auth if not authenticated
@@ -24,15 +26,15 @@ const Profile = () => {
     try {
       await signOut();
       toast({
-        title: "Вы вышли из аккаунта",
-        description: "Вы успешно вышли из вашего аккаунта."
+        title: t("signed_out_title"),
+        description: t("signed_out_success_desc")
       });
       navigate('/auth');
     } catch (error) {
       console.error("Error signing out:", error);
       toast({
-        title: "Ошибка",
-        description: "Не удалось выйти из аккаунта. Пожалуйста, попробуйте снова.",
+        title: t("error_title"),
+        description: t("signout_failed_desc"),
         variant: "destructive"
       });
     }
@@ -43,8 +45,8 @@ const Profile = () => {
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
           <div className="animate-pulse text-center">
-            <h1 className="text-2xl font-semibold mb-4">Загрузка</h1>
-            <p className="text-gray-500">Пожалуйста, подождите...</p>
+            <h1 className="text-2xl font-semibold mb-4">{t('loading')}</h1>
+            <p className="text-gray-500">{t('please_wait')}</p>
           </div>
         </div>
       </Layout>
@@ -71,7 +73,7 @@ const Profile = () => {
         <div className="max-w-3xl mx-auto">
           <div className="bg-white rounded-2xl shadow-xl overflow-hidden">
             <div className="p-8 text-center border-b border-gray-100">
-              <h1 className="text-3xl font-bold text-gray-900">Ваш профиль</h1>
+              <h1 className="text-3xl font-bold text-gray-900">{t('your_profile')}</h1>
             </div>
             
             <div className="p-8">
@@ -82,12 +84,12 @@ const Profile = () => {
                 </Avatar>
                 
                 <h2 className="text-2xl font-semibold mb-1">
-                  {auth.user.fullName || "Добро пожаловать!"}
+                  {auth.user.fullName || t('welcome')}
                 </h2>
                 
                 <div className="mt-8 w-full flex justify-center">
                   <Button onClick={handleSignOut} variant="outline" className="border-red-300 text-red-600 hover:bg-red-50 hover:text-red-700">
-                    Выйти
+                    {t('sign_out')}
                   </Button>
                 </div>
               </div>
@@ -97,10 +99,10 @@ const Profile = () => {
           <div className="mt-6 text-center">
             <Button 
               variant="ghost" 
-              onClick={() => navigate('/cities')}
+              onClick={() => navigate('/')}
               className="text-gray-600 hover:text-gray-900"
             >
-              Вернуться к городам
+              {t('back_to_cities')} 
             </Button>
           </div>
         </div>

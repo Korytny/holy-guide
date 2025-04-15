@@ -33,22 +33,22 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
     if (type === 'spots') {
       tableName = 'spots';
     }
-    
+
     const { data, error } = await supabase
       .from(tableName)
       .select('*')
       .textSearch('name', term);
-    
+
     if (error) {
       console.error(`Error searching ${type}:`, error);
       return [];
     }
 
     if (!data) return [];
-    
+
     // Import transform functions on demand to avoid circular dependencies
     const { transformCity, transformPlace, transformRoute, transformEvent } = await import('./apiUtils');
-    
+
     switch (type) {
       case 'cities':
         return data.map(transformCity);
@@ -67,121 +67,137 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
   }
 };
 
-// User profile related functions
-export const addCityToFavorites = async (cityId: string) => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      throw new Error('Not authenticated');
-    }
-    
-    const { data: profile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-      
-    if (fetchError) {
-      console.error('Error fetching profile:', fetchError);
-      throw fetchError;
-    }
-    
-    let currentLikes = profile?.cities_like || [];
-    
-    if (!Array.isArray(currentLikes)) {
-      currentLikes = [];
-    }
-    
-    if (!currentLikes.includes(cityId)) {
-      const { error: updateError } = await supabase
-        .from('profiles')
-        .update({ 
-          cities_like: [...currentLikes, cityId] 
-        })
-        .eq('id', session.user.id);
-        
-      if (updateError) {
-        console.error('Error updating favorites:', updateError);
-        throw updateError;
-      }
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error in addCityToFavorites:', error);
+// --- User profile related functions ---
+
+// Generic function to fetch profile
+const fetchUserProfile = async (userId: string) => {
+  const { data: profile, error } = await supabase
+    .from('profiles')
+    .select('*')
+    .eq('id', userId)
+    .maybeSingle();
+
+  if (error) {
+    console.error('Error fetching profile:', error);
     throw error;
   }
+  return profile;
+};
+
+// Generic function to update favorites
+const updateFavorites = async (userId: string, field: string, currentLikes: string[], itemId: string, add: boolean) => {
+  let updatedLikes;
+  if (add) {
+    if (!currentLikes.includes(itemId)) {
+      updatedLikes = [...currentLikes, itemId];
+    } else {
+      return true; // Already liked
+    }
+  } else {
+    updatedLikes = currentLikes.filter(id => id !== itemId);
+    if (updatedLikes.length === currentLikes.length) {
+      return true; // Was not liked
+    }
+  }
+
+  const { error: updateError } = await supabase
+    .from('profiles')
+    .update({ [field]: updatedLikes })
+    .eq('id', userId);
+
+  if (updateError) {
+    console.error(`Error updating ${field}:`, updateError);
+    throw updateError;
+  }
+  return true;
+};
+
+// City Favorites
+export const addCityToFavorites = async (cityId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.cities_like && Array.isArray(profile.cities_like) ? profile.cities_like : [];
+  return updateFavorites(session.user.id, 'cities_like', currentLikes, cityId, true);
 };
 
 export const removeCityFromFavorites = async (cityId: string) => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      throw new Error('Not authenticated');
-    }
-    
-    const { data: profile, error: fetchError } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-      
-    if (fetchError) {
-      console.error('Error fetching profile:', fetchError);
-      throw fetchError;
-    }
-    
-    let currentLikes = profile?.cities_like || [];
-    
-    if (!Array.isArray(currentLikes)) {
-      return true;
-    }
-    
-    const updatedLikes = currentLikes.filter(id => id !== cityId);
-    
-    const { error: updateError } = await supabase
-      .from('profiles')
-      .update({ cities_like: updatedLikes })
-      .eq('id', session.user.id);
-      
-    if (updateError) {
-      console.error('Error updating favorites:', updateError);
-      throw updateError;
-    }
-    
-    return true;
-  } catch (error) {
-    console.error('Error in removeCityFromFavorites:', error);
-    throw error;
-  }
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.cities_like && Array.isArray(profile.cities_like) ? profile.cities_like : [];
+  return updateFavorites(session.user.id, 'cities_like', currentLikes, cityId, false);
 };
 
+// Route Favorites
+export const addRouteToFavorites = async (routeId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.routes_like && Array.isArray(profile.routes_like) ? profile.routes_like : [];
+  return updateFavorites(session.user.id, 'routes_like', currentLikes, routeId, true);
+};
+
+export const removeRouteFromFavorites = async (routeId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.routes_like && Array.isArray(profile.routes_like) ? profile.routes_like : [];
+  return updateFavorites(session.user.id, 'routes_like', currentLikes, routeId, false);
+};
+
+// Event Favorites
+export const addEventToFavorites = async (eventId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.events_like && Array.isArray(profile.events_like) ? profile.events_like : [];
+  return updateFavorites(session.user.id, 'events_like', currentLikes, eventId, true);
+};
+
+export const removeEventFromFavorites = async (eventId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.events_like && Array.isArray(profile.events_like) ? profile.events_like : [];
+  return updateFavorites(session.user.id, 'events_like', currentLikes, eventId, false);
+};
+
+// Place Favorites (Added)
+export const addPlaceToFavorites = async (placeId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.places_like && Array.isArray(profile.places_like) ? profile.places_like : [];
+  return updateFavorites(session.user.id, 'places_like', currentLikes, placeId, true);
+};
+
+export const removePlaceFromFavorites = async (placeId: string) => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (!session) throw new Error('Not authenticated');
+  const profile = await fetchUserProfile(session.user.id);
+  const currentLikes = profile?.places_like && Array.isArray(profile.places_like) ? profile.places_like : [];
+  return updateFavorites(session.user.id, 'places_like', currentLikes, placeId, false);
+};
+
+// Get User Profile (Updated)
 export const getUserProfile = async (): Promise<UserProfile | null> => {
   try {
     const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      return null;
-    }
-    
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-      
-    if (error || !profile) {
-      return null;
-    }
-    
+    if (!session) return null;
+
+    const profile = await fetchUserProfile(session.user.id);
+    if (!profile) return null;
+
     return {
       id: profile.id,
       fullName: profile.full_name,
       avatarUrl: profile.avatar_url,
       updatedAt: profile.updated_at,
-      cities_like: profile.cities_like || []
+      cities_like: profile.cities_like && Array.isArray(profile.cities_like) ? profile.cities_like : [],
+      routes_like: profile.routes_like && Array.isArray(profile.routes_like) ? profile.routes_like : [],
+      events_like: profile.events_like && Array.isArray(profile.events_like) ? profile.events_like : [],
+      places_like: profile.places_like && Array.isArray(profile.places_like) ? profile.places_like : [] // Added
     };
   } catch (error) {
     console.error('Error getting user profile:', error);
@@ -199,36 +215,5 @@ export const signOut = async () => {
   } catch (error) {
     console.error('Error signing out:', error);
     throw error;
-  }
-};
-
-export const isCityFavorite = async (cityId: string): Promise<boolean> => {
-  try {
-    const { data: { session } } = await supabase.auth.getSession();
-    
-    if (!session) {
-      return false;
-    }
-    
-    const { data: profile, error } = await supabase
-      .from('profiles')
-      .select('*')
-      .eq('id', session.user.id)
-      .maybeSingle();
-      
-    if (error || !profile) {
-      return false;
-    }
-    
-    const currentLikes = profile.cities_like || [];
-    
-    if (!Array.isArray(currentLikes)) {
-      return false;
-    }
-    
-    return currentLikes.includes(cityId);
-  } catch (error) {
-    console.error('Error in isCityFavorite:', error);
-    return false;
   }
 };

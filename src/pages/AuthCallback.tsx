@@ -5,6 +5,7 @@ import { supabase } from '../integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '../context/AuthContext';
 import Layout from '../components/Layout';
+import { useLanguage } from "../context/LanguageContext"; // Added import
 
 const AuthCallback = () => {
   const navigate = useNavigate();
@@ -12,6 +13,7 @@ const AuthCallback = () => {
   const { refreshProfile } = useAuth();
   const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const [isProcessing, setIsProcessing] = useState(true);
+  const { t } = useLanguage(); // Added hook
 
   useEffect(() => {
     const handleAuthCallback = async () => {
@@ -25,7 +27,7 @@ const AuthCallback = () => {
         
         if (!code) {
           console.error("No code found in URL");
-          setErrorMessage('No authentication code found in URL');
+          setErrorMessage(t('no_auth_code_found'));
           setIsProcessing(false);
           return;
         }
@@ -51,15 +53,15 @@ const AuthCallback = () => {
             await refreshProfile();
             
             toast({
-              title: 'Добро пожаловать!',
-              description: 'Вы успешно вошли в систему.',
+              title: t('welcome_back_title'),
+              description: t('signed_in_successfully_desc'),
             });
             
-            // Redirect to the profile page after successful auth
-            navigate('/profile');
+            // Redirect to the home page after successful auth
+            navigate('/');
           } catch (profileError) {
             console.error("Error refreshing profile:", profileError);
-            setErrorMessage("Не удалось загрузить профиль пользователя");
+            setErrorMessage(t("profile_load_failed_desc"));
             setIsProcessing(false);
           }
         }, 1000);
@@ -67,8 +69,8 @@ const AuthCallback = () => {
         console.error('Error during auth callback:', error);
         setIsProcessing(false);
         toast({
-          title: 'Ошибка аутентификации',
-          description: error instanceof Error ? error.message : 'Не удалось войти в систему',
+          title: t('auth_error_title'),
+          description: error instanceof Error ? error.message : t('signin_failed_desc'),
           variant: 'destructive',
         });
         
@@ -80,7 +82,7 @@ const AuthCallback = () => {
     };
 
     handleAuthCallback();
-  }, [navigate, toast, refreshProfile]);
+  }, [navigate, toast, refreshProfile, t]); // Added t to dependency array
 
   return (
     <Layout hideNavbar>
@@ -88,17 +90,17 @@ const AuthCallback = () => {
         <div className="text-center max-w-md w-full p-6 bg-white rounded-2xl shadow-xl">
           {errorMessage ? (
             <>
-              <h1 className="text-2xl font-semibold mb-4 text-red-600">Ошибка аутентификации</h1>
+              <h1 className="text-2xl font-semibold mb-4 text-red-600">{t('auth_error_title')}</h1>
               <p className="text-gray-700 mb-4">{errorMessage}</p>
-              <p className="text-gray-500">Перенаправление на страницу входа...</p>
+              <p className="text-gray-500">{t('redirecting_to_signin')}</p>
             </>
           ) : (
             <>
               <div className={`${isProcessing ? 'animate-pulse' : ''} mb-4`}>
                 <div className="h-12 w-12 bg-blue-200 rounded-full mx-auto mb-4"></div>
               </div>
-              <h1 className="text-2xl font-semibold mb-4">Завершение аутентификации</h1>
-              <p className="text-gray-500">Пожалуйста, подождите, пока мы входим в систему...</p>
+              <h1 className="text-2xl font-semibold mb-4">{t('completing_auth')}</h1>
+              <p className="text-gray-500">{t('please_wait_signing_in')}</p>
             </>
           )}
         </div>
