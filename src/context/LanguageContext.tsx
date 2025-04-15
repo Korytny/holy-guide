@@ -10,7 +10,7 @@ interface LanguageContextType {
   isLoading: boolean;
 }
 
-const defaultLanguage: Language = 'en';
+const defaultLanguage: Language = 'en'; // Set default language to English
 
 // Basic translations
 const baseTranslations: Record<Language, Record<string, string>> = {

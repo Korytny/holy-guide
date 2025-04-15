@@ -30,8 +30,8 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<LanguageSelection />} />
-              <Route path="/cities" element={<CitiesPage />} />
+              <Route path="/" element={<CitiesPage />} />
+              <Route path="/language" element={<LanguageSelection />} />
               <Route path="/cities/:id" element={<CityDetail />} />
               <Route path="/places/:id" element={<PlaceDetail />} />
               <Route path="/routes/:id" element={<RouteDetail />} />
