@@ -3,58 +3,77 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Route } from '../types';
 import { useLanguage } from '../context/LanguageContext';
-import { RouteIcon, Heart } from 'lucide-react';
+import { useAuth } from '../context/AuthContext';
+import { Route as RouteIcon, Heart } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
+import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
 
 interface RouteCardProps {
   route: Route;
+  className?: string; 
 }
 
-const RouteCard: React.FC<RouteCardProps> = ({ route }) => {
+const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
   const { language, t } = useLanguage();
+  const { auth, isFavorite, toggleFavorite } = useAuth(); 
   
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = getLocalizedText(route.description, language);
-  
+  const isRouteFavorite = auth.isAuthenticated && auth.user ? isFavorite('route', route.id) : false;
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    // toggleFavorite handles the auth check
+    if (route.id) {
+        toggleFavorite('route', route.id);
+    }
+  };
+
   return (
-    <Link to={`/routes/${route.id}`} className="block">
-      <div className="india-card animate-slide-up">
-        <div className="relative">
-          <img 
-            src={route.imageUrl} 
-            alt={routeName} 
-            className="india-card-image"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute top-2 left-2 right-2 flex justify-between">
-            <div className="bg-white/80 p-1.5 rounded-full">
-              <RouteIcon size={16} className="text-spiritualPurple" />
-            </div>
-            <div className="bg-white/80 p-1.5 rounded-full">
-              <Heart size={16} className="text-gray-600" />
-            </div>
-          </div>
-        </div>
-        <div className="india-card-content">
-          <h3 className="text-lg font-medium mb-1">{routeName}</h3>
-          <div className="text-sm text-gray-600 h-[4.5rem] overflow-hidden space-y-1">
-            {route.info ? (
-              Object.entries(route.info)
-                .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key))
-                .slice(0, 3)
-                .map(([key, value], i) => (
-                  <div key={i} className="line-clamp-3">
-                    {['en', 'ru', 'hi'].includes(key) ? '' : `${key} `}
-                    {typeof value === 'object' ? getLocalizedText(value, language) : String(value)}
-                  </div>
-                ))
-            ) : (
-              <p className="line-clamp-3">{routeDescription}</p>
-            )}
-          </div>
-        </div>
+    <div 
+      className={cn(
+        "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+        className
+      )}
+    >
+      <div className="relative">
+         <Link to={`/routes/${route.id}`} className="absolute inset-0 z-0"></Link> 
+        <img 
+          src={route.imageUrl || '/placeholder.svg'} 
+          alt={routeName}
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+         {/* Favorite Button - Always visible */} 
+         {route.id && (
+            <Button 
+              variant="ghost" 
+              size="icon"
+              className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 h-8 w-8"
+              onClick={handleFavoriteClick}
+              aria-label={isRouteFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
+            >
+              <Heart 
+                size={16}
+                className={cn("transition-colors", isRouteFavorite ? "fill-red-500 text-red-500" : "text-white")}
+               />
+            </Button>
+          )}
       </div>
-    </Link>
+      <Link to={`/routes/${route.id}`} className="p-3 flex-grow flex flex-col justify-between"> 
+          <div>
+             <h3 className="text-base font-medium mb-1 truncate" title={routeName}>{routeName}</h3>
+            <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+              {routeDescription || t('no_description_available')}
+            </p>
+          </div>
+          <div className="flex items-center text-xs text-gray-500 mt-1">
+            <RouteIcon size={14} className="mr-1" />
+            <span>{t('spiritual_route')}</span>
+          </div>
+      </Link>
+    </div>
   );
 };
 

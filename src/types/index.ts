@@ -42,6 +42,7 @@ export interface Place {
     latitude: number;
     longitude: number;
   };
+  order?: number; // Added order field for routes
   // Database fields
   city?: string;
   coordinates?: any;
@@ -62,6 +63,7 @@ export interface MapLocation extends Partial<Place> {
     latitude: number;
     longitude: number;
   };
+  order?: number; // Also added here for consistency
   // Database fields
   city?: string;
   coordinates?: any;

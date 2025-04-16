@@ -2,40 +2,21 @@
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { Button } from '@/components/ui/button';
-import { MenubarMenu, Menubar, MenubarContent, MenubarItem, MenubarTrigger } from '@/components/ui/menubar';
-import { LogOut, User } from 'lucide-react';
-import { signOut } from '../services/api';
-import { useToast } from '@/hooks/use-toast';
+// Removed DropdownMenu imports
+import { User } from 'lucide-react'; // Removed LogOut as sign out is in profile page
+// import { signOut } from '../services/api'; // No longer needed here
+// import { useToast } from '@/hooks/use-toast'; // No longer needed here
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 
 const Navbar = () => {
-  const { auth, refreshProfile } = useAuth();
+  // Removed refreshProfile and toast as handleSignOut is removed
+  const { auth } = useAuth();
   const { t } = useLanguage();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  
-  const handleSignOut = async () => {
-    try {
-      await signOut();
-      toast({
-        title: t("signed_out"),
-        description: t("signed_out_successfully")
-      });
-      await refreshProfile();
-      navigate('/');
-    } catch (error) {
-      console.error('Error signing out:', error);
-      toast({
-        title: t("error"),
-        description: t("failed_to_sign_out"),
-        variant: "destructive"
-      });
-    }
-  };
-  
-  // Removed debug logging to prevent unnecessary re-renders
-  
+
+  // Removed handleSignOut function
+
   return (
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -45,33 +26,24 @@ const Navbar = () => {
               Wander guide
             </h1>
           </div>
-          
+
           <div className="flex items-center space-x-4">
             <LanguageSwitcher />
-            
+
             {auth.isAuthenticated ? (
-              <Menubar className="border-none">
-                <MenubarMenu>
-                  <MenubarTrigger className="cursor-pointer">
-                    <div className="flex items-center gap-2">
-                      <User size={20} />
-                      <span>{t("profile")}</span>
-                    </div>
-                  </MenubarTrigger>
-                  <MenubarContent>
-                    <MenubarItem onClick={() => navigate('/profile')}>
-                      {t("my_profile")}
-                    </MenubarItem>
-                    <MenubarItem onClick={handleSignOut} className="text-red-600">
-                      <LogOut size={16} className="mr-2" />
-                      {t("sign_out")}
-                    </MenubarItem>
-                  </MenubarContent>
-                </MenubarMenu>
-              </Menubar>
+              // Replaced DropdownMenu with a direct Button link to profile
+              <Button
+                variant="ghost"
+                className="flex items-center gap-2"
+                onClick={() => navigate('/profile')} // Navigate directly
+              >
+                <User size={18} />
+                <span className="hidden sm:inline">{t("profile")}</span>
+              </Button>
             ) : (
+              // Simple Sign In button remains the same
               <Button variant="ghost" className="flex items-center gap-2" onClick={() => navigate('/auth')}>
-                <User size={16} />
+                <User size={18} />
                 {t("sign_in")}
               </Button>
             )}

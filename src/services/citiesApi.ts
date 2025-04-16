@@ -49,6 +49,10 @@ const transformCity = (dbCity: CityFromDB): City => {
 };
 
 export const getCities = async (): Promise<City[]> => {
+  if (!supabase) {
+    console.error('[CitiesAPI] Supabase client not available');
+    return [];
+  }
   const { data, error } = await supabase
     .from('cities')
     .select('*')
@@ -63,6 +67,10 @@ export const getCities = async (): Promise<City[]> => {
 };
 
 export const getCityById = async (id: string): Promise<City | null> => {
+  if (!supabase) {
+    console.error('[CitiesAPI] Supabase client not available');
+    return null;
+  }
   const { data, error } = await supabase
     .from('cities')
     .select('*')
@@ -77,7 +85,32 @@ export const getCityById = async (id: string): Promise<City | null> => {
   return transformCity(data);
 };
 
+export const getCitiesByIds = async (ids: string[]): Promise<City[]> => {
+  if (!supabase || !ids || ids.length === 0) {
+    return [];
+  }
+  try {
+    const { data, error } = await supabase
+      .from('cities')
+      .select('*')
+      .in('id', ids);
+
+    if (error) {
+      console.error('Error fetching cities by IDs:', error);
+      return [];
+    }
+    return data ? data.map(transformCity) : [];
+  } catch (error) {
+    console.error('Error in getCitiesByIds:', error);
+    return [];
+  }
+};
+
 export const searchCities = async (search: string): Promise<City[]> => {
+  if (!supabase) {
+    console.error('[CitiesAPI] Supabase client not available');
+    return [];
+  }
   const { data, error } = await supabase
     .from('cities')
     .select('*')

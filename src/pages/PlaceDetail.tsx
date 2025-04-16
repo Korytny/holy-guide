@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getPlaceById, getRoutesByPlaceId, getEventsByPlaceId } from '../services/api';
@@ -7,7 +8,8 @@ import { useAuth } from '../context/AuthContext'; // Import useAuth
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import RouteCard from '../components/RouteCard';
 import EventCard from '../components/EventCard';
-import MapView from '../components/MapView';
+// import MapView from '../components/MapView'; // Remove old import
+import CityMapView from '../components/CityMapView'; // Import new map
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Import Carousel components
 import { Card, CardContent } from "@/components/ui/card"; // Import Card for Carousel item styling
@@ -65,7 +67,8 @@ const PlaceDetail = () => {
     }, [id]);
 
     if (loading) {
-        return (
+        // ... Loading skeleton remains the same ...
+         return (
             <Layout>
                 <div className="app-container py-10">
                     <div className="animate-pulse">
@@ -93,7 +96,8 @@ const PlaceDetail = () => {
     }
 
     if (!place) {
-        return (
+        // ... Not found remains the same ...
+         return (
             <Layout>
                 <div className="app-container py-10 text-center">
                     <h2 className="text-xl font-semibold mb-4">{t('place_not_found')}</h2>
@@ -115,15 +119,15 @@ const PlaceDetail = () => {
         getLocalizedText(place.info, language)
     ].filter(text => text && text.trim()) : [];
 
-    // Prepare locations for MapView, ensure type is number
+    // Prepare locations for MapView, ensure type is number and id is present
     const mapLocations = place ? [{
         id: place.id,
         latitude: place.location.latitude,
         longitude: place.location.longitude,
         name: place.name,
-        description: place.description, // Map popup might need LocalizedText handling
+        description: place.description,
         imageUrl: place.imageUrl,
-        type: place.type // Should be number?
+        type: place.type
     }] : [];
 
     // Prepare images for Carousel
@@ -153,7 +157,8 @@ const PlaceDetail = () => {
                 <div className="grid md:grid-cols-2 gap-8 mb-10">
                     {/* Image Carousel Section */} 
                     <div className="relative w-full h-64 md:h-96"> 
-                        {allImages.length > 0 ? (
+                        {/* ... Carousel remains the same ... */}
+                          {allImages.length > 0 ? (
                             <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
                                 <CarouselContent className="h-full">
                                     {allImages.map((imgUrl, index) => (
@@ -203,11 +208,12 @@ const PlaceDetail = () => {
                                  <span>{t(placeTypeKey)}</span> 
                              </div>
                          </div>
-                     </div>
+                    </div>
 
                     {/* About Section */}
                     <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-                        <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_place')}</h2>
+                       {/* ... About section remains the same ... */} 
+                         <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_place')}</h2>
                         {descriptionParts.length > 0 ? (
                             <div className="prose max-w-none text-gray-700">
                                 {descriptionParts.map((part, index) => (
@@ -220,22 +226,24 @@ const PlaceDetail = () => {
                     </div>
                 </div>
 
-                {/* Map Section */} 
+                {/* Map Section - Use CityMapView */} 
                 {place && (
                     <div className="mb-10">
                         <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('location')}</h2>
                         <div className="rounded-xl overflow-hidden shadow-lg h-96"> 
-                            <MapView
-                                locations={mapLocations}
-                                center={[place.location.longitude, place.location.latitude]}
-                                zoom={14}
+                            <CityMapView
+                                locations={mapLocations} 
+                                center={[place.location.latitude, place.location.longitude]} // Center on place
+                                zoom={15} // Zoom closer for single place
+                                maintainZoom={true} // Keep zoom fixed
                             />
                         </div>
                     </div>
                 )}
 
-                {/* Tabs Section */} 
-                <Tabs defaultValue="routes" className="w-full">
+                {/* Tabs Section */}
+                 {/* ... Tabs remain the same ... */} 
+                 <Tabs defaultValue="routes" className="w-full">
                     <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center">
                         <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">{t('related_routes')} ({relatedRoutes.length})</TabsTrigger>
                         <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">{t('related_events')} ({relatedEvents.length})</TabsTrigger>

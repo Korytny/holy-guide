@@ -1,5 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
 import { transformPlace } from '@/services/apiUtils';
+import { Place } from '@/types'; // Import Place type
 
 export const fetchPlaceData = async (ids: string[]) => {
   try {
@@ -21,7 +22,7 @@ export const fetchPlaceData = async (ids: string[]) => {
 };
 
 
-export const getPlacesByCityId = async (cityId: string) => {
+export const getPlacesByCityId = async (cityId: string): Promise<Place[]> => {
   try {
     const { data, error } = await supabase
       .from('spots')
@@ -40,7 +41,7 @@ export const getPlacesByCityId = async (cityId: string) => {
   }
 };
 
-export const getPlaceById = async (id: string) => {
+export const getPlaceById = async (id: string): Promise<Place | null> => {
   try {
     const { data, error } = await supabase
       .from('spots')
@@ -60,38 +61,41 @@ export const getPlaceById = async (id: string) => {
   }
 };
 
-export const getPlacesByRouteId = async (routeId: string) => {
+export const getPlacesByRouteId = async (routeId: string): Promise<Place[]> => {
   try {
-    // First get spot IDs from join table
-    const { data: joinData, error: joinError } = await supabase
-      .from('spot_route')
-      .select('spot_id')
-      .eq('route_id', routeId);
-
-    if (joinError || !joinData?.length) {
-      return [];
-    }
-
-    // Then fetch full spot data
-    const spotIds = joinData.map(item => item.spot_id);
-    const { data: spots, error: spotsError } = await supabase
+    // Fetch spots data directly joined with the order from spot_route
+    const { data: spotsData, error: spotsError } = await supabase
       .from('spots')
-      .select('*')
-      .in('id', spotIds);
+      .select(`
+        *,
+        spot_route!inner (order)
+      `)
+      .eq('spot_route.route_id', routeId)
+      .order('order', { foreignTable: 'spot_route', ascending: true });
 
     if (spotsError) {
-      console.error('Error fetching spots:', spotsError);
+      console.error('Error fetching spots for route:', spotsError);
       return [];
     }
 
-    return spots ? spots.map(transformPlace) : [];
+    // Transform the data, including the order
+    return spotsData ? spotsData.map(spot => {
+      const transformed = transformPlace(spot);
+      // Extract the order from the nested structure
+      const orderData = Array.isArray(spot.spot_route) ? spot.spot_route[0] : spot.spot_route;
+      if (orderData && typeof orderData.order === 'number') {
+        transformed.order = orderData.order;
+      }
+      return transformed;
+    }) : [];
+
   } catch (error) {
     console.error('Error in getPlacesByRouteId:', error);
     return [];
   }
 };
 
-export const getPlacesByEventId = async (eventId: string) => {
+export const getPlacesByEventId = async (eventId: string): Promise<Place[]> => {
   try {
     // First get spot IDs from join table
     const { data: joinData, error: joinError } = await supabase
@@ -102,7 +106,6 @@ export const getPlacesByEventId = async (eventId: string) => {
     if (joinError || !joinData?.length) {
       return [];
     }
-    // Remove this inner declaration
 
     // Then fetch full spot data
     const spotIds = joinData.map(item => item.spot_id);

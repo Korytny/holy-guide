@@ -8,7 +8,7 @@ import { useAuth } from '../context/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceCard from '../components/PlaceCard';
 import EventCard from '../components/EventCard';
-import MapView from '../components/MapView';
+import CityMapView from '../components/CityMapView'; // Import new map
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Import Carousel
 import { Card, CardContent } from "@/components/ui/card"; // Import Card
@@ -41,6 +41,7 @@ const RouteDetail = () => {
            getPlacesByRouteId(id),
            getEventsByRouteId(id)
         ]);
+        // placesData should already be sorted by order from the API call
         setPlaces(placesData);
         setEvents(eventsData);
       }
@@ -64,8 +65,8 @@ const RouteDetail = () => {
   }, []);
 
   if (loading) {
-    // ... Loading skeleton can be improved to match the final layout ...
-     return (
+     // ... Loading skeleton remains the same ...
+      return (
       <Layout>
         <div className="app-container py-10">
           <div className="animate-pulse">
@@ -93,7 +94,8 @@ const RouteDetail = () => {
   }
 
   if (!route) {
-    return (
+    // ... Not found remains the same ...
+     return (
       <Layout>
         <div className="app-container py-10 text-center">
           <h2 className="text-xl font-semibold mb-4">{t('route_not_found')}</h2>
@@ -107,6 +109,7 @@ const RouteDetail = () => {
 
   const isRouteFavorite = route ? isFavorite('route', route.id) : false;
 
+  // Prepare map locations from places on the route (already sorted by API)
   const mapLocations = places.map(place => ({
     id: place.id,
     latitude: place.location.latitude,
@@ -114,8 +117,17 @@ const RouteDetail = () => {
     name: place.name,
     description: place.description,
     imageUrl: place.imageUrl,
-    type: place.type
+    type: place.type,
+    order: place.order // Pass order if available
   }));
+
+  // Extract coordinates for the polyline, ensure they are in the correct order
+  const polylinePoints = places
+      .filter(place => place.location?.latitude && place.location?.longitude)
+      // Sort again just to be absolutely sure, though API should handle it
+      .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+      .map(place => [place.location.latitude, place.location.longitude] as [number, number]);
+
 
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = route.description ? getLocalizedText(route.description, language) : '';
@@ -130,7 +142,8 @@ const RouteDetail = () => {
     <Layout>
       <div className="app-container py-6">
         <div className="flex justify-between items-center mb-6">
-          <button 
+          {/* ... Back button remains the same ... */} 
+            <button 
             onClick={() => navigate(route.cityId ? `/cities/${route.cityId}` : '/')} 
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
@@ -142,6 +155,7 @@ const RouteDetail = () => {
         <div className="grid md:grid-cols-2 gap-8 mb-10">
            {/* Image Carousel Section */} 
            <div className="relative w-full h-64 md:h-96"> 
+               {/* ... Carousel remains the same ... */} 
                 {allImages.length > 0 ? (
                     <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
                         <CarouselContent className="h-full">
@@ -169,10 +183,12 @@ const RouteDetail = () => {
                  )}
 
                  {/* Overlay elements */}
-                 <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
+                 {/* ... Overlay remains the same ... */} 
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
 
                   {/* Badges - Stats */}
-                  <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
+                  {/* ... Badges remain the same ... */} 
+                   <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
                     {places.length > 0 && (
                       <button 
                         onClick={() => scrollToTab('places', 'places-content')} 
@@ -200,7 +216,8 @@ const RouteDetail = () => {
                   </div>
 
                  {/* Favorite Button */} 
-                 {route && id && (
+                  {/* ... Favorite button remains the same ... */} 
+                  {route && id && (
                      <Button
                          variant="ghost"
                          size="icon"
@@ -213,6 +230,7 @@ const RouteDetail = () => {
                  )}
 
                  <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
+                   {/* ... Title remains the same ... */} 
                     <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md">{routeName}</h1>
                     <div className="flex items-center text-white/90">
                       <RouteIconUi size={16} className="mr-1" />
@@ -223,7 +241,8 @@ const RouteDetail = () => {
 
            {/* About Section */} 
            <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-             <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_route')}</h2>
+              {/* ... About section remains the same ... */} 
+               <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_route')}</h2>
              {route.info ? (
                 <div className="prose max-w-none text-gray-700">
                   {Object.entries(route.info)
@@ -244,18 +263,23 @@ const RouteDetail = () => {
            </div>
         </div>
 
-        {/* Map Section */} 
+        {/* Map Section - Pass polylinePoints */} 
         {places.length > 0 && (
           <div className="mb-10">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('route_on_map_title')}</h2>
             <div className="rounded-xl overflow-hidden shadow-lg h-96">
-              <MapView locations={mapLocations} />
+              <CityMapView 
+                locations={mapLocations} 
+                polylinePoints={polylinePoints} // Pass the points for the line
+                maintainZoom={false} // Allow map to fit bounds for route
+              />
             </div>
           </div>
         )}
 
         {/* Tabs Section - Added value, onValueChange, and IDs */} 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* ... Tabs remain the same ... */} 
+         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center">
             <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
               {t('places_on_route')} ({places.length})

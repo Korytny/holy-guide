@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getEventById, getPlacesByEventId, getRoutesByEventId } from '../services/api';
@@ -7,7 +8,8 @@ import { useAuth } from '../context/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceCard from '../components/PlaceCard';
 import RouteCard from '../components/RouteCard';
-import MapView from '../components/MapView';
+// import MapView from '../components/MapView'; // Remove old import
+import CityMapView from '../components/CityMapView'; // Import new map
 import { Button } from '@/components/ui/button';
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Import Carousel
 import { Card, CardContent } from "@/components/ui/card"; // Import Card
@@ -63,7 +65,7 @@ const EventDetail = () => {
   }, []);
 
   if (loading) {
-    // ... Loading skeleton can be improved ...
+     // ... Loading skeleton remains the same ...
      return (
       <Layout>
         <div className="app-container py-10">
@@ -92,6 +94,7 @@ const EventDetail = () => {
   }
 
   if (!event) {
+    // ... Not found remains the same ...
      return (
       <Layout>
         <div className="app-container py-10 text-center">
@@ -106,6 +109,7 @@ const EventDetail = () => {
 
   const isEventFavorite = event ? isFavorite('event', event.id) : false;
 
+  // Prepare map locations from related places
   const mapLocations = places.map(place => ({
     id: place.id,
     latitude: place.location.latitude,
@@ -132,7 +136,8 @@ const EventDetail = () => {
     <Layout>
       <div className="app-container py-6">
         <div className="flex justify-between items-center mb-6">
-           <button 
+           {/* ... Back button remains the same ... */} 
+            <button 
             onClick={() => navigate(event.cityId ? `/cities/${event.cityId}` : '/')} 
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
@@ -144,7 +149,8 @@ const EventDetail = () => {
         <div className="grid md:grid-cols-2 gap-8 mb-10">
           {/* Image Carousel Section */} 
           <div className="relative w-full h-64 md:h-96"> 
-             {allImages.length > 0 ? (
+              {/* ... Carousel remains the same ... */} 
+              {allImages.length > 0 ? (
                  <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
                      <CarouselContent className="h-full">
                          {allImages.map((imgUrl, index) => (
@@ -171,10 +177,12 @@ const EventDetail = () => {
               )}
 
              {/* Overlay elements */} 
-             <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
+              {/* ... Overlay remains the same ... */} 
+              <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
 
              {/* Badges - Stats */} 
-              <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
+               {/* ... Badges remain the same ... */} 
+                <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
                 {places.length > 0 && (
                   <button 
                     onClick={() => scrollToTab('places', 'places-content')} 
@@ -202,7 +210,8 @@ const EventDetail = () => {
               </div>
              
              {/* Favorite Button */} 
-             {event && id && (
+             {/* ... Favorite button remains the same ... */} 
+              {event && id && (
                  <Button 
                    variant="ghost" 
                    size="icon"
@@ -215,6 +224,7 @@ const EventDetail = () => {
               )}
              
              <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
+              {/* ... Title remains the same ... */} 
                <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md">{eventName}</h1>
                {event.date && (
                  <div className="flex items-center text-white/90 bg-black/30 px-3 py-1 rounded-full inline-flex">
@@ -227,7 +237,8 @@ const EventDetail = () => {
 
           {/* About Section */} 
           <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_event')}</h2>
+             {/* ... About section remains the same ... */} 
+             <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_event')}</h2>
             {descriptionParts.length > 0 ? (
               <div className="prose max-w-none text-gray-700">
                 {descriptionParts.map((part, index) => (
@@ -240,18 +251,22 @@ const EventDetail = () => {
           </div>
         </div>
 
-        {/* Map Section */} 
+        {/* Map Section - Use CityMapView */} 
         {places.length > 0 && (
           <div className="mb-10">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('event_locations')}</h2>
              <div className="rounded-xl overflow-hidden shadow-lg h-96">
-                <MapView locations={mapLocations} />
+                <CityMapView 
+                    locations={mapLocations} 
+                    maintainZoom={false} // Allow map to fit bounds for event locations
+                />
             </div>
           </div>
         )}
 
         {/* Tabs Section - Added value, onValueChange, and IDs */} 
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+        {/* ... Tabs remain the same ... */} 
+         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
           <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center">
             <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
                <MapPin size={16} />

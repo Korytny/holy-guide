@@ -1,9 +1,9 @@
 
 import React, { useEffect, useRef, memo } from 'react';
-import L from 'leaflet';
+import L, { LatLngExpression } from 'leaflet';
 import 'leaflet/dist/leaflet.css';
 import { createRoot } from 'react-dom/client';
-import { BrowserRouter } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { getLocalizedText } from '../utils/languageUtils';
 import MapPopup from './MapPopup';
@@ -16,6 +16,7 @@ interface Location {
   type?: number;
   imageUrl?: string;
   description?: string | { [key: string]: string };
+  order?: number; // Include order if available
 }
 
 interface CityMapViewProps {
@@ -23,172 +24,138 @@ interface CityMapViewProps {
   center?: [number, number];
   zoom?: number;
   maintainZoom?: boolean;
+  polylinePoints?: LatLngExpression[]; // Add prop for polyline points
 }
 
-const CityMapView: React.FC<CityMapViewProps> = memo(({
+// Wrapper to use hook
+const CityMapViewWrapper: React.FC<CityMapViewProps> = (props) => {
+  const navigate = useNavigate();
+  return <CityMapView {...props} navigate={navigate} />;
+};
+
+interface CityMapViewInternalProps extends CityMapViewProps {
+  navigate: ReturnType<typeof useNavigate>;
+}
+
+const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
   locations = [],
   center,
   zoom = 13,
-  maintainZoom = false
+  maintainZoom = false,
+  polylinePoints, // Receive polyline points
+  navigate
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
+  const polylineRef = useRef<L.Polyline | null>(null); // Ref to manage existing polyline
   const { language } = useLanguage();
   const [isMapReady, setIsMapReady] = React.useState(false);
 
-  // Color mapping for location types
+  // Color mapping
   const getMarkerColor = (type?: number) => {
-    const colors: Record<number, string> = {
-      1: '#3b82f6', // Blue
-      2: '#ef4444', // Red
-      3: '#10b981', // Green
-      4: '#f59e0b', // Yellow
-    };
-    return colors[type || 1] || '#4f46e5'; // Default indigo
+    const colors: Record<number, string> = { 1: '#3b82f6', 2: '#ef4444', 3: '#10b981', 4: '#f59e0b' };
+    return colors[type || 1] || '#4f46e5';
   };
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current) return;
-
+    if (!mapContainer.current || mapInstance.current) return; // Initialize only once
     const defaultCenter = center || [55.751244, 37.618423];
-    
-    mapInstance.current = L.map(mapContainer.current, {
-      center: defaultCenter,
-      zoom,
-    });
-
+    mapInstance.current = L.map(mapContainer.current, { center: defaultCenter, zoom });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a>'
+      attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapInstance.current);
-
     setIsMapReady(true);
-
-    return () => {
-      mapInstance.current?.remove();
-      mapInstance.current = null;
-    };
+    return () => { mapInstance.current?.remove(); mapInstance.current = null; };
   }, []);
 
-  // Add markers
+  // Add/Update markers and polyline
   useEffect(() => {
     if (!mapInstance.current || !isMapReady) return;
 
+    const map = mapInstance.current;
     const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
-    
-    // Clear previous markers
-    mapInstance.current.eachLayer(layer => {
-      if (layer instanceof L.Marker) {
-        mapInstance.current?.removeLayer(layer);
+
+    // --- Clear previous layers --- 
+    map.eachLayer(layer => {
+      // Keep the tile layer, remove markers and existing polyline
+      if (layer instanceof L.Marker || layer === polylineRef.current) {
+        map.removeLayer(layer);
       }
     });
-    
-    if (validLocations.length === 0) return;
-    
-    const bounds = L.latLngBounds(
-      validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number])
-    );
+    polylineRef.current = null; // Reset polyline ref
 
-    validLocations.forEach(location => {
-      // Skip invalid locations
-      if (!location?.latitude || !location?.longitude) {
-        console.warn('Invalid location coordinates:', location);
-        return;
-      }
+    // --- Add Markers --- 
+    if (validLocations.length > 0) {
+        const bounds = L.latLngBounds(validLocations.map(loc => [loc.latitude, loc.longitude] as [number, number]));
+        validLocations.forEach(location => {
+          if (!location?.latitude || !location?.longitude) return;
 
-      // Create marker
-      const marker = L.marker([location.latitude, location.longitude], {
-        icon: L.divIcon({
-          className: 'custom-marker',
-          html: `<div style="
-            background-color: ${getMarkerColor(location.type)};
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            border: 2px solid white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-          "></div>`,
-          iconSize: [24, 24],
-          iconAnchor: [12, 12],
-          popupAnchor: [0, -12]
-        })
-      }).addTo(mapInstance.current!);
-      
-      const locationId = location.id;
-      
-      // Process name and description for the popup
-      const name = location.name ?
-        (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Place') :
-        'Place';
+          const marker = L.marker([location.latitude, location.longitude], {
+            icon: L.divIcon({
+              className: 'custom-marker',
+              html: `<div style="background-color:${getMarkerColor(location.type)};width:20px;height:20px;border-radius:50%;border:2px solid white;"></div>`,
+              iconSize: [24, 24], iconAnchor: [12, 12], popupAnchor: [0, -12]
+            })
+          }).addTo(map);
 
-      const description = location.description ?
-        (typeof location.description === 'string' ? location.description : getLocalizedText(location.description, language)) :
-        '';
+          const locationId = location.id;
+          const name = location.name ? (typeof location.name === 'string' ? location.name : getLocalizedText(location.name, language) || 'Place') : 'Place';
+          const description = location.description ? (typeof location.description === 'string' ? location.description : getLocalizedText(location.description, language)) : '';
 
-      if (!name) {
-        console.warn('Location missing name:', location);
-        return;
-      }
-      
-      if (!locationId) {
-        console.warn('Location missing ID, cannot create proper link:', location);
-        return;
-      }
+          if (!locationId || !name) return;
 
-      // Create popup content
-      const popupContent = document.createElement('div');
-      popupContent.className = 'popup-container';
-      
-      const root = createRoot(popupContent);
-      
-      try {
-        root.render(
-          <BrowserRouter>
-            <MapPopup
-              name={name}
-              placeId={locationId}
-              imageUrl={location.imageUrl}
-              description={description}
-            />
-          </BrowserRouter>
-        );
-        
-        marker.bindPopup(popupContent, {
-          minWidth: 200,
-          className: 'custom-popup'
+          const popupContent = document.createElement('div');
+          const root = createRoot(popupContent);
+          try {
+            root.render(
+              <MapPopup
+                name={name}
+                placeId={locationId}
+                imageUrl={location.imageUrl}
+                description={description}
+                onNavigate={navigate}
+              />
+            );
+            marker.bindPopup(popupContent, { minWidth: 200, className: 'custom-popup' });
+          } catch (error) { console.error('Popup render error:', error); }
         });
-      } catch (error) {
-        console.error('Popup render error:', error);
-      }
-    });
 
-    // Center map on markers if we have any and should adjust the view
-    if (bounds.isValid() && !maintainZoom) {
-      mapInstance.current.fitBounds(bounds, {
-        padding: [30, 30], // Add some padding
-        maxZoom: 15 // Limit maximum zoom level
-      });
+        // --- Add Polyline --- 
+        if (polylinePoints && polylinePoints.length > 1) {
+          polylineRef.current = L.polyline(polylinePoints, { 
+              color: '#3388ff', // Blue color
+              weight: 3, 
+              opacity: 0.7,
+              dashArray: '5, 5' // Dashed line
+          }).addTo(map);
+          // Optionally fit bounds to the polyline as well
+          // bounds.extend(polylineRef.current.getBounds());
+        }
+
+        // --- Fit Bounds --- 
+        if (bounds.isValid() && !maintainZoom) {
+          try {
+              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 }); // Increased padding slightly
+          } catch (e) {
+              console.error("Error fitting map bounds:", e);
+          }
+        }
+    } else {
+      // If no locations, maybe reset view?
+      if (center) map.setView(center, zoom);
     }
-    
-    mapInstance.current.invalidateSize();
 
-  }, [locations, language, isMapReady, maintainZoom]);
+  }, [locations, polylinePoints, language, isMapReady, maintainZoom, navigate, center, zoom]);
 
   return (
     <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
       <div ref={mapContainer} className="h-full w-full" />
       {!isMapReady && (
-        <div className="absolute inset-0 flex items-center justify-center bg-gray-100">
-          <p>Loading map...</p>
-        </div>
+        <div className="absolute inset-0 flex items-center justify-center bg-gray-100"><p>Loading map...</p></div>
       )}
     </div>
   );
 });
 
-export default CityMapView;
+export default CityMapViewWrapper;

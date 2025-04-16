@@ -3,61 +3,89 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { Place } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useAuth } from '../context/AuthContext';
 import { MapPin, Heart } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
+import { cn } from "@/lib/utils";
+import { Button } from '@/components/ui/button';
 
 interface PlaceCardProps {
   place: Place;
+  className?: string;
 }
 
-const PlaceCard: React.FC<PlaceCardProps> = ({ place }) => {
+const getPlaceTypeKey = (type: number | undefined): string => {
+    switch (type) {
+        case 1: return 'place_type_temple';
+        case 2: return 'place_type_samadhi';
+        case 3: return 'place_type_kunda';
+        case 4: return 'place_type_sacred_site';
+        default: return 'sacred_place';
+    }
+};
+
+const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
   const { language, t } = useLanguage();
+  const { auth, isFavorite, toggleFavorite } = useAuth();
   
   const placeName = getLocalizedText(place.name, language);
   const placeDescription = getLocalizedText(place.description, language);
-  
+  const isPlaceFavorite = auth.isAuthenticated && auth.user ? isFavorite('place', place.id) : false;
+  const placeTypeKey = getPlaceTypeKey(place.type);
+
+  const handleFavoriteClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    // toggleFavorite handles the auth check
+    if (place.id) {
+      toggleFavorite('place', place.id);
+    }
+  };
+
   return (
-    <Link to={`/places/${place.id}`} className="block">
-      <div className="india-card animate-slide-up">
-        <div className="relative">
-          <img
-            src={place.imageUrl}
-            alt={placeName}
-            className="india-card-image"
-          />
-          <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent" />
-          <div className="absolute top-2 left-2 right-2 flex justify-between">
-            <div className="bg-white/80 p-1.5 rounded-full">
-              <MapPin size={18} className="text-blue-600" />
-            </div>
-            <div className="bg-white/80 p-1.5 rounded-full">
-              <Heart size={18} className="text-gray-600" />
-            </div>
-          </div>
-        </div>
-        <div className="india-card-content">
-          <div className="flex items-start justify-between">
-            <h3 className="text-lg font-medium mb-1">{placeName}</h3>
-            {/* Icons removed from title area - now shown above image */}
-          </div>
-          <div className="text-sm text-gray-600 h-[4.5rem] overflow-hidden space-y-1">
-            {place.info ? (
-              Object.entries(place.info)
-                .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key))
-                .slice(0, 3)
-                .map(([key, value], i) => (
-                  <div key={i} className="line-clamp-3">
-                    {['en', 'ru', 'hi'].includes(key) ? '' : `${key} `}
-                    {typeof value === 'object' ? getLocalizedText(value, language) : String(value)}
-                  </div>
-                ))
-            ) : (
-              <p className="line-clamp-3">{placeDescription}</p>
-            )}
-          </div>
-        </div>
+    <div 
+        className={cn(
+            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+            className
+        )}
+    >
+      <div className="relative">
+        <Link to={`/places/${place.id}`} className="absolute inset-0 z-0"></Link> 
+        <img
+          src={place.imageUrl || '/placeholder.svg'} 
+          alt={placeName}
+          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+        />
+        {/* Favorite Button - Always visible */} 
+        {place.id && (
+            <Button 
+                variant="ghost" 
+                size="icon"
+                className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 h-8 w-8"
+                onClick={handleFavoriteClick}
+                aria-label={isPlaceFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
+            >
+                <Heart 
+                    size={16} 
+                    className={cn("transition-colors", isPlaceFavorite ? "fill-red-500 text-red-500" : "text-white")}
+                />
+            </Button>
+        )}
       </div>
-    </Link>
+      
+      <Link to={`/places/${place.id}`} className="p-3 flex-grow flex flex-col justify-between">
+          <div>
+            <h3 className="text-base font-medium mb-1 truncate" title={placeName}>{placeName}</h3>
+            <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+                {placeDescription || t('no_description_available')}
+            </p>
+          </div>
+          <div className="flex items-center text-xs text-gray-500 mt-1">
+              <MapPin size={14} className="mr-1" />
+              <span>{t(placeTypeKey)}</span>
+          </div>
+      </Link>
+    </div>
   );
 };
 

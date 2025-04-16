@@ -1,15 +1,20 @@
 
 import React from 'react';
-import { Link } from 'react-router-dom';
 
 interface MapPopupProps {
   name: string;
   placeId: string;
   imageUrl?: string;
   description?: string;
+  onNavigate: (path: string) => void; // Function to handle navigation
 }
 
-const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
+const MapPopup = ({ name, placeId, imageUrl, description, onNavigate }: MapPopupProps) => {
+  
+  const handleClick = () => {
+    onNavigate(`/places/${placeId}`);
+  };
+
   return (
     <div className="p-2 w-56 max-w-full">
       {imageUrl ? (
@@ -30,16 +35,12 @@ const MapPopup = ({ name, placeId, imageUrl, description }: MapPopupProps) => {
         <p className="text-xs text-gray-600 mb-2 line-clamp-2">{description}</p>
       )}
       
-      <Link
-       to={`/places/${placeId}`}
-       className="text-xs text-blue-500 hover:underline block text-center"
-       onClick={(e) => {
-         e.preventDefault();
-         window.location.href = `/places/${placeId}`;
-       }}
-     >
-       View details →
-     </Link>
+      <div 
+        className="text-xs text-blue-500 hover:underline block text-center cursor-pointer pt-2"
+        onClick={handleClick} // Call the passed navigation function
+      >
+        View details →
+      </div>
     </div>
   );
 };

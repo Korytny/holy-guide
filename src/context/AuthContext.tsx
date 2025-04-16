@@ -15,7 +15,6 @@ import {
 } from '../services/api';
 import { useToast } from '@/hooks/use-toast';
 
-// Define accepted favorite types
 type FavoriteType = 'city' | 'route' | 'event' | 'place';
 
 interface AuthContextType {
@@ -44,69 +43,79 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [auth, setAuth] = useState<AuthState>(initialState);
   const { toast } = useToast();
 
+  // Log state changes (optional, can be removed if too noisy)
+  // useEffect(() => {
+  //   console.log('[AuthContext] State updated:', { isLoading: auth.isLoading, isAuthenticated: auth.isAuthenticated, user: !!auth.user });
+  // }, [auth]);
+
   const refreshProfile = useCallback(async () => {
+    let newAuthState: AuthState | null = null;
     try {
       const profile = await getUserProfile();
-      setAuth(prev => ({
-        ...prev,
+      newAuthState = {
         isAuthenticated: !!profile,
         isLoading: false,
         user: profile
-      }));
+      };
     } catch (error) {
-      console.error('Error refreshing profile:', error);
-      toast({
-        title: 'Error',
-        description: 'Failed to refresh profile information.',
-        variant: 'destructive'
-      });
-      setAuth(prev => ({ ...prev, isLoading: false, isAuthenticated: false, user: null }));
+      console.error('[AuthContext] Error refreshing profile:', error);
+      toast({ title: 'Error', description: 'Failed to refresh profile information.', variant: 'destructive' });
+      newAuthState = { isAuthenticated: false, isLoading: false, user: null };
+    } finally {
+       if (newAuthState !== null) {
+         setAuth(newAuthState);
+       }
     }
   }, [toast]);
 
   useEffect(() => {
     let isMounted = true;
+    let refreshTimeoutId: NodeJS.Timeout | null = null;
+
     const initAuth = async () => {
+      if (!supabase) {
+        console.error('[AuthContext] Supabase client not available during init.');
+        setAuth({ isAuthenticated: false, isLoading: false, user: null });
+        return;
+      }
       try {
         const { data: authListener } = supabase.auth.onAuthStateChange(
-          async (event, session) => {
+          (event, session) => {
             if (!isMounted) return;
+
+            if (refreshTimeoutId) {
+                clearTimeout(refreshTimeoutId);
+                refreshTimeoutId = null;
+            }
+
             if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
-              await refreshProfile();
+              // Schedule refreshProfile after a short delay
+              refreshTimeoutId = setTimeout(async () => {
+                  if (isMounted) {
+                      await refreshProfile();
+                  }
+                  refreshTimeoutId = null;
+              }, 200); // Keep the delay
+
             } else if (event === 'SIGNED_OUT') {
-              setAuth({
-                isAuthenticated: false,
-                isLoading: false,
-                user: null
-              });
+              setAuth({ isAuthenticated: false, isLoading: false, user: null });
             }
           }
         );
 
-        // Initial check
-        const { data: { session } } = await supabase.auth.getSession();
-        if (session && isMounted) {
-          await refreshProfile();
-        } else if (isMounted) {
-          setAuth({
-            isAuthenticated: false,
-            isLoading: false,
-            user: null
-          });
-        }
+        // Rely on the listener for initial session check
 
         return () => {
+          if (refreshTimeoutId) {
+              clearTimeout(refreshTimeoutId);
+          }
           isMounted = false;
           authListener?.subscription.unsubscribe();
         };
       } catch (error) {
-        console.error('Error initializing auth:', error);
+        console.error('[AuthContext] Error initializing auth:', error);
         if (isMounted) {
-          setAuth({
-            isAuthenticated: false,
-            isLoading: false,
-            user: null
-          });
+           setAuth({ isAuthenticated: false, isLoading: false, user: null });
         }
       }
     };
@@ -115,6 +124,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
     return () => {
       isMounted = false;
+      if (refreshTimeoutId) {
+          clearTimeout(refreshTimeoutId);
+      }
     };
   }, [refreshProfile]);
 
@@ -124,7 +136,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       case 'city': return auth.user.cities_like?.includes(id) ?? false;
       case 'route': return auth.user.routes_like?.includes(id) ?? false;
       case 'event': return auth.user.events_like?.includes(id) ?? false;
-      case 'place': return auth.user.places_like?.includes(id) ?? false; // Added place
+      case 'place': return auth.user.places_like?.includes(id) ?? false;
       default: return false;
     }
   }, [auth.user]);
@@ -136,27 +148,24 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
 
     const currentlyFavorite = isFavorite(type, id);
-    
-    // Determine the correct API function based on type
     let action: (itemId: string) => Promise<boolean>;
     switch (type) {
       case 'city': action = currentlyFavorite ? removeCityFromFavorites : addCityToFavorites; break;
       case 'route': action = currentlyFavorite ? removeRouteFromFavorites : addRouteToFavorites; break;
       case 'event': action = currentlyFavorite ? removeEventFromFavorites : addEventToFavorites; break;
-      case 'place': action = currentlyFavorite ? removePlaceFromFavorites : addPlaceToFavorites; break; // Added place
+      case 'place': action = currentlyFavorite ? removePlaceFromFavorites : addPlaceToFavorites; break;
       default: console.error('Invalid favorite type'); return;
     }
     
-    // Determine the field name for optimistic update
     let field: keyof UserProfile | null = null;
      switch (type) {
       case 'city': field = 'cities_like'; break;
       case 'route': field = 'routes_like'; break;
       case 'event': field = 'events_like'; break;
-      case 'place': field = 'places_like'; break; // Added place
+      case 'place': field = 'places_like'; break;
     }
-    if (!field) return; // Should not happen
-    const fieldName = field; // Ensure TS knows it's not null
+    if (!field) return;
+    const fieldName = field;
 
     const optimisticUpdate = (add: boolean) => {
       setAuth(prev => {
@@ -173,18 +182,13 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
     };
 
-    optimisticUpdate(!currentlyFavorite); // Update UI immediately
+    optimisticUpdate(!currentlyFavorite);
 
     try {
       await action(id);
-      // Optionally refresh profile to ensure data consistency, but optimistic update should suffice
-      // await refreshProfile(); 
-      toast({
-        title: currentlyFavorite ? 'Removed from Favorites' : 'Added to Favorites',
-        variant: "default"
-      });
+      toast({ title: currentlyFavorite ? 'Removed from Favorites' : 'Added to Favorites', variant: "default" });
     } catch (error) {
-      console.error(`Error toggling ${type} favorite:`, error);
+      console.error(`[AuthContext] Error toggling ${type} favorite:`, error);
       toast({ title: 'Error', description: `Failed to update ${type} favorites.`, variant: 'destructive' });
       optimisticUpdate(currentlyFavorite); // Revert UI on error
     }
