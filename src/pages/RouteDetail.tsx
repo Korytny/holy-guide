@@ -1,5 +1,4 @@
-
-import React, { useState, useEffect, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { getRouteById, getPlacesByRouteId, getEventsByRouteId } from '../services/api';
 import { Route, Place, Event } from '../types';
@@ -8,12 +7,16 @@ import { useAuth } from '../context/AuthContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceCard from '../components/PlaceCard';
 import EventCard from '../components/EventCard';
-import CityMapView from '../components/CityMapView'; // Import new map
+import PlaceCardMob from '../components/PlaceCardMob';
+import EventCardMob from '../components/EventCardMob';
+import { useIsSmallScreen } from '../hooks/use-small-screen';
+import CityMapView from '../components/CityMapView';
 import { Button } from '@/components/ui/button';
-import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel"; // Import Carousel
-import { Card, CardContent } from "@/components/ui/card"; // Import Card
 import { Badge } from "@/components/ui/badge"; // Import Badge
-import { ArrowLeft, Heart, MapPin, CalendarDays, Route as RouteIconUi } from 'lucide-react'; // Import icons
+import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
+import { Card, CardContent } from "@/components/ui/card";
+// Import necessary icons
+import { ArrowLeft, Heart, MapPin, CalendarDays, Route as RouteIconUi } from 'lucide-react'; // Renamed Route from react-router
 import { getLocalizedText } from '../utils/languageUtils';
 import Layout from '../components/Layout';
 
@@ -23,13 +26,15 @@ const RouteDetail = () => {
   const [places, setPlaces] = useState<Place[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState<string>('places'); // State for active tab
+  const [activeTab, setActiveTab] = useState<string>('places');
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const navigate = useNavigate();
+  const isSmallScreen = useIsSmallScreen();
 
   const loadRouteData = async () => {
-    if (!id) return;
+      // ... loading logic ...
+        if (!id) return;
 
     setLoading(true);
     try {
@@ -41,7 +46,6 @@ const RouteDetail = () => {
            getPlacesByRouteId(id),
            getEventsByRouteId(id)
         ]);
-        // placesData should already be sorted by order from the API call
         setPlaces(placesData);
         setEvents(eventsData);
       }
@@ -55,18 +59,22 @@ const RouteDetail = () => {
   useEffect(() => {
     loadRouteData();
   }, [id]);
-  
-  // Function to scroll to a specific tab content
+
   const scrollToTab = useCallback((tabValue: string, tabId: string) => {
-    setActiveTab(tabValue); // Switch tab first
+     // ... scroll logic ...
+      setActiveTab(tabValue);
     setTimeout(() => {
        document.getElementById(tabId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 50); 
+    }, 50);
   }, []);
 
+  const RelatedPlaceCardComponent = isSmallScreen ? PlaceCardMob : PlaceCard;
+  const RelatedEventCardComponent = isSmallScreen ? EventCardMob : EventCard;
+
+
   if (loading) {
-     // ... Loading skeleton remains the same ...
-      return (
+     // ... Loading skeleton ...
+       return (
       <Layout>
         <div className="app-container py-10">
           <div className="animate-pulse">
@@ -94,7 +102,7 @@ const RouteDetail = () => {
   }
 
   if (!route) {
-    // ... Not found remains the same ...
+    // ... Not found ...
      return (
       <Layout>
         <div className="app-container py-10 text-center">
@@ -108,41 +116,17 @@ const RouteDetail = () => {
   }
 
   const isRouteFavorite = route ? isFavorite('route', route.id) : false;
-
-  // Prepare map locations from places on the route (already sorted by API)
-  const mapLocations = places.map(place => ({
-    id: place.id,
-    latitude: place.location.latitude,
-    longitude: place.location.longitude,
-    name: place.name,
-    description: place.description,
-    imageUrl: place.imageUrl,
-    type: place.type,
-    order: place.order // Pass order if available
-  }));
-
-  // Extract coordinates for the polyline, ensure they are in the correct order
-  const polylinePoints = places
-      .filter(place => place.location?.latitude && place.location?.longitude)
-      // Sort again just to be absolutely sure, though API should handle it
-      .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
-      .map(place => [place.location.latitude, place.location.longitude] as [number, number]);
-
-
+  const mapLocations = places.map(place => ({ /* ... map location data ... */ id: place.id, latitude: place.location.latitude, longitude: place.location.longitude, name: place.name, description: place.description, imageUrl: place.imageUrl, type: place.type, order: place.order }));
+  const polylinePoints = places /* ... polyline logic ... */ .filter(place => place.location?.latitude && place.location?.longitude).sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity)).map(place => [place.location.latitude, place.location.longitude] as [number, number]);
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = route.description ? getLocalizedText(route.description, language) : '';
-
-   // Prepare images for Carousel
-  const allImages = [
-        route.imageUrl,
-        ...(Array.isArray(route.images) ? route.images.filter(img => typeof img === 'string') : []) 
-    ].filter(Boolean) as string[];
+  const allImages = [ /* ... image array logic ... */ route.imageUrl, ...(Array.isArray(route.images) ? route.images.filter(img => typeof img === 'string') : []) ].filter(Boolean) as string[];
 
   return (
     <Layout>
       <div className="app-container py-6">
-        <div className="flex justify-between items-center mb-6">
-          {/* ... Back button remains the same ... */} 
+         {/* ... Back button, Image Carousel, About Section, Map Section ... */}
+          <div className="flex justify-between items-center mb-6">
             <button 
             onClick={() => navigate(route.cityId ? `/cities/${route.cityId}` : '/')} 
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
@@ -151,11 +135,9 @@ const RouteDetail = () => {
             {t('back_to_city')} 
           </button>
         </div>
-        
-        <div className="grid md:grid-cols-2 gap-8 mb-10">
+         <div className="grid md:grid-cols-2 gap-8 mb-10">
            {/* Image Carousel Section */} 
            <div className="relative w-full h-64 md:h-96"> 
-               {/* ... Carousel remains the same ... */} 
                 {allImages.length > 0 ? (
                     <Carousel className="w-full h-full rounded-xl overflow-hidden shadow-lg">
                         <CarouselContent className="h-full">
@@ -182,12 +164,8 @@ const RouteDetail = () => {
                      </div>
                  )}
 
-                 {/* Overlay elements */}
-                 {/* ... Overlay remains the same ... */} 
                   <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
 
-                  {/* Badges - Stats */}
-                  {/* ... Badges remain the same ... */} 
                    <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
                     {places.length > 0 && (
                       <button 
@@ -214,9 +192,6 @@ const RouteDetail = () => {
                       </button>
                     )}
                   </div>
-
-                 {/* Favorite Button */} 
-                  {/* ... Favorite button remains the same ... */} 
                   {route && id && (
                      <Button
                          variant="ghost"
@@ -230,7 +205,6 @@ const RouteDetail = () => {
                  )}
 
                  <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
-                   {/* ... Title remains the same ... */} 
                     <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md">{routeName}</h1>
                     <div className="flex items-center text-white/90">
                       <RouteIconUi size={16} className="mr-1" />
@@ -238,10 +212,8 @@ const RouteDetail = () => {
                     </div>
                  </div>
            </div>
-
            {/* About Section */} 
            <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-              {/* ... About section remains the same ... */} 
                <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_route')}</h2>
              {route.info ? (
                 <div className="prose max-w-none text-gray-700">
@@ -262,9 +234,7 @@ const RouteDetail = () => {
               )}
            </div>
         </div>
-
-        {/* Map Section - Pass polylinePoints */} 
-        {places.length > 0 && (
+         {places.length > 0 && (
           <div className="mb-10">
             <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('route_on_map_title')}</h2>
             <div className="rounded-xl overflow-hidden shadow-lg h-96">
@@ -277,34 +247,48 @@ const RouteDetail = () => {
           </div>
         )}
 
-        {/* Tabs Section - Added value, onValueChange, and IDs */} 
-        {/* ... Tabs remain the same ... */} 
-         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center">
-            <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
-              {t('places_on_route')} ({places.length})
-            </TabsTrigger>
-            <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
-              {t('related_events')} ({events.length})
-            </TabsTrigger>
-          </TabsList>
+        {/* Tabs Section - Updated */}
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center gap-2 md:gap-4">
+                {/* Use simplified keys and add count badge */}
+                <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+                    <MapPin size={16} className="flex-shrink-0" />
+                    <span>{t('places_tab_title')}</span> {/* Assuming 'places_tab_title' key */}
+                    {places.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{places.length}</Badge>}
+                </TabsTrigger>
+                <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+                    <CalendarDays size={16} className="flex-shrink-0" />
+                    <span>{t('events_tab_title')}</span> {/* Assuming 'events_tab_title' key */}
+                    {events.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{events.length}</Badge>}
+                </TabsTrigger>
+            </TabsList>
 
+          {/* TabsContent remains the same */}
           <TabsContent value="places" id="places-content">
-            {places.length === 0 ? (
+             {/* ... content ... */}
+               {places.length === 0 ? (
               <div className="text-center py-10 text-gray-500">{t('no_places_found')}</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
-                {places.map(place => <PlaceCard key={place.id} place={place} />)}
+               // Conditional grid rendering
+              <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
+                {places.map(place =>
+                    // Use the determined component
+                    <RelatedPlaceCardComponent key={place.id} place={place} />
+                )}
               </div>
             )}
           </TabsContent>
-
           <TabsContent value="events" id="events-content">
-            {events.length === 0 ? (
+             {/* ... content ... */}
+                {events.length === 0 ? (
               <div className="text-center py-10 text-gray-500">{t('no_events_found')}</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
-                {events.map(event => <EventCard key={event.id} event={event} />)}
+              // Conditional grid rendering
+               <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2'}`}>
+                {events.map(event =>
+                    // Use the determined component
+                    <RelatedEventCardComponent key={event.id} event={event} />
+                )}
               </div>
             )}
           </TabsContent>

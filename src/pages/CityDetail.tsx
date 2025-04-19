@@ -1,18 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Layout from '../components/Layout';
-import {
-  getCityById
-} from '../services/citiesApi';
-import {
-  getRoutesByCityId
-} from '../services/routesApi';
-import {
-  getEventsByCityId
-} from '../services/eventsApi';
-import {
-  getPlacesByCityId
-} from '../services/placesApi';
+import { getCityById } from '../services/citiesApi';
+import { getRoutesByCityId } from '../services/routesApi';
+import { getEventsByCityId } from '../services/eventsApi';
+import { getPlacesByCityId } from '../services/placesApi';
 import { City, Place, Route, Event } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -22,19 +14,23 @@ import { Button } from "@/components/ui/button";
 import PlaceCard from '../components/PlaceCard';
 import RouteCard from '../components/RouteCard';
 import EventCard from '../components/EventCard';
+import PlaceCardMob from '../components/PlaceCardMob';
+import RouteCardMob from '../components/RouteCardMob';
+import EventCardMob from '../components/EventCardMob';
+import { useIsSmallScreen } from '../hooks/use-small-screen';
 import CityMapView from '../components/CityMapView';
 import { ArrowLeft, Heart, MapPin, Map, Route as RouteIcon, CalendarDays } from 'lucide-react';
 import SearchBar from '../components/SearchBar';
 import { getLocalizedText } from '../utils/languageUtils';
 
 interface MapLocation {
-  id: string; 
+  id: string;
   latitude: number;
   longitude: number;
-  name: any; 
-  description: any; 
+  name: any;
+  description: any;
   imageUrl: string | undefined;
-  type: number | undefined; 
+  type: number | undefined;
 }
 
 const CityDetail: React.FC = (): JSX.Element => {
@@ -45,14 +41,16 @@ const CityDetail: React.FC = (): JSX.Element => {
   const [routes, setRoutes] = useState<Route[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
-  const [activeTab, setActiveTab] = useState<string>('places'); // State for active tab
+  const [activeTab, setActiveTab] = useState<string>('places');
   const { language, t } = useLanguage();
-  const { auth, isFavorite, toggleFavorite } = useAuth(); 
-  const navigate = useNavigate(); 
+  const { auth, isFavorite, toggleFavorite } = useAuth();
+  const navigate = useNavigate();
+  const isSmallScreen = useIsSmallScreen();
 
   useEffect(() => {
     const loadCityData = async () => {
-      if (!id) return;
+      // ... loading logic ...
+        if (!id) return;
 
       setLoading(true);
       try {
@@ -81,7 +79,8 @@ const CityDetail: React.FC = (): JSX.Element => {
 
 
   const handleSearchPlaces = (term: string) => {
-    if (!term) {
+    // ... search logic ...
+      if (!term) {
       setPlaces(originalPlaces);
       return;
     }
@@ -95,18 +94,21 @@ const CityDetail: React.FC = (): JSX.Element => {
     setPlaces(results);
   };
 
-  // Updated function to scroll to a specific tab content
   const scrollToTab = useCallback((tabValue: string, tabId: string) => {
-    setActiveTab(tabValue); // Switch tab first
-    // Use timeout to allow tab content to render before scrolling
+    // ... scroll logic ...
+      setActiveTab(tabValue);
     setTimeout(() => {
        document.getElementById(tabId)?.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-    }, 50); // Small delay 
+    }, 50);
   }, []);
 
+  const PlaceCardComponent = isSmallScreen ? PlaceCardMob : PlaceCard;
+  const RouteCardComponent = isSmallScreen ? RouteCardMob : RouteCard;
+  const EventCardComponent = isSmallScreen ? EventCardMob : EventCard;
+
   if (loading) {
-    // ... Loading skeleton remains the same ...
-    return (
+    // ... Loading skeleton ...
+     return (
       <Layout>
         <div className="app-container py-10">
           <div className="animate-pulse">
@@ -134,7 +136,7 @@ const CityDetail: React.FC = (): JSX.Element => {
   }
 
   if (!city) {
-    // ... Not found remains the same ...
+    // ... Not found ...
      return (
       <Layout>
         <div className="app-container py-10 text-center">
@@ -146,35 +148,16 @@ const CityDetail: React.FC = (): JSX.Element => {
       </Layout>
     );
   }
-  
+
   const cityIsFavorite = id ? isFavorite('city', id) : false;
-
-  const mapLocations: MapLocation[] = places.map(place => ({
-    id: place.id,
-    latitude: place.location.latitude,
-    longitude: place.location.longitude,
-    name: place.name,
-    description: place.description,
-    imageUrl: place.imageUrl,
-    type: place.type
-  }));
-
+  const mapLocations: MapLocation[] = places.map(place => ({ /* ... map location data ... */ id: place.id, latitude: place.location.latitude, longitude: place.location.longitude, name: place.name, description: place.description, imageUrl: place.imageUrl, type: place.type}));
   const cityName = getLocalizedText(city.name, language) || city.name.en;
-  const infoFields = city.info
-    ? Object.entries(city.info)
-        .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key))
-        .map(([key, value]) => {
-          const displayKey = ['en', 'ru', 'hi'].includes(key) ? '' : key;
-          const textValue = typeof value === 'object'
-            ? getLocalizedText(value, language)
-            : String(value);
-          return { key: displayKey, value: textValue };
-        })
-    : [];
+  const infoFields = city.info ? Object.entries(city.info) /* ... info fields logic ... */ .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key)).map(([key, value]) => { const displayKey = ['en', 'ru', 'hi'].includes(key) ? '' : key; const textValue = typeof value === 'object' ? getLocalizedText(value, language) : String(value); return { key: displayKey, value: textValue }; }) : [];
 
   return (
     <Layout>
       <div className="app-container py-6">
+        {/* ... Header, Image, About sections ... */}
         <div className="flex justify-between items-center mb-6">
             <button 
               onClick={() => navigate('/')} 
@@ -275,9 +258,9 @@ const CityDetail: React.FC = (): JSX.Element => {
            </div>
         </div>
 
-        {/* Map Section */} 
+        {/* Map Section */}
         {places.length > 0 && (
-          <div className="mb-10">
+           <div className="mb-10">
             <div className="flex items-center mb-4">
               <Map size={20} className="mr-2" />
               <h2 className="text-xl md:text-2xl font-semibold text-gray-900">{t('explore_on_map')}</h2>
@@ -291,27 +274,32 @@ const CityDetail: React.FC = (): JSX.Element => {
           </div>
         )}
 
-        {/* Tabs Section - Added value and onValueChange */} 
+        {/* Tabs Section - Updated */}
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center">
-            <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
-              <MapPin size={16} />
-              {t('sacred_places')} ({places.length})
+          <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center gap-2 md:gap-4">
+            {/* Use simplified keys and add count badge */}
+            <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+              <MapPin size={16} className="flex-shrink-0" />
+              <span>{t('places_tab_title')}</span>
+              {places.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{places.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
-              <RouteIcon size={16} />
-              {t('spiritual_routes')} ({routes.length})
+            <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+              <RouteIcon size={16} className="flex-shrink-0" />
+              <span>{t('routes_tab_title')}</span>
+              {routes.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{routes.length}</Badge>}
             </TabsTrigger>
-            <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[150px] py-2">
-              <CalendarDays size={16} />
-              {t('holy_events')} ({events.length})
+            <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+              <CalendarDays size={16} className="flex-shrink-0" />
+              <span>{t('events_tab_title')}</span>
+              {events.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{events.length}</Badge>}
             </TabsTrigger>
           </TabsList>
 
-          {/* Added IDs to TabsContent */} 
+          {/* TabsContent remains the same as before */}
           <TabsContent value="places" id="places-content">
-            <div className="mb-6">
-              <SearchBar 
+             {/* ... content ... */}
+              <div className="mb-6">
+              <SearchBar
                 placeholder={t('search_places_placeholder')}
                 onSearch={handleSearchPlaces}
               />
@@ -321,33 +309,39 @@ const CityDetail: React.FC = (): JSX.Element => {
                  {t('no_places_found')}
               </div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6">
+              // Conditional grid rendering
+              <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                 {places.map(place => (
-                  <PlaceCard key={place.id} place={place} />
+                  // Use the determined component
+                  <PlaceCardComponent key={place.id} place={place} />
                 ))}
               </div>
             )}
           </TabsContent>
-
           <TabsContent value="routes" id="routes-content">
-            {routes.length === 0 ? (
+             {/* ... content ... */}
+               {routes.length === 0 ? (
                <div className="text-center py-10 text-gray-500">{t('no_routes_found')}</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+              // Conditional grid rendering
+              <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                 {routes.map(route => (
-                  <RouteCard key={route.id} route={route} />
+                  // Use the determined component
+                  <RouteCardComponent key={route.id} route={route} />
                 ))}
               </div>
             )}
           </TabsContent>
-
           <TabsContent value="events" id="events-content">
-            {events.length === 0 ? (
+             {/* ... content ... */}
+              {events.length === 0 ? (
                <div className="text-center py-10 text-gray-500">{t('no_events_found')}</div>
             ) : (
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
+               // Conditional grid rendering
+              <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                 {events.map(event => (
-                  <EventCard key={event.id} event={event} />
+                  // Use the determined component
+                  <EventCardComponent key={event.id} event={event} />
                 ))}
               </div>
             )}

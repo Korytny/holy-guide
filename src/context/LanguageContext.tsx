@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { Language, LanguageText } from '../types';
 import { getTranslations } from '../services/api';
@@ -26,21 +25,19 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "no_description_available": "No description available",
     "back_to_city": "Back to City",
     "sacred_place": "Sacred Place",
-    "no_image_available": "No image available", 
+    "no_image_available": "No image available",
     "cities": "Cities",
     "places": "Places",
     "routes": "Routes",
     "events": "Events",
-    
     // Place Types
     "place_type_temple": "Temple",
     "place_type_samadhi": "Samadhi",
     "place_type_kunda": "Kunda",
     "place_type_sacred_site": "Sacred Site",
-
     // Authentication
     "sign_in": "Sign In",
-    "signin": "Sign In", 
+    "signin": "Sign In",
     "sign_out": "Sign Out",
     "signed_out": "Signed Out",
     "signed_out_successfully": "You have been successfully signed out.",
@@ -60,14 +57,12 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "no_auth_code_found": "No authentication code found in URL",
     "signed_in_successfully_desc": "You have successfully signed in.",
     "profile_load_failed_desc": "Failed to load user profile",
-    // "signin_failed_desc": "Failed to sign in", // Duplicate removed
     "redirecting_to_signin": "Redirecting to sign in page...",
     "completing_auth": "Completing Authentication",
     "please_wait_signing_in": "Please wait while we sign you in...",
     "auth_timeout_desc": "Authentication process timed out. Please try again.",
     "session_not_established_desc": "Could not establish session. Please try again.",
     "login_to_view_cities": "Please sign in to view cities.",
-
     // Profile
     "profile": "Profile",
     "my_profile": "My Profile",
@@ -79,11 +74,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "favorite_routes": "Favorite Routes",
     "favorite_events": "Favorite Events",
     "no_favorites_yet": "You haven't added any favorite {{type}} yet.",
-    
-    // Cities
+    // Cities & Details Pages Tabs (Original and New)
     "sacred_places": "Sacred Places",
     "spiritual_routes": "Spiritual Routes",
     "holy_events": "Holy Events",
+    "places_tab_title": "Places",
+    "routes_tab_title": "Routes",
+    "events_tab_title": "Events",
     "about_city": "About the City",
     "city_not_found": "City not found",
     "explore_on_map": "Explore on Map",
@@ -92,18 +89,15 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "cities_subtitle": "Discover the spiritual heart of India through its most sacred cities",
     "search_placeholder": "Search cities...",
     "search_places_placeholder": "Search places in this city...",
-    // "no_cities_found": "No cities found", // Duplicate removed
     "try_adjusting_search": "Try adjusting your search or explore all available options.",
     "no_cities_available": "There are currently no cities available.",
-    
     // Favorites
     "add_to_favorites": "Add to Favorites",
     "remove_from_favorites": "Remove from Favorites",
     "added_to_favorites_description": "was added to your favorites",
     "removed_from_favorites_description": "was removed from your favorites",
     "error_updating_favorites": "Error updating favorites",
-    
-    // Places, Routes and Events
+    // Places, Routes and Events Details
     "location": "Location",
     "no_places_found": "No places found",
     "no_routes_found": "No routes found",
@@ -118,8 +112,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "route_not_found": "Route not found",
     "event_not_found": "Event not found",
     "places_on_route": "Places on Route",
-    // "related_events": "Related Events", // Duplicate removed
-    "spiritual_route": "Spiritual Route", 
+    "spiritual_route": "Spiritual Route"
   },
   ru: {
     // General
@@ -138,16 +131,14 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "places": "Места",
     "routes": "Маршруты",
     "events": "События",
-    
     // Place Types
     "place_type_temple": "Храм",
     "place_type_samadhi": "Самадхи",
     "place_type_kunda": "Кунда",
     "place_type_sacred_site": "Святое место",
-
     // Authentication
     "sign_in": "Войти",
-    "signin": "Вход", 
+    "signin": "Вход",
     "sign_out": "Выйти",
     "signed_out": "Выход выполнен",
     "signed_out_successfully": "Вы успешно вышли из своего аккаунта.",
@@ -167,14 +158,12 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "no_auth_code_found": "Код аутентификации не найден в URL",
     "signed_in_successfully_desc": "Вы успешно вошли в систему.",
     "profile_load_failed_desc": "Не удалось загрузить профиль пользователя",
-    // "signin_failed_desc": "Не удалось войти в систему", // Duplicate removed
     "redirecting_to_signin": "Перенаправление на страницу входа...",
     "completing_auth": "Завершение аутентификации",
     "please_wait_signing_in": "Пожалуйста, подождите, пока мы входим в систему...",
     "auth_timeout_desc": "Время ожидания процесса аутентификации истекло. Пожалуйста, попробуйте снова.",
     "session_not_established_desc": "Не удалось установить сессию. Пожалуйста, попробуйте снова.",
      "login_to_view_cities": "Пожалуйста, войдите, чтобы просматривать города.",
-
     // Profile
     "profile": "Профиль",
     "my_profile": "Мой профиль",
@@ -186,11 +175,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "favorite_routes": "Избранные маршруты",
     "favorite_events": "Избранные события",
     "no_favorites_yet": "Вы пока не добавили избранные {{type}}.",
-    
-    // Cities
+    // Cities & Details Pages Tabs (Original and New)
     "sacred_places": "Священные места",
     "spiritual_routes": "Духовные маршруты",
     "holy_events": "Священные события",
+    "places_tab_title": "Места",
+    "routes_tab_title": "Маршруты",
+    "events_tab_title": "События",
     "about_city": "О городе",
     "city_not_found": "Город не найден",
     "explore_on_map": "Исследовать на карте",
@@ -199,18 +190,15 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "cities_subtitle": "Откройте для себя духовное сердце Индии через её самые священные города",
     "search_placeholder": "Поиск городов...",
     "search_places_placeholder": "Искать места в этом городе...",
-    // "no_cities_found": "Города не найдены", // Duplicate removed
     "try_adjusting_search": "Попробуйте изменить условия поиска или изучите все доступные варианты.",
     "no_cities_available": "В настоящее время нет доступных городов.",
-
     // Favorites
     "add_to_favorites": "Добавить в избранное",
     "remove_from_favorites": "Удалить из избранного",
     "added_to_favorites_description": "добавлен в избранное",
     "removed_from_favorites_description": "удален из избранного",
     "error_updating_favorites": "Ошибка при обновлении избранного",
-    
-    // Places, Routes and Events
+    // Places, Routes and Events Details
     "location": "Местоположение",
     "no_places_found": "Места не найдены",
     "no_routes_found": "Маршруты не найдены",
@@ -225,8 +213,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "route_not_found": "Маршрут не найден",
     "event_not_found": "Событие не найдено",
     "places_on_route": "Места на маршруте",
-    // "related_events": "Связанные события", // Duplicate removed
-    "spiritual_route": "Духовный маршрут",
+    "spiritual_route": "Духовный маршрут"
   },
   hi: {
     // General
@@ -245,13 +232,11 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "places": "स्थान",
     "routes": "मार्ग",
     "events": "कार्यक्रम",
-    
     // Place Types
     "place_type_temple": "मंदिर",
     "place_type_samadhi": "समाधि",
     "place_type_kunda": "कुंड",
     "place_type_sacred_site": "पवित्र स्थल",
-    
     // Authentication
     "sign_in": "साइन इन करें",
     "signin": "साइन इन",
@@ -274,14 +259,12 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "no_auth_code_found": "URL में कोई प्रमाणीकरण कोड नहीं मिला",
     "signed_in_successfully_desc": "आपने सफलतापूर्वक साइन इन कर लिया है।",
     "profile_load_failed_desc": "उपयोगकर्ता प्रोफ़ाइल लोड करने में विफल",
-    // "signin_failed_desc": "साइन इन करने में विफल", // Duplicate removed
     "redirecting_to_signin": "साइन इन पेज पर रीडायरेक्ट किया जा रहा है...",
     "completing_auth": "प्रमाणीकरण पूरा किया जा रहा है",
     "please_wait_signing_in": "कृपया प्रतीक्षा करें जब तक हम आपको साइन इन करते हैं...",
     "auth_timeout_desc": "प्रमाणीकरण प्रक्रिया में समय समाप्त हो गया। कृपया पुनः प्रयास करें।",
     "session_not_established_desc": "सत्र स्थापित नहीं किया जा सका। कृपया पुनः प्रयास करें।",
     "login_to_view_cities": "शहरों को देखने के लिए कृपया साइन इन करें।",
-
     // Profile
     "profile": "प्रोफ़ाइल",
     "my_profile": "मेरी प्रोफ़ाइल",
@@ -293,11 +276,13 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "favorite_routes": "पसंदीदा मार्ग",
     "favorite_events": "पसंदीदा कार्यक्रम",
     "no_favorites_yet": "आपने अभी तक कोई पसंदीदा {{type}} नहीं जोड़ा है।",
-    
-    // Cities
+    // Cities & Details Pages Tabs (Original and New)
     "sacred_places": "पवित्र स्थान",
     "spiritual_routes": "आध्यात्मिक मार्ग",
     "holy_events": "पवित्र कार्यक्रम",
+    "places_tab_title": "स्थान",
+    "routes_tab_title": "मार्ग",
+    "events_tab_title": "कार्यक्रम",
     "about_city": "शहर के बारे में",
     "city_not_found": "शहर नहीं मिला",
     "explore_on_map": "नक्शे पर खोजें",
@@ -306,18 +291,15 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "cities_subtitle": "भारत की आध्यात्मिक हृदयस्थली को उसके सबसे पवित्र शहरों के माध्यम से खोजें",
     "search_placeholder": "शहर खोजें...",
     "search_places_placeholder": "इस शहर में स्थान खोजें...",
-    // "no_cities_found": "कोई शहर नहीं मिला", // Duplicate removed
     "try_adjusting_search": "अपनी खोज को समायोजित करने का प्रयास करें या सभी उपलब्ध विकल्पों का अन्वेषण करें।",
     "no_cities_available": "वर्तमान में कोई शहर उपलब्ध नहीं हैं।",
-    
     // Favorites
     "add_to_favorites": "पसंदीदा में जोड़ें",
     "remove_from_favorites": "पसंदीदा से हटाएं",
     "added_to_favorites_description": "आपके पसंदीदा में जोड़ा गया",
     "removed_from_favorites_description": "आपके पसंदीदा से हटाया गया",
     "error_updating_favorites": "पसंदीदा अपडेट करने में त्रुटि",
-    
-    // Places, Routes and Events
+    // Places, Routes and Events Details
     "location": "स्थान",
     "no_places_found": "कोई स्थान नहीं मिला",
     "no_routes_found": "कोई मार्ग नहीं मिला",
@@ -332,8 +314,7 @@ const baseTranslations: Record<Language, Record<string, string>> = {
     "route_not_found": "मार्ग नहीं मिला",
     "event_not_found": "कार्यक्रम नहीं मिला",
     "places_on_route": "मार्ग पर स्थान",
-    // "related_events": "संबंधित कार्यक्रम", // Duplicate removed
-    "spiritual_route": "आध्यात्मिक मार्ग",
+    "spiritual_route": "आध्यात्मिक मार्ग"
   }
 };
 
@@ -351,17 +332,20 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
     const savedLanguage = localStorage.getItem('language') as Language;
     return savedLanguage && baseTranslations[savedLanguage] ? savedLanguage : defaultLanguage;
   });
-  
+
   const [translations, setTranslations] = useState<Record<string, string>>(baseTranslations[language] || baseTranslations.en);
   const [isLoading, setIsLoading] = useState(true);
-  
+
   useEffect(() => {
     const loadTranslations = async () => {
       setIsLoading(true);
       try {
+        // Assuming baseTranslations is sufficient for this example
+        // In a real app, you might fetch translations from an API here based on `language`
         setTranslations(baseTranslations[language] || baseTranslations.en);
       } catch (error) {
         console.error('Failed to load translations:', error);
+        // Fallback to English if the selected language fails
         if (language !== 'en') {
           setTranslations(baseTranslations.en);
         }
@@ -369,11 +353,11 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
         setIsLoading(false);
       }
     };
-    
+
     loadTranslations();
     localStorage.setItem('language', language);
   }, [language]);
-  
+
   const t = (key: string, options?: { [key: string]: string | number }): string => {
     let translation = translations[key] || baseTranslations.en[key] || key;
     if (options) {
@@ -383,10 +367,10 @@ export const LanguageProvider: React.FC<{children: React.ReactNode}> = ({ childr
     }
     return translation;
   };
-  
+
   return (
     <LanguageContext.Provider value={{ language, setLanguage, t, isLoading }}>
-      {!isLoading ? children : null} 
+      {!isLoading ? children : null}
     </LanguageContext.Provider>
   );
 };
