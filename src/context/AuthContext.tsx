@@ -1,7 +1,7 @@
 
 import React, { createContext, useContext, useEffect, useState, useMemo, useCallback } from 'react';
 import { supabase } from '../integrations/supabase/client';
-import { AuthState, UserProfile } from '../types';
+import { AuthState, UserProfile, Session } from '../types'; // Import Session
 import {
   getUserProfile,
   addCityToFavorites,
@@ -19,7 +19,8 @@ type FavoriteType = 'city' | 'route' | 'event' | 'place';
 
 interface AuthContextType {
   auth: AuthState;
-  refreshProfile: () => Promise<void>;
+  // Make session argument optional in the type definition
+  refreshProfile: (session?: Session | null) => Promise<void>; 
   isFavorite: (type: FavoriteType, id: string) => boolean;
   toggleFavorite: (type: FavoriteType, id: string) => Promise<void>;
 }
@@ -27,12 +28,14 @@ interface AuthContextType {
 const initialState: AuthState = {
   isAuthenticated: false,
   isLoading: true,
-  user: null
+  user: null,
+  session: null, // Initialize session state
 };
 
 const AuthContext = createContext<AuthContextType>({
   auth: initialState,
-  refreshProfile: async () => {},
+  // Update default value to match optional signature
+  refreshProfile: async (_session?: Session | null) => {},
   isFavorite: () => false,
   toggleFavorite: async () => {}
 });
@@ -44,29 +47,50 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const { toast } = useToast();
 
   // Log state changes (optional, can be removed if too noisy)
-  // useEffect(() => {
-  //   console.log('[AuthContext] State updated:', { isLoading: auth.isLoading, isAuthenticated: auth.isAuthenticated, user: !!auth.user });
-  // }, [auth]);
+   useEffect(() => {
+     console.log('[AuthContext] State updated:', { isLoading: auth.isLoading, isAuthenticated: auth.isAuthenticated, user: !!auth.user, session: !!auth.session });
+   }, [auth]);
 
-  const refreshProfile = useCallback(async () => {
-    let newAuthState: AuthState | null = null;
-    try {
-      const profile = await getUserProfile();
-      newAuthState = {
-        isAuthenticated: !!profile,
-        isLoading: false,
-        user: profile
-      };
-    } catch (error) {
-      console.error('[AuthContext] Error refreshing profile:', error);
-      toast({ title: 'Error', description: 'Failed to refresh profile information.', variant: 'destructive' });
-      newAuthState = { isAuthenticated: false, isLoading: false, user: null };
-    } finally {
-       if (newAuthState !== null) {
-         setAuth(newAuthState);
-       }
+  // Update function to handle optional session argument
+  const refreshProfile = useCallback(async (sessionArg?: Session | null) => {
+    let sessionToUse = sessionArg;
+    // If session is not provided, try to get it
+    if (sessionToUse === undefined) {
+        try {
+            const { data: { session } } = await supabase.auth.getSession();
+            sessionToUse = session;
+        } catch (error) {
+             console.error('[AuthContext] Error getting session in refreshProfile:', error);
+             sessionToUse = null;
+        }
     }
-  }, [toast]);
+
+    let newAuthState: AuthState;
+    if (!sessionToUse) {
+        newAuthState = { isAuthenticated: false, isLoading: false, user: null, session: null };
+    } else {
+         try {
+            // getUserProfile should ideally fetch using sessionToUse.user.id internally
+            // If not, you might need to pass the user ID here.
+            const profile = await getUserProfile(); 
+             newAuthState = {
+              isAuthenticated: !!profile, // isAuthenticated depends on profile presence
+              isLoading: false,
+              user: profile,
+              session: sessionToUse // Store the session object
+            };
+          } catch (error) {
+            console.error('[AuthContext] Error refreshing profile:', error);
+            toast({ title: 'Error', description: 'Failed to refresh profile information.', variant: 'destructive' });
+             // Keep session even if profile fetch fails, but mark as not fully authenticated?
+             // Or revert to initial state? Let's revert for now.
+             newAuthState = { isAuthenticated: false, isLoading: false, user: null, session: sessionToUse }; 
+          }
+    }
+
+     setAuth(newAuthState);
+
+  }, [toast]); // Added toast to dependencies
 
   useEffect(() => {
     let isMounted = true;
@@ -75,7 +99,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     const initAuth = async () => {
       if (!supabase) {
         console.error('[AuthContext] Supabase client not available during init.');
-        setAuth({ isAuthenticated: false, isLoading: false, user: null });
+        if (isMounted) setAuth({ isAuthenticated: false, isLoading: false, user: null, session: null });
         return;
       }
       try {
@@ -89,21 +113,47 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             }
 
             if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION' || event === 'TOKEN_REFRESHED') {
+              // Set loading state and session immediately
+               if (isMounted) {
+                   setAuth(prev => ({
+                       ...prev,
+                       isLoading: true, // Indicate loading while profile is fetched
+                       session: session // Set the session as soon as it's available
+                   }));
+               }
+
               // Schedule refreshProfile after a short delay
               refreshTimeoutId = setTimeout(async () => {
                   if (isMounted) {
-                      await refreshProfile();
+                      await refreshProfile(session); // Pass the session to refreshProfile
                   }
                   refreshTimeoutId = null;
               }, 200); // Keep the delay
 
             } else if (event === 'SIGNED_OUT') {
-              setAuth({ isAuthenticated: false, isLoading: false, user: null });
+              if (isMounted) setAuth({ isAuthenticated: false, isLoading: false, user: null, session: null }); // Clear all auth state on sign out
+            } else {
+                 // Handle other events if necessary, e.g., USER_UPDATED
+                 console.log('[AuthContext] Auth state change event:', event);
+                 // For USER_UPDATED, you might want to refresh the profile
+                 if (event === 'USER_UPDATED' && session && isMounted) {
+                      refreshProfile(session); 
+                 }
             }
           }
         );
 
-        // Rely on the listener for initial session check
+         // Also perform an initial check in case onAuthStateChange doesn't fire immediately
+         // or the component mounts after the initial session check.
+         const { data: { session } } = await supabase.auth.getSession();
+         if (isMounted) {
+              if (session) {
+                  setAuth(prev => ({ ...prev, isLoading: true, session: session }));
+                  await refreshProfile(session);
+              } else {
+                   setAuth({ isAuthenticated: false, isLoading: false, user: null, session: null });
+              }
+         }
 
         return () => {
           if (refreshTimeoutId) {
@@ -115,7 +165,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       } catch (error) {
         console.error('[AuthContext] Error initializing auth:', error);
         if (isMounted) {
-           setAuth({ isAuthenticated: false, isLoading: false, user: null });
+           setAuth({ isAuthenticated: false, isLoading: false, user: null, session: null });
         }
       }
     };
@@ -128,9 +178,10 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           clearTimeout(refreshTimeoutId);
       }
     };
-  }, [refreshProfile]);
+  }, [refreshProfile]); // Added refreshProfile to dependencies
 
   const isFavorite = useCallback((type: FavoriteType, id: string): boolean => {
+    // Check auth.user (UserProfile) as favorites are stored there
     if (!auth.user) return false;
     switch (type) {
       case 'city': return auth.user.cities_like?.includes(id) ?? false;
@@ -139,10 +190,11 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       case 'place': return auth.user.places_like?.includes(id) ?? false;
       default: return false;
     }
-  }, [auth.user]);
+  }, [auth.user]); // Dependency on auth.user
 
   const toggleFavorite = useCallback(async (type: FavoriteType, id: string) => {
-    if (!auth.isAuthenticated || !auth.user) {
+    // Check for session existence for authentication status
+    if (!auth.session || !auth.user) { // Check both session and user profile
       toast({ title: 'Authentication Required', description: 'Please sign in to save favorites.', variant: 'destructive' });
       return;
     }
@@ -192,8 +244,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       toast({ title: 'Error', description: `Failed to update ${type} favorites.`, variant: 'destructive' });
       optimisticUpdate(currentlyFavorite); // Revert UI on error
     }
-  }, [auth.isAuthenticated, auth.user, isFavorite, toast]);
+  }, [auth.session, auth.user, isFavorite, toast]); // Added auth.session to dependencies
 
+  // Pass the refreshProfile function that handles optional session
   const contextValue = useMemo(() => ({ 
     auth, 
     refreshProfile,

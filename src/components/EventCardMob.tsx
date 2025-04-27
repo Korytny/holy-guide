@@ -26,10 +26,10 @@ const EventCardMob: React.FC<EventCardMobProps> = ({ event, className }) => {
   const eventDate = event.date ? new Date(event.date) : null;
   const formattedDate = eventDate ? eventDate.toLocaleDateString(language, { /* month: 'short', */ day: 'numeric' }) : null; // Keep it short
 
-  const handleFavoriteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (event.id) { // Corrected to use the event prop's id
+  const handleFavoriteClick = (e: React.MouseEvent<HTMLButtonElement>) => { // Renamed parameter to 'e' to avoid conflict
+    e.preventDefault();
+    e.stopPropagation();
+    if (event.id) { // Now correctly using the 'event' prop
         toggleFavorite('event', event.id); // Pass 'event' type
     }
   };

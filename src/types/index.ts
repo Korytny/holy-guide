@@ -62,7 +62,7 @@ export interface MapLocation extends Partial<Place> {
   location: {
     latitude: number;
     longitude: number;
-  };
+    };
   order?: number; // Also added here for consistency
   // Database fields
   city?: string;
@@ -129,8 +129,13 @@ export interface UserProfile {
   places_like?: string[]; // Added
 }
 
+// Import and EXPORT Session type from supabase-js
+import { Session } from '@supabase/supabase-js';
+export type { Session }; // Export the Session type
+
 export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: UserProfile | null;
+  user: UserProfile | null; // This is the UserProfile from your DB
+  session: Session | null; // Add Supabase Session object
 }

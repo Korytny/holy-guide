@@ -30,11 +30,11 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
   };
 
   const infoDescription = city.info?.[language] || city.info?.en || '' ;
-  const cityRating = city.rating || 4.9; // Example rating
+  const displayRating = 4.9; // Use a local variable for the example rating
 
   // Helper to create minimal stat badges
   const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | undefined }) => {
-      if (count === undefined || count <= 0) return null;
+      if (count === undefined || count === null || count <= 0) return null; // Also check for null
       return (
           <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-gray-200 text-gray-600 font-normal">
               <Icon size={12} className="flex-shrink-0" />
@@ -86,10 +86,10 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
                  <StatBadge icon={MapPin} count={city.spotsCount} />
                  <StatBadge icon={RouteIcon} count={city.routesCount} />
                  <StatBadge icon={CalendarDays} count={city.eventsCount} />
-                 {/* Rating Badge - Now last */}
-                {cityRating && (
+                 {/* Rating Badge - Use displayRating */}
+                {displayRating && (
                     <Badge variant="default" className="bg-orange-500 text-white text-xs px-1.5 py-0.5 flex-shrink-0">
-                        {cityRating.toFixed(1)}
+                        {displayRating.toFixed(1)}
                     </Badge>
                 )}
              </div>
