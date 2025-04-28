@@ -129,5 +129,21 @@
     "remove_existing_photo": "Удалить существующее фото",
     "undo_remove_photo": "Отменить удаление фото",
     "previous_photo": "Предыдущее фото",
-    "next_photo": "Следующее фото"
+    "next_photo": "Следующее фото",
+    "favorite_cities_count": "Избранные города",
+    "favorite_places_count": "Избранные места",
+    "favorite_routes_count": "Избранные маршруты",
+    "favorite_events_count": "Избранные события",
+    "comments_count": "Комментарии",
+    "photos_count": "Фотографии",
+    "audio_story": "Аудио история",
+    "loading_stories": "Загрузка историй...",
+    "error_loading_stories": "Ошибка загрузки историй.",
+    "no_stories_available": "Аудио историй не найдено для этого объекта.",
+    "your_browser_does_not_support_audio": "Ваш браузер не поддерживает аудио элемент.",
+    "no_story_for_current_language": "Нет истории на текущем языке.",
+    "failed_to_generate_audio": "Не удалось сгенерировать аудио.",
+    "no_text_content_for_language": "Нет текстового содержания для текущего языка.",
+    "generating_audio": "Генерация аудио...",
+    "no_stories_available_for_language": "Для этого объекта нет аудио историй на данном языке."
 }

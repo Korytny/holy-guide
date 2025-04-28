@@ -129,5 +129,21 @@
     "remove_existing_photo": "Remove existing photo",
     "undo_remove_photo": "Undo remove photo",
     "previous_photo": "Previous photo",
-    "next_photo": "Next photo"
+    "next_photo": "Next photo",
+    "favorite_cities_count": "Favorite Cities",
+    "favorite_places_count": "Favorite Places",
+    "favorite_routes_count": "Favorite Routes",
+    "favorite_events_count": "Favorite Events",
+    "comments_count": "Comments",
+    "photos_count": "Photos",
+    "audio_story": "Audio Story",
+    "loading_stories": "Loading stories...",
+    "error_loading_stories": "Error loading stories.",
+    "no_stories_available": "No audio stories available for this entity.",
+    "your_browser_does_not_support_audio": "Your browser does not support the audio element.",
+    "no_story_for_current_language": "No story available for the current language.",
+    "failed_to_generate_audio": "Failed to generate audio.",
+    "no_text_content_for_language": "No text content found for the current language.",
+    "generating_audio": "Generating audio...",
+    "no_stories_available_for_language": "No audio stories available for this entity in this language."
 }

@@ -1,21 +1,25 @@
 import React, { useState, useEffect } from 'react';
-import { City, Place, Route, Event } from '../../types'; // Updated path
+import { City, Place, Route, Event } from '../../types';
 import {
   getCitiesByIds,
   getRoutesByIds,
   getEventsByIds,
-  fetchPlaceData // For places
-} from '../../services/api'; // Updated path
+  fetchPlaceData
+} from '../../services/api';
 import FavoritesCarousel from './FavoritesCarousel';
-import CityCard from '../CityCard'; // Updated path
-import PlaceCard from '../PlaceCard'; // Updated path
-import RouteCard from '../RouteCard'; // Updated path
-import EventCard from '../EventCard'; // Updated path
+import CityCard from '../CityCard';
+import PlaceCard from '../PlaceCard';
+import RouteCard from '../RouteCard';
+import EventCard from '../EventCard';
 import { Separator } from "@/components/ui/separator";
-import { useAuth } from '../../context/AuthContext'; // Updated path
-import { useLanguage } from '../../context/LanguageContext'; // Updated path
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
 
-const FavoritesSection = () => {
+interface FavoritesSectionProps {
+  onFavoriteCountsLoaded?: (counts: { citiesCount: number; placesCount: number; routesCount: number; eventsCount: number }) => void;
+}
+
+const FavoritesSection: React.FC<FavoritesSectionProps> = ({ onFavoriteCountsLoaded }) => {
     const { auth } = useAuth();
     const { t } = useLanguage();
 
@@ -28,16 +32,22 @@ const FavoritesSection = () => {
     const [loadingPlaces, setLoadingPlaces] = useState(false);
     const [loadingRoutes, setLoadingRoutes] = useState(false);
     const [loadingEvents, setLoadingEvents] = useState(false);
+    const [isLoadingAny, setIsLoadingAny] = useState(true); // To track if any loading is in progress
 
     // Fetch favorites when user data is available
     useEffect(() => {
       if (auth.user) {
         const fetchFavs = async () => {
+          let cities: City[] = [];
+          let places: Place[] = [];
+          let routes: Route[] = [];
+          let events: Event[] = [];
+
           // Fetch Cities
           if (auth.user?.cities_like && auth.user.cities_like.length > 0) {
             setLoadingCities(true);
             try {
-              const cities = await getCitiesByIds(auth.user.cities_like);
+              cities = await getCitiesByIds(auth.user.cities_like);
               setFavoriteCities(cities);
             } catch (e) { console.error("Failed to load favorite cities", e); }
              finally { setLoadingCities(false); }
@@ -47,7 +57,7 @@ const FavoritesSection = () => {
           if (auth.user?.places_like && auth.user.places_like.length > 0) {
             setLoadingPlaces(true);
              try {
-              const places = await fetchPlaceData(auth.user.places_like);
+              places = await fetchPlaceData(auth.user.places_like);
               setFavoritePlaces(places);
             } catch (e) { console.error("Failed to load favorite places", e); }
              finally { setLoadingPlaces(false); }
@@ -57,7 +67,7 @@ const FavoritesSection = () => {
           if (auth.user?.routes_like && auth.user.routes_like.length > 0) {
              setLoadingRoutes(true);
              try {
-              const routes = await getRoutesByIds(auth.user.routes_like);
+              routes = await getRoutesByIds(auth.user.routes_like);
               setFavoriteRoutes(routes);
             } catch (e) { console.error("Failed to load favorite routes", e); }
              finally { setLoadingRoutes(false); }
@@ -67,15 +77,49 @@ const FavoritesSection = () => {
           if (auth.user?.events_like && auth.user.events_like.length > 0) {
             setLoadingEvents(true);
             try {
-              const events = await getEventsByIds(auth.user.events_like);
+              events = await getEventsByIds(auth.user.events_like);
               setFavoriteEvents(events);
             } catch (e) { console.error("Failed to load favorite events", e); }
             finally { setLoadingEvents(false); }
           }
+
+          // Call the callback with counts after all fetches are attempted
+          if (onFavoriteCountsLoaded) {
+              onFavoriteCountsLoaded({
+                  citiesCount: cities.length,
+                  placesCount: places.length,
+                  routesCount: routes.length,
+                  eventsCount: events.length,
+              });
+          }
+           setIsLoadingAny(false); // All fetches attempted
         };
         fetchFavs();
+      } else {
+         // If user is not available (e.g., signed out), reset counts to 0
+         if (onFavoriteCountsLoaded) {
+            onFavoriteCountsLoaded({
+                citiesCount: 0,
+                placesCount: 0,
+                routesCount: 0,
+                eventsCount: 0,
+            });
+         }
+          setIsLoadingAny(false);
       }
-    }, [auth.user]); // Re-run when user object changes (e.g., after login or profile refresh)
+    }, [auth.user, onFavoriteCountsLoaded]); // Add onFavoriteCountsLoaded to dependencies
+
+     // Optional: effect to update counts if state changes later (e.g., user unfavorites something)
+     useEffect(() => {
+         if (!isLoadingAny && onFavoriteCountsLoaded) { // Only update if initial loading is done
+             onFavoriteCountsLoaded({
+                 citiesCount: favoriteCities.length,
+                 placesCount: favoritePlaces.length,
+                 routesCount: favoriteRoutes.length,
+                 eventsCount: favoriteEvents.length,
+             });
+         }
+     }, [favoriteCities, favoritePlaces, favoriteRoutes, favoriteEvents, isLoadingAny, onFavoriteCountsLoaded]);
 
     return (
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-10">

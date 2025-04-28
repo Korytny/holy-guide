@@ -1,31 +1,80 @@
 import React, { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useAuth } from '../../context/AuthContext'; // Updated path
-import { useLanguage } from '../../context/LanguageContext'; // Updated path
-import { Comment, getCommentsByUserId } from '../../services/comments'; // Updated path
+import { useAuth } from '../../context/AuthContext';
+import { useLanguage } from '../../context/LanguageContext';
+import { Comment, getCommentsByUserId } from '../../services/comments';
 
-const UserCommentsSection = () => {
+interface UserCommentsSectionProps {
+  onCommentsAndPhotosCountLoaded?: (counts: { commentsCount: number; photosCount: number }) => void;
+}
+
+const UserCommentsSection: React.FC<UserCommentsSectionProps> = ({ onCommentsAndPhotosCountLoaded }) => {
     const { auth } = useAuth();
     const { t } = useLanguage();
     const [userComments, setUserComments] = useState<Comment[]>([]);
     const [loadingComments, setLoadingComments] = useState(false);
+    const [isLoadingAny, setIsLoadingAny] = useState(true); // To track if initial loading is in progress
 
     useEffect(() => {
         if (auth.user) {
             const fetchUserComments = async () => {
                 setLoadingComments(true);
+                let comments: Comment[] = [];
                 try {
-                    const comments = await getCommentsByUserId(auth.user!.id); // Use non-null assertion as auth.user is checked
+                    comments = await getCommentsByUserId(auth.user!.id); // Use non-null assertion as auth.user is checked
                     setUserComments(comments);
                 } catch (e) {
                     console.error("Failed to load user comments", e);
                 } finally {
                     setLoadingComments(false);
+                     setIsLoadingAny(false); // Loading is done
+                }
+                
+                 // Calculate photo count
+                const totalPhotos = comments.reduce((count, comment) => {
+                    // Check if photo_url exists and is an array before counting
+                    if (comment.photo_url && Array.isArray(comment.photo_url)) {
+                        return count + comment.photo_url.length;
+                    }
+                    return count;
+                }, 0);
+
+                // Call the callback with counts
+                if (onCommentsAndPhotosCountLoaded) {
+                    onCommentsAndPhotosCountLoaded({
+                        commentsCount: comments.length,
+                        photosCount: totalPhotos,
+                    });
                 }
             };
             fetchUserComments();
+        } else {
+             // If user is not available, reset counts to 0
+             if (onCommentsAndPhotosCountLoaded) {
+                onCommentsAndPhotosCountLoaded({
+                    commentsCount: 0,
+                    photosCount: 0,
+                });
+             }
+             setIsLoadingAny(false);
         }
-    }, [auth.user]);
+    }, [auth.user, onCommentsAndPhotosCountLoaded]); // Add dependencies
+
+     // Optional: effect to update counts if comments state changes later
+     useEffect(() => {
+        if (!isLoadingAny && onCommentsAndPhotosCountLoaded) { // Only update if initial loading is done
+             const totalPhotos = userComments.reduce((count, comment) => {
+                    if (comment.photo_url && Array.isArray(comment.photo_url)) {
+                        return count + comment.photo_url.length;
+                    }
+                    return count;
+                }, 0);
+            onCommentsAndPhotosCountLoaded({
+                commentsCount: userComments.length,
+                photosCount: totalPhotos,
+            });
+        }
+     }, [userComments, isLoadingAny, onCommentsAndPhotosCountLoaded]);
 
     // Helper to get link based on entity type
     const getEntityLink = (comment: Comment) => {
@@ -37,7 +86,7 @@ const UserCommentsSection = () => {
             case 'event': return `/events/${comment.entity_id}`;
             default: return '#'; // Fallback
         }
-    }; // <-- Added missing semicolon here
+    };
 
     // Helper to get localized entity type name
     const getLocalizedEntityType = (type: Comment['entity_type']) => {
@@ -48,7 +97,7 @@ const UserCommentsSection = () => {
             case 'event': return t('event');
             default: return type;
         }
-    }; // <-- Added missing semicolon here
+    };
 
     return (
         <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">

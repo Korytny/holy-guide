@@ -1,26 +1,31 @@
+// console.log('CityDetail: Module file is being processed'); // Removed log
+
 import React, { useState, useEffect, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import Layout from '../components/Layout'; // Corrected path
-import { getCityById } from '../services/citiesApi'; // Corrected path
-import { getRoutesByCityId } from '../services/routesApi'; // Corrected path
-import { getEventsByCityId } from '../services/eventsApi'; // Corrected path
-import { getPlacesByCityId } from '../services/placesApi'; // Corrected path
-import { City, Place, Route, Event } from '../types'; // Corrected path
-import { useLanguage } from '../context/LanguageContext'; // Corrected path
+import Layout from '../components/Layout';
+import { getCityById } from '../services/citiesApi';
+import { getRoutesByCityId } from '../services/routesApi';
+import { getEventsByCityId } from '../services/eventsApi';
+import { getPlacesByCityId } from '../services/placesApi';
+import { City, Place, Route, Event } from '../types';
+import { useLanguage } from '../context/LanguageContext';
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from 'lucide-react';
-import { getLocalizedText } from '../utils/languageUtils'; // Corrected path
-import CommentsSection from '../components/CommentsSection'; // Corrected path
-import CityHeader from '../components/city_detail/CityHeader'; // Import new component
-import CityAbout from '../components/city_detail/CityAbout'; // Import new component
-import CityMapSection from '../components/city_detail/CityMapSection'; // Import new component
-import CityTabsContent from '../components/city_detail/CityTabsContent'; // Import new component
+import { getLocalizedText } from '../utils/languageUtils';
+import CommentsSection from '../components/CommentsSection';
+import CityHeader from '../components/city_detail/CityHeader';
+import CityAbout from '../components/city_detail/CityAbout';
+import CityMapSection from '../components/city_detail/CityMapSection';
+import CityTabsContent from '../components/city_detail/CityTabsContent';
+import AudioPlayer from '../components/AudioPlayer';
 
 const CityDetail: React.FC = (): JSX.Element => {
+  // console.log('CityDetail: Component function started'); // Removed log
+
   const { id } = useParams<{ id: string }>();
   const [city, setCity] = useState<City | null>(null);
   const [places, setPlaces] = useState<Place[]>([]);
-  const [originalPlaces, setOriginalPlaces] = useState<Place[]>([]); // Keep for search
+  const [originalPlaces, setOriginalPlaces] = useState<Place[]>([]);
   const [routes, setRoutes] = useState<Route[]>([]);
   const [events, setEvents] = useState<Event[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -28,10 +33,18 @@ const CityDetail: React.FC = (): JSX.Element => {
   const { language, t } = useLanguage();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    const loadCityData = async () => {
-        if (!id) return;
+  // console.log('CityDetail: Hooks initialized', { id, loading, city: !!city, language }); // Removed log
 
+  useEffect(() => {
+    // console.log('CityDetail: useEffect [id, language] triggered', { id, language }); // Removed log
+    const loadCityData = async () => {
+        if (!id) {
+            // console.log('CityDetail: ID is missing, stopping load.'); // Removed log
+             setLoading(false);
+             return;
+        }
+
+      // console.log('CityDetail: Starting data load for city ID:', id); // Removed log
       setLoading(true);
       try {
         const [cityData, placesData, routesData, eventsData] = await Promise.all([
@@ -41,6 +54,8 @@ const CityDetail: React.FC = (): JSX.Element => {
           getEventsByCityId(id),
         ]);
 
+        // console.log('CityDetail: Data loaded successfully', { cityLoaded: !!cityData, placesCount: placesData.length, routesCount: routesData.length, eventsCount: eventsData.length }); // Removed log
+
         setCity(cityData);
         setPlaces(placesData);
         setOriginalPlaces(placesData);
@@ -48,8 +63,11 @@ const CityDetail: React.FC = (): JSX.Element => {
         setEvents(eventsData);
 
       } catch (error) {
-        console.error('Failed to load city data:', error);
+        // Keep console.error for actual errors
+        console.error('CityDetail: Failed to load city data:', error);
+        setCity(null);
       } finally {
+        // console.log('CityDetail: Data load finished.'); // Removed log
         setLoading(false);
       }
     };
@@ -80,9 +98,10 @@ const CityDetail: React.FC = (): JSX.Element => {
     }, 50);
   }, []);
 
+  // console.log('CityDetail: Before render checks', { loading, city: !!city }); // Removed log
 
   if (loading) {
-    // Loading skeleton remains the same
+    // console.log('CityDetail: Rendering Loading skeleton.'); // Removed log
      return (
       <Layout>
         <div className="app-container py-10">
@@ -111,7 +130,7 @@ const CityDetail: React.FC = (): JSX.Element => {
   }
 
   if (!city) {
-    // Not found remains the same
+    // console.log('CityDetail: Rendering Not Found message.'); // Removed log
      return (
       <Layout>
         <div className="app-container py-10 text-center">
@@ -124,43 +143,49 @@ const CityDetail: React.FC = (): JSX.Element => {
     );
   }
 
+  // console.log('CityDetail: Rendering main content.'); // Removed log
+
   return (
     <Layout>
       <div className="app-container py-6">
         {/* Back Button */}
         <div className="flex justify-between items-center mb-6">
-            <button 
-              onClick={() => navigate('/')} 
+            <button
+              onClick={() => navigate('/')}
               className="inline-flex items-center text-gray-600 hover:text-gray-900"
             >
               <ArrowLeft size={18} className="mr-2" />
-              {t('back_to_cities')} 
+              {t('back_to_cities')}
             </button>
         </div>
 
         {/* Grid for Header and About */}
         <div className="grid md:grid-cols-2 gap-8 mb-10">
-            <CityHeader 
-                city={city} 
-                places={places} 
-                routes={routes} 
-                events={events} 
-                id={id!} 
-                onTabSelect={scrollToTab} 
+            <CityHeader
+                city={city}
+                places={places}
+                routes={routes}
+                events={events}
+                id={id!}
+                onTabSelect={scrollToTab}
             />
             <CityAbout city={city} />
         </div>
 
+        {/* Audio Player - Added Here */}
+        {/* console.log('CityDetail: Attempting to render AudioPlayer', { id }); // Removed log */}
+        {id && <AudioPlayer entityType="city" entityId={id} />}
+
         {/* Map Section */}
         <CityMapSection places={places} />
-        
+
         {/* Tabs Section */}
-        <CityTabsContent 
-            places={places} 
-            routes={routes} 
-            events={events} 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
+        <CityTabsContent
+            places={places}
+            routes={routes}
+            events={events}
+            activeTab={activeTab}
+            onTabChange={setActiveTab}
             onSearch={handleSearchPlaces}
         />
 

@@ -1,5 +1,5 @@
 
-import React, { Suspense, lazy } from 'react'; // Import Suspense and lazy
+import React, { Suspense, lazy } from 'react'; // Restored Suspense and lazy import
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -11,7 +11,7 @@ import { AuthProvider } from "./context/AuthContext";
 // --- Lazy load pages ---
 const LanguageSelection = lazy(() => import("./pages/LanguageSelection"));
 const CitiesPage = lazy(() => import("./pages/CitiesPage"));
-const CityDetail = lazy(() => import("./pages/CityDetail"));
+const CityDetail = lazy(() => import("./pages/CityDetail")); // Restored lazy loading
 const PlaceDetail = lazy(() => import("./pages/PlaceDetail"));
 const RouteDetail = lazy(() => import("./pages/RouteDetail"));
 const EventDetail = lazy(() => import("./pages/EventDetail"));
@@ -25,7 +25,8 @@ const queryClient = new QueryClient();
 // Simple loading fallback component
 const LoadingFallback = () => (
   <div className="min-h-screen flex items-center justify-center">
-    <div>Loading...</div> 
+    {/* You can use a spinner or a more sophisticated loader here */}
+    <div>Loading...</div>
   </div>
 );
 
@@ -37,11 +38,14 @@ const App = () => (
           <Toaster />
           <Sonner />
           <BrowserRouter>
-            {/* Wrap Routes with Suspense */}
+             {/* Removed diagnostic logs */}
+            {/* Restore Suspense wrapper */}
             <Suspense fallback={<LoadingFallback />}>
               <Routes>
+                 {/* Removed diagnostic logs */}
                 <Route path="/" element={<CitiesPage />} />
                 <Route path="/language" element={<LanguageSelection />} />
+                {/* Restored lazy loaded CityDetail */}
                 <Route path="/cities/:id" element={<CityDetail />} />
                 <Route path="/places/:id" element={<PlaceDetail />} />
                 <Route path="/routes/:id" element={<RouteDetail />} />
