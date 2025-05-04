@@ -1,3 +1,4 @@
+[bylb
 {
     "explore": "खोजें",
     "back_to_cities": "शहरों पर वापस जाएं",
@@ -145,5 +146,9 @@
     "failed_to_generate_audio": "Failed to generate audio",
     "no_text_content_for_language": "No text content found for the current language",
     "generating_audio": "Generating audio",
-    "no_stories_available_for_language": "No audio stories available for this entity in this language"
+    "no_stories_available_for_language": "No audio stories available for this entity in this language",
+    "details_button": "विवरण",
+    "events_label": "कार्यक्रम",
+    "routes_label": "मार्ग",
+    "spots_label": "स्थान"
 }

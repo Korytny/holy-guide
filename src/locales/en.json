@@ -145,5 +145,9 @@
     "failed_to_generate_audio": "Failed to generate audio.",
     "no_text_content_for_language": "No text content found for the current language.",
     "generating_audio": "Generating audio...",
-    "no_stories_available_for_language": "No audio stories available for this entity in this language."
+    "no_stories_available_for_language": "No audio stories available for this entity in this language.",
+    "details_button": "Details",
+    "events_label": "Events",
+    "routes_label": "Routes",
+    "spots_label": "Spots"
 }
