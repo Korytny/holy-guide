@@ -121,19 +121,9 @@ const HeroSection: React.FC = () => {
 
   return (
     <section className="overflow-hidden bg-white dark:bg-gray-900">
-      <div className="md:grid md:grid-cols-2 md:items-center md:gap-4 lg:gap-8">
-        {/* Text Content - Left */}
-        <div className="p-6 md:p-8 lg:p-12 order-2 md:order-1">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white sm:text-4xl lg:text-5xl mb-4">
-            {currentTitle}
-          </h1>
-          <p className="mt-4 text-gray-600 dark:text-gray-300">
-            {currentDescription}
-          </p>
-        </div>
-
-        {/* Image - Right */}
-        <div className="order-1 md:order-2 h-64 md:h-auto">
+      <div className="w-full">
+        {/* Image Only */}
+        <div className="h-64 md:h-auto">
           <img
             alt={currentTitle}
             src={imageUrl}

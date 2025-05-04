@@ -8,10 +8,13 @@ interface LayoutProps {
 }
 
 const Layout = ({ children, hideNavbar = false }: LayoutProps) => {
+  // Assume navbar height is 4rem (64px)
+  const navbarHeight = '4rem'; 
   return (
     <div className="min-h-screen flex flex-col">
       {!hideNavbar && <Navbar />}
-      <main className="flex-grow">
+      {/* Removed background from main element */}
+      <main className={`flex-grow min-h-[calc(100vh-${navbarHeight})] w-full`}>
         {children}
       </main>
     </div>
