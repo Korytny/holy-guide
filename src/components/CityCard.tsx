@@ -76,21 +76,21 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <MapPin size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('spots_label', 'Мест')}:</span>
+                       <span>{t('spots_label')}:</span>
                        <span className="font-medium ml-auto">{city.spotsCount}</span> 
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <RouteIcon size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('routes_label', 'Маршрутов')}:</span>
+                       <span>{t('routes_label')}:</span>
                        <span className="font-medium ml-auto">{city.routesCount}</span> 
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <CalendarDays size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('events_label', 'Событий')}:</span>
+                       <span>{t('events_label')}:</span>
                        <span className="font-medium ml-auto">{city.eventsCount}</span> 
                    </div>
               )}
@@ -103,7 +103,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
                 variant="default" 
                 className="w-full" 
             >
-                {t('details_button', 'Подробнее')} 
+                {t('details_button')}
             </Button>
         </div>
       </Link>
