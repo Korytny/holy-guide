@@ -117,7 +117,7 @@
     "about_route": "Об этом маршруте",
     "about_event": "Об этом событии",
     "event_locations": "Места проведения",
-    "place_not_found": "Место не найдено",
+    "place_not_found": "Место не найден",
     "route_not_found": "Маршрут не найден",
     "event_not_found": "Событие не найдено",
     "places_on_route": "Места на маршруте",
@@ -145,5 +145,9 @@
     "failed_to_generate_audio": "Не удалось сгенерировать аудио.",
     "no_text_content_for_language": "Нет текстового содержания для текущего языка.",
     "generating_audio": "Генерация аудио...",
-    "no_stories_available_for_language": "Для этого объекта нет аудио историй на данном языке."
+    "no_stories_available_for_language": "Для этого объекта нет аудио историй на данном языке.",
+    "spots_label": "Мест",
+    "routes_label": "Маршрутов",
+    "events_label": "Событий",
+    "details_button": "Подробнее"
 }
