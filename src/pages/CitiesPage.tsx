@@ -5,6 +5,7 @@ import CityCard from '../components/CityCard';
 import CityCardMob from '../components/CityCardMob'; // Import the mobile card
 import SearchBar from '../components/SearchBar';
 import Layout from '../components/Layout';
+import HeroSection from '../components/HeroSection'; // Import the new HeroSection component
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { useIsSmallScreen } from '../hooks/use-small-screen'; // Import the screen size hook
@@ -71,17 +72,21 @@ const CitiesPage = () => {
 
   return (
     <Layout>
+      <HeroSection /> {/* Added the HeroSection component here */}
       {/* Changed gradient from purple to orange */}
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-orange-100 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
+          {/* Removed the old title and subtitle as HeroSection likely replaces this */}
+          {/*
           <div className="text-center mb-8">
             <h1 className="text-3xl font-bold text-gray-900">{t('cities_title')}</h1>
             <p className="mt-4 text-lg text-gray-600">
               {t('cities_subtitle')}
             </p>
           </div>
+          */}
 
-          <div className="flex justify-center mb-8">
+          <div className="flex justify-center mb-8 pt-8"> {/* Added padding-top to space from Hero */}
             <div className="w-full max-w-2xl">
               <SearchBar placeholder={t('search_placeholder')} onSearch={term => setSearchTerm(term)} />
             </div>
