@@ -24,7 +24,7 @@ export const imageCloudProps: Omit<ICloud, "children"> = {
     reverse: true,
     depth: 1.5, 
     wheelZoom: false,
-    imageScale: 0.4, // *** Reduced image scale further ***
+    imageScale: 0.2, // Small icons
     activeCursor: "pointer",
     tooltip: "native", 
     initial: [0.1, -0.1],
@@ -33,7 +33,7 @@ export const imageCloudProps: Omit<ICloud, "children"> = {
     outlineColour: "#0000",
     maxSpeed: 0.03,
     minSpeed: 0.01,
-    radius: 800, // Keep this name radius, radiusX - not correct
+    radius: 2000, // Large radius
   },
 };
 
@@ -71,9 +71,8 @@ export function ImageCloud({ items, className, cloudOptions, imageClassName }: I
           src={item.imageUrl}
           alt={item.alt} 
           title={item.alt} // Add title for native tooltip
-          // Reducing base size further
           className={cn(
-            "w-6 h-6 object-cover rounded-full shadow-sm", // Reduced base size again
+            "w-6 h-6 object-cover rounded-full shadow-sm", // Keep base size or adjust if needed
             imageClassName
           )} 
         />
@@ -97,8 +96,9 @@ export function ImageCloud({ items, className, cloudOptions, imageClassName }: I
   }
 
   return (
+    // Added 'image-cloud-wrapper' class
     <div 
-      className={cn("relative w-full h-full", className)}
+      className={cn("relative w-full h-full image-cloud-wrapper", className)}
     > 
       {/* @ts-ignore - Cloud component might have type issues with img/a children */}
       <Cloud {...imageCloudProps} options={mergedOptions}>

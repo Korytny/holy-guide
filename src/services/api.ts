@@ -262,3 +262,42 @@ export const search = async (term: string, type: 'cities' | 'spots' | 'routes' |
 export const getTranslations = async (/* language: Language */) => {
   return {}; // Placeholder
 };
+
+// Added function to fetch title data
+// Interface for multilingual data (adjust languages as needed)
+interface MultilingualString {
+  en: string; ru: string; hi: string; [key: string]: string;
+}
+interface TitleData {
+  name: MultilingualString | string; 
+  description: MultilingualString | string;
+}
+
+export async function fetchTitleData(element: string): Promise<TitleData | null> {
+  if (!supabase) {
+     console.error('[API fetchTitleData] Supabase client not available');
+     return null;
+   }
+  try {
+      const { data, error } = await supabase
+        .from('titles') // Correct table name
+        .select('name, description')
+        .eq('element', element)
+        .single();
+
+      if (error) {
+        if (error.code === 'PGRST116') { // Code for "Not found"
+             console.warn(`[API fetchTitleData] No record found for element "${element}"`);
+             return null; // Return null instead of throwing error for not found
+        } else {
+             console.error(`Error fetching title data for element "${element}":`, error);
+             throw error; // Throw other errors
+        }
+      }
+      // Explicitly cast to TitleData, assuming the DB schema matches
+      return data as TitleData | null;
+  } catch (err) {
+       console.error(`[API fetchTitleData] Unexpected error fetching element "${element}":`, err);
+       throw err; // Re-throw unexpected errors
+  }
+}

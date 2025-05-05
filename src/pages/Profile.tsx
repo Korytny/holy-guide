@@ -46,6 +46,7 @@ const Profile = () => {
   }, []);
 
   if (auth.isLoading) {
+    // Layout is kept here for loading state
     return (
       <Layout>
         <div className="min-h-screen flex items-center justify-center">
@@ -75,8 +76,8 @@ const Profile = () => {
     photosCount: commentPhotoCounts?.photosCount || 0,
   };
 
+  // REMOVED Layout wrapper from the main return statement
   return (
-    <Layout>
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           
@@ -101,7 +102,6 @@ const Profile = () => {
           </div>
         </div>
       </div>
-    </Layout>
   );
 };
 

@@ -102,6 +102,7 @@ const CityDetail: React.FC = (): JSX.Element => {
 
   if (loading) {
     // console.log('CityDetail: Rendering Loading skeleton.'); // Removed log
+     // Layout is kept here as it might render before App.tsx applies the main Layout during suspense
      return (
       <Layout>
         <div className="app-container py-10">
@@ -131,6 +132,7 @@ const CityDetail: React.FC = (): JSX.Element => {
 
   if (!city) {
     // console.log('CityDetail: Rendering Not Found message.'); // Removed log
+    // Layout is kept here for the same reason as loading state
      return (
       <Layout>
         <div className="app-container py-10 text-center">
@@ -145,8 +147,8 @@ const CityDetail: React.FC = (): JSX.Element => {
 
   // console.log('CityDetail: Rendering main content.'); // Removed log
 
+  // REMOVED Layout wrapper from the main return statement
   return (
-    <Layout>
       <div className="app-container py-6">
         {/* Back Button */}
         <div className="flex justify-between items-center mb-6">
@@ -195,7 +197,6 @@ const CityDetail: React.FC = (): JSX.Element => {
         )}
 
       </div>
-    </Layout>
   );
 };
 
