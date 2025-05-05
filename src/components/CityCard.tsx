@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { City } from '../types';
@@ -28,30 +27,30 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         toggleFavorite('city', city.id);
     }
   };
-  
+
   // Make sure to get the localized info description
   const infoDescription = getLocalizedText(city.info, language) || t('no_description_available');
 
   return (
-    <div 
+    <div
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col",
             className
         )}
     >
       {/* Image Section */}
       <div className="relative">
-        <Link to={`/cities/${city.id}`} className="absolute inset-0 z-0"></Link> 
-        <img 
-          src={city.imageUrl || '/placeholder.svg'} 
-          alt={cityName} 
+        <Link to={`/cities/${city.id}`} className="absolute inset-0 z-0"></Link>
+        <img
+          src={city.imageUrl || '/placeholder.svg'}
+          alt={cityName}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />
-        
-        {/* Favorite Button */} 
+
+        {/* Favorite Button */}
         {city.id && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 group-hover:opacity-100 opacity-75 transition-opacity"
               onClick={handleFavoriteClick}
@@ -63,35 +62,43 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
       </div>
 
       {/* Content Section - Now wrapped by Link */}
-      <Link to={`/cities/${city.id}`} className="p-4 flex-grow flex flex-col justify-between"> 
-        <div> 
-          <h3 className="text-lg font-semibold mb-1 truncate" title={cityName}>{cityName}</h3>
+      <Link to={`/cities/${city.id}`} className="p-4 flex-grow flex flex-col justify-between">
+        <div>
+          <h3
+             className={cn( // Use cn for combining classes
+                 "font-heading", // Apply heading font class
+                 "text-lg font-semibold mb-1 truncate"
+             )}
+             title={cityName}
+          >
+             {cityName}
+          </h3>
           {/* Added description back */}
           <p className="text-sm text-gray-600 line-clamp-2 mb-3">
              {infoDescription}
           </p>
-          
+
           {/* Vertical Stats Section */}
           <div className="space-y-2 mb-4">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <MapPin size={16} className="mr-2 text-gray-500"/>
                        <span>{t('spots_label')}:</span>
-                       <span className="font-medium ml-auto">{city.spotsCount}</span> 
+                       <span className="font-medium ml-auto">{city.spotsCount}</span>
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <RouteIcon size={16} className="mr-2 text-gray-500"/>
                        <span>{t('routes_label')}:</span>
-                       <span className="font-medium ml-auto">{city.routesCount}</span> 
+                       <span className="font-medium ml-auto">{city.routesCount}</span>
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <CalendarDays size={16} className="mr-2 text-gray-500"/>
                        <span>{t('events_label')}:</span>
-                       <span className="font-medium ml-auto">{city.eventsCount}</span> 
+                       <span className="font-medium ml-auto">{city.eventsCount}</span>
                    </div>
               )}
           </div>
@@ -99,9 +106,9 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
 
         {/* Details Button */}
          <div className="mt-auto pt-3"> {/* Pushes button to bottom */}
-            <Button 
-                variant="default" 
-                className="w-full" 
+            <Button
+                variant="default"
+                className="w-full"
             >
                 {t('details_button')}
             </Button>

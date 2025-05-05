@@ -3,6 +3,7 @@ import { useLanguage, Language } from '../context/LanguageContext'; // Import La
 import { ImageCloud, ImageCloudItem } from './ui/image-cloud';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchTitleData } from '@/services/api'; // Import actual API function
+import { cn } from "@/lib/utils"; // Import cn utility
 
 // Interface for multilingual data (adjust languages as needed)
 interface MultilingualString {
@@ -32,18 +33,18 @@ const FullScreenHero: React.FC<FullScreenHeroProps> = ({ imageCloudItems, isClou
        setTextError(null);
        try {
          const data = await fetchTitleData('hero') as HeroTextData | null;
-         if (data) { 
-           setTitleData(data); 
-         } else { 
+         if (data) {
+           setTitleData(data);
+         } else {
            // Don't set an error if data is simply not found (null)
-           // setTextError(t('error_loading_data') || 'Hero text not found.'); 
+           // setTextError(t('error_loading_data') || 'Hero text not found.');
            console.warn("Hero title data not found for element 'hero'");
          }
        } catch (error) {
          console.error("Error fetching hero title:", error);
          setTextError(t('error_loading_failed') || 'Failed to load hero text.');
-       } finally { 
-         setIsTextLoading(false); 
+       } finally {
+         setIsTextLoading(false);
        }
     };
     loadTitle();
@@ -86,7 +87,10 @@ const FullScreenHero: React.FC<FullScreenHeroProps> = ({ imageCloudItems, isClou
            <p className="text-red-500 pointer-events-auto">{textError}</p>
         ) : titleData ? (
            <div className="pointer-events-auto">
-             <h1 className="text-4xl font-bold text-black dark:text-white sm:text-5xl lg:text-6xl mb-4">
+             <h1 className={cn( // Use cn for combining classes
+                "font-heading", // Apply heading font class explicitly
+                "text-4xl font-bold text-black dark:text-white sm:text-5xl lg:text-6xl mb-4"
+             )}>
                {getLocalizedString(titleData.name)}
              </h1>
              <p className="mt-4 text-lg text-gray-800 dark:text-gray-300 max-w-xl mx-auto">
