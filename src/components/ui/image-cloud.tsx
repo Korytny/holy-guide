@@ -33,7 +33,7 @@ export const imageCloudProps: Omit<ICloud, "children"> = {
     outlineColour: "#0000",
     maxSpeed: 0.03,
     minSpeed: 0.01,
-    radius: 800, // Keep the large radius
+    radius: 800, // Keep this name radius, radiusX - not correct
   },
 };
 
