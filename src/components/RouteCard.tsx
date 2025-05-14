@@ -8,6 +8,7 @@ import { Route as RouteIcon, Heart } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface RouteCardProps {
   route: Route;
@@ -63,14 +64,16 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
       </div>
       <Link to={`/routes/${route.id}`} className="p-3 flex-grow flex flex-col justify-between"> 
           <div>
-             <h3 className="text-base font-medium mb-1 truncate" title={routeName}>{routeName}</h3>
-            <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+             <h3 className="text-base font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={routeName}>{routeName}</h3>
+            <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
               {routeDescription || t('no_description_available')}
             </p>
           </div>
-          <div className="flex items-center text-xs text-gray-500 mt-1">
-            <RouteIcon size={14} className="mr-1" />
-            <span>{t('spiritual_route')}</span>
+          <div className="flex items-center mt-1">
+            <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']">
+              <RouteIcon size={12} className="flex-shrink-0" />
+              <span>{t('spiritual_route')}</span>
+            </Badge>
           </div>
       </Link>
     </div>

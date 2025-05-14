@@ -36,7 +36,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
   const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | undefined }) => {
       if (count === undefined || count === null || count <= 0) return null; // Also check for null
       return (
-          <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-gray-200 text-gray-600 font-normal">
+          <Badge variant="outline" className="text-xs px-2 py-0.5 flex items-center gap-2 border-[#09332A] text-[#09332A] font-['Monaco']">
               <Icon size={12} className="flex-shrink-0" />
               <span className="text-xs">{count}</span>
           </Badge>
@@ -77,7 +77,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
           {/* Top Row: Title and Stats */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-semibold line-clamp-2 flex-grow mr-1" title={cityName}> 
+             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 font-[Laudatio] text-[#09332A]" title={cityName}> 
                 {cityName}
              </h3>
              {/* Stats and Rating Container */}
@@ -96,7 +96,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1"> 
+          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1 font-['Monaco']"> 
             {infoDescription || t('no_description_available')}
           </p>
         </div>

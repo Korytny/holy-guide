@@ -6,7 +6,7 @@ import CityCardMob from '../components/CityCardMob';
 import SearchBar from '../components/SearchBar';
 // import Layout from '../components/Layout'; // Layout is applied in App.tsx
 // import HeroSection from '../components/HeroSection'; // Use FullScreenHero instead
-import FullScreenHero from '../components/FullScreenHero'; // Import the new component
+  import HeroSection from '../components/HeroSection'; // Updated import
 import { ImageCloudItem } from '../components/ui/image-cloud'; 
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -112,10 +112,9 @@ const CitiesPage = () => {
   return (
     <>
       {/* Use the new FullScreenHero component */}
-      <FullScreenHero
+      <HeroSection
         imageCloudItems={imageCloudItems}
         isCloudLoading={isCloudLoading}
-        heroText={heroText}
       />
             
       {/* Cities List Section */}

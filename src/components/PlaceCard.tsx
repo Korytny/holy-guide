@@ -75,12 +75,12 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
       
       <Link to={`/places/${place.id}`} className="p-3 flex-grow flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-medium mb-1 truncate" title={placeName}>{placeName}</h3>
-            <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+            <h3 className="text-base font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={placeName}>{placeName}</h3>
+            <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
                 {placeDescription || t('no_description_available')}
             </p>
           </div>
-          <div className="flex items-center text-xs text-gray-500 mt-1">
+          <div className="flex items-center text-xs text-[#09332A] mt-1 font-['Monaco']">
               <MapPin size={14} className="mr-1" />
               <span>{t(placeTypeKey)}</span>
           </div>

@@ -65,33 +65,39 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
       {/* Content Section - Now wrapped by Link */}
       <Link to={`/cities/${city.id}`} className="p-4 flex-grow flex flex-col justify-between"> 
         <div> 
-          <h3 className="text-lg font-semibold mb-1 truncate" title={cityName}>{cityName}</h3>
+          <h3 className="text-lg font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={cityName}>{cityName}</h3>
           {/* Added description back */}
-          <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+          <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
              {infoDescription}
           </p>
           
           {/* Vertical Stats Section */}
-          <div className="space-y-2 mb-4">
+          <div className="space-y-3 mb-4">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
-                       <MapPin size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('spots_label')}:</span>
-                       <span className="font-medium ml-auto">{city.spotsCount}</span> 
+                   <div className="flex justify-between items-center text-sm text-black font-['Monaco'] px-[108px]">
+                       <div className="flex items-center">
+                           <MapPin size={16} className="mr-2 text-gray-500"/>
+                           <span>{t('spots_label')}:</span>
+                       </div>
+                       <span className="font-medium">{city.spotsCount}</span> 
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
-                       <RouteIcon size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('routes_label')}:</span>
-                       <span className="font-medium ml-auto">{city.routesCount}</span> 
+                   <div className="flex justify-between items-center text-sm text-black font-['Monaco'] px-[108px]">
+                       <div className="flex items-center">
+                           <RouteIcon size={16} className="mr-2 text-gray-500"/>
+                           <span>{t('routes_label')}:</span>
+                       </div>
+                       <span className="font-medium">{city.routesCount}</span> 
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
-                       <CalendarDays size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('events_label')}:</span>
-                       <span className="font-medium ml-auto">{city.eventsCount}</span> 
+                   <div className="flex justify-between items-center text-sm text-black font-['Monaco'] px-[108px]">
+                       <div className="flex items-center">
+                           <CalendarDays size={16} className="mr-2 text-gray-500"/>
+                           <span>{t('events_label')}:</span>
+                       </div>
+                       <span className="font-medium">{city.eventsCount}</span> 
                    </div>
               )}
           </div>
@@ -101,7 +107,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
          <div className="mt-auto pt-3"> {/* Pushes button to bottom */}
             <Button 
                 variant="default" 
-                className="w-full" 
+                className="w-full text-[#09332A]" 
             >
                 {t('details_button')}
             </Button>

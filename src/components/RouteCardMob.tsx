@@ -22,10 +22,6 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
   const routeDescription = getLocalizedText(route.description, language);
   const isRouteFavorite = auth.isAuthenticated && auth.user ? isFavorite('route', route.id) : false;
 
-  // Example: Add duration and rating if they exist on the Route type
-  const routeDuration = route.duration || null; // e.g., "2 hours" or number in minutes
-  const routeRating = route.rating || null;
-
   const handleFavoriteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -67,34 +63,20 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
           {/* Top Row: Title and Stats/Rating */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-semibold line-clamp-2 flex-grow mr-1" title={routeName}>
+             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 font-[Laudatio] text-[#09332A]" title={routeName}>
                 {routeName}
              </h3>
              {/* Stats and Rating Container */}
              <div className="flex items-center flex-shrink-0 gap-1.5">
                  {/* Route Icon Badge */}
-                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-gray-200 text-gray-600 font-normal" title={t('spiritual_route')}>
+                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']" title={t('spiritual_route')}>
                      <RouteIcon size={12} className="flex-shrink-0" />
                  </Badge>
-                 {/* Optional: Duration Badge */}
-                 {routeDuration && (
-                      <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-gray-200 text-gray-600 font-normal">
-                          <Clock size={12} className="flex-shrink-0" />
-                           {/* Format duration appropriately */}
-                          <span className="text-xs">{routeDuration}</span> 
-                      </Badge>
-                 )}
-                 {/* Rating Badge */}
-                {routeRating && (
-                    <Badge variant="default" className="bg-orange-500 text-white text-xs px-1.5 py-0.5 flex-shrink-0">
-                        {routeRating.toFixed(1)}
-                    </Badge>
-                )}
              </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1">
+          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
             {routeDescription || t('no_description_available')}
           </p>
         </div>

@@ -22,8 +22,8 @@ const CityAbout: React.FC<CityAboutProps> = ({ city }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-             <h2 className="text-xl md:text-2xl font-semibold mb-4 text-gray-900">{t('about_city')}</h2>
-             <div className="space-y-3 prose max-w-none text-gray-700">
+             <h2 className="text-xl md:text-2xl font-bold mb-4 text-[#09332A] font-[Laudatio]">{t('about_city')}</h2>
+             <div className="space-y-3 prose max-w-none text-black font-['Monaco']">
                 {infoFields.length > 0 ? (
                   infoFields.map((field, i) => (
                     <p key={i}>

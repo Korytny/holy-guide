@@ -41,22 +41,22 @@ const CityTabsContent: React.FC<CityTabsContentProps> = ({
         <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
             <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center gap-2 md:gap-4">
                 {/* Places Tab */}
-                <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+                <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <MapPin size={16} className="flex-shrink-0" />
-                    <span>{t('places_tab_title')}</span>
-                    {places.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{places.length}</Badge>}
+                    <span className="font-bold text-[#09332A] font-[Laudatio]">{t('places_tab_title')}</span>
+                    {places.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{places.length}</Badge>}
                 </TabsTrigger>
                 {/* Routes Tab */}
-                <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+                <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <RouteIcon size={16} className="flex-shrink-0" />
-                    <span>{t('routes_tab_title')}</span>
-                    {routes.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{routes.length}</Badge>}
+                    <span className="font-bold text-[#09332A] font-[Laudatio]">{t('routes_tab_title')}</span>
+                    {routes.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{routes.length}</Badge>}
                 </TabsTrigger>
                 {/* Events Tab */}
-                <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm">
+                <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <CalendarDays size={16} className="flex-shrink-0" />
-                    <span>{t('events_tab_title')}</span>
-                    {events.length > 0 && <Badge variant="secondary" className="ml-1.5 px-1.5 py-0.5 text-xs font-medium">{events.length}</Badge>}
+                    <span className="font-bold text-[#09332A] font-[Laudatio]">{t('events_tab_title')}</span>
+                    {events.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{events.length}</Badge>}
                 </TabsTrigger>
             </TabsList>
 

@@ -26,7 +26,7 @@ const Navbar = () => {
           </div>
 
           <div className="flex-1 flex justify-center">
-            <h1 className="text-xl font-bold cursor-pointer" onClick={() => navigate('/')}>
+            <h1 className="text-xl font-bold cursor-pointer text-[#09332A]" onClick={() => navigate('/')}>
               Wander guide
             </h1>
           </div>

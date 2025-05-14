@@ -305,14 +305,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ entityType, entityId 
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-4">{t('comments')}</h2>
+      <h2 className="text-2xl font-bold mb-2 font-[Laudatio] text-[#09332A]">{t('comments')}</h2>
 
       {isLoading && <p>{t('loading_comments')}</p>}
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <div className="space-y-4">
         {comments.length === 0 && !isLoading && !error && (
-          <p>{t('no_comments_yet')}</p>
+          <p className="text-gray-600 font-['Monaco']">{t('no_comments_yet')}</p>
         )}
 
         {comments.map((comment) => {
@@ -493,7 +493,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ entityType, entityId 
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xl font-semibold mb-3">{isAuthenticated ? t('leave_a_comment') : t('login_to_comment')}</h3>
+        <h3 className="text-xl font-bold mb-3 font-[Laudatio] text-[#09332A]">{isAuthenticated ? t('leave_a_comment') : t('login_to_comment')}</h3>
 
         {isAuthenticated ? (
           <div className="flex flex-col space-y-3">

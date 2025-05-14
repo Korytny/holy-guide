@@ -7,7 +7,8 @@ import { useAuth } from '../context/AuthContext';
 import { Calendar, Heart } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils"; 
-import { Button } from '@/components/ui/button'; 
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 
 interface EventCardProps {
   event: Event;
@@ -66,16 +67,18 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
       {/* Content Section */} 
       <Link to={`/events/${event.id}`} className="p-3 flex-grow flex flex-col justify-between">
            <div> 
-             <h3 className="text-base font-medium mb-1 truncate" title={eventName}>{eventName}</h3>
-             <p className="text-sm text-gray-600 line-clamp-3 mb-3">
+             <h3 className="text-base font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={eventName}>{eventName}</h3>
+             <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
                  {eventDescription || t('no_description_available')}
              </p>
            </div>
           {/* Footer with date info */} 
           {event.date && (
-              <div className="flex items-center text-xs text-gray-500 mt-1">
-                  <Calendar size={14} className="mr-1" />
-                  <span>{new Date(event.date).toLocaleDateString()}</span>
+              <div className="flex items-center mt-1">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']">
+                      <Calendar size={12} className="flex-shrink-0" />
+                      <span>{new Date(event.date).toLocaleDateString()}</span>
+                  </Badge>
               </div>
           )}
       </Link>
