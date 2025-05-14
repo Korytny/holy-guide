@@ -66,36 +66,35 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         <div>
           <h3
              className={cn(
-                 "font-['Laudatio']",
-                 "text-lg font-semibold mb-1 truncate text-[#09332A]"
+                 "font-[LaudatioC] text-lg font-semibold mb-1 truncate text-[#09332A]"
              )}
              title={cityName}
           >
              {cityName}
           </h3>
           {/* Added description back */}
-          <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
+          <p className="text-sm text-black line-clamp-3 mb-3 font-[Monaco]">
              {infoDescription}
           </p>
 
           {/* Vertical Stats Section */}
-          <div className="space-y-3 mb-4 px-[108px] font-['Laudatio']">
+          <div className="space-y-3 mb-4 px-[108px] font-['Monaco']">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
+                   <div className="flex items-center text-base font-medium text-gray-700">
                        <MapPin size={16} className="mr-2 text-gray-500"/>
                        <span>{t('spots_label')}:</span>
                        <span className="font-medium ml-auto">{city.spotsCount}</span>
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
+                   <div className="flex items-center text-sm font-medium text-gray-700">
                        <RouteIcon size={16} className="mr-2 text-gray-500"/>
                        <span>{t('routes_label')}:</span>
                        <span className="font-medium ml-auto">{city.routesCount}</span>
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
-                   <div className="flex items-center text-sm text-gray-700">
+                   <div className="flex items-center text-sm font-medium text-gray-700">
                        <CalendarDays size={16} className="mr-2 text-gray-500"/>
                        <span>{t('events_label')}:</span>
                        <span className="font-medium ml-auto">{city.eventsCount}</span>

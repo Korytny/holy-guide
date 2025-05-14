@@ -21,8 +21,9 @@ const PlaceDetail = () => {
     const { t } = useLanguage();
     const navigate = useNavigate();
 
-    useEffect(() => {
-        const loadPlaceData = async () => {
+  useEffect(() => {
+    window.scrollTo(0, 0);
+    const loadPlaceData = async () => {
             if (!id) return;
 
             setLoading(true);
@@ -57,7 +58,7 @@ const PlaceDetail = () => {
     if (loading) {
         // Loading skeleton remains the same
          return (
-            <Layout>
+            <Layout hideNavbar>
                 <div className="app-container py-10">
                     <div className="animate-pulse">
                         <div className="h-8 w-48 bg-gray-300 rounded mb-6"></div>
@@ -126,11 +127,15 @@ const PlaceDetail = () => {
                     <PlaceAbout place={place} />
                 </div>
 
-                 {/* Map Section */}
-                 <PlaceMap place={place} />
+                {/* Related Content Tabs - Added spacing */}
+                <div className="mt-8 mb-8">
+                  <PlaceRelatedContent relatedRoutes={relatedRoutes} relatedEvents={relatedEvents} />
+                </div>
 
-                {/* Related Content Tabs */}
-                <PlaceRelatedContent relatedRoutes={relatedRoutes} relatedEvents={relatedEvents} />
+                {/* Map Section */}
+                <div className="bg-white rounded-xl shadow-sm p-6 mb-10">
+                    <PlaceMap place={place} />
+                </div>
 
                 {/* Comments Section */}
                 {id && (

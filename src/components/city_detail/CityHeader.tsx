@@ -63,7 +63,7 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
                     className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
                     aria-label={`${t('sacred_places')}: ${places.length}`}
                    >
-                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
+                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm font-medium hover:bg-black/80 transition-colors">
                       <MapPin size={14} />
                       <span>{places.length}</span>
                     </Badge>
@@ -75,7 +75,7 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
                     className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
                     aria-label={`${t('spiritual_routes')}: ${routes.length}`}
                    >
-                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
+                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm font-medium hover:bg-black/80 transition-colors">
                       <RouteIcon size={14} />
                       <span>{routes.length}</span>
                     </Badge>
@@ -87,7 +87,7 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
                     className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
                     aria-label={`${t('holy_events')}: ${events.length}`}
                    >
-                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
+                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm font-medium hover:bg-black/80 transition-colors">
                       <CalendarDays size={14} />
                       <span>{events.length}</span>
                     </Badge>
@@ -111,7 +111,7 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
             {/* City Name & Country */}
             <div className="absolute bottom-0 left-0 p-4 md:p-6 pointer-events-none">
                 <div className="bg-black/60 rounded-lg px-3 py-2 inline-block">
-                    <h1 className="text-2xl md:text-3xl font-[Laudatio] font-bold text-white mb-1 md:mb-2 drop-shadow-md">
+                    <h1 className="text-2xl md:text-3xl font-[LaudatioC] font-bold text-white mb-1 md:mb-2 drop-shadow-md">
                       {cityName}
                     </h1>
                 </div>

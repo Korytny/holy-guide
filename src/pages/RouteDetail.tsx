@@ -46,6 +46,7 @@ const RouteDetail = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     loadRouteData();
   }, [id]);
 
@@ -58,7 +59,7 @@ const RouteDetail = () => {
 
   if (loading) {
        return (
-      <Layout>
+      <Layout hideNavbar>
         <div className="app-container py-10">
           <div className="animate-pulse">
             <div className="h-8 w-48 bg-gray-300 rounded mb-6"></div>
@@ -123,16 +124,18 @@ const RouteDetail = () => {
             <RouteAbout route={route} />
         </div>
 
+                {/* Related Content Tabs - Added spacing */}
+                <div className="mt-8 mb-8">
+                  <RelatedContentTabs 
+                    places={places} 
+                    events={events} 
+                    activeTab={activeTab} 
+                    onTabChange={setActiveTab} 
+                  />
+                </div>
+
         {/* Route Map */} 
         <RouteMap places={places} />
-
-        {/* Related Content Tabs */}
-        <RelatedContentTabs 
-            places={places} 
-            events={events} 
-            activeTab={activeTab} 
-            onTabChange={setActiveTab} 
-        />
         
         {/* Comments Section */} 
         {id && (

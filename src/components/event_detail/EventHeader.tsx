@@ -53,7 +53,7 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
                      </div>
                  )}
 
-                  <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl pointer-events-none"></div>
+                  <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent rounded-xl pointer-events-none"></div>
 
                    {/* Badges for related items */}
                    <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
@@ -61,7 +61,7 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
                       <button 
                         onClick={() => onTabSelect('places', 'places-content')} 
                         className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
-                        aria-label={`${t('related_places')}: ${places.length}`}
+                        aria-label={`${t('places')}: ${places.length}`}
                       >
                         <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
                           <MapPin size={14} />
@@ -73,7 +73,7 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
                       <button 
                         onClick={() => onTabSelect('routes', 'routes-content')} 
                         className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
-                        aria-label={`${t('related_routes')}: ${routes.length}`}
+                        aria-label={`${t('routes')}: ${routes.length}`}
                       >
                         <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
                           <RouteIcon size={14} />
@@ -97,9 +97,11 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
 
                  {/* Title and Date */}
                  <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
-                    <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md">{eventName}</h1>
+                    <div className="bg-black/40 px-4 py-2 rounded-lg mb-2">
+                      <h1 className="text-3xl font-bold text-white font-[Laudatio]">{eventName}</h1>
+                    </div>
                      {event.date && (
-                         <div className="flex items-center text-white/90">
+                         <div className="flex items-center text-white/90 bg-black/40 px-3 py-1 rounded-full">
                            <CalendarDays size={16} className="mr-1" />
                            <span className="text-sm">{new Date(event.date).toLocaleDateString()}</span>
                          </div>

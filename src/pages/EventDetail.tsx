@@ -46,6 +46,7 @@ const EventDetail = () => {
   };
 
   useEffect(() => {
+    window.scrollTo(0, 0);
     loadEventData();
   }, [id]);
 
@@ -60,7 +61,7 @@ const EventDetail = () => {
   if (loading) {
     // Loading skeleton remains the same
        return (
-      <Layout>
+      <Layout hideNavbar>
         <div className="app-container py-10">
           <div className="animate-pulse">
             <div className="h-8 w-48 bg-gray-300 rounded mb-6"></div>
@@ -126,14 +127,16 @@ const EventDetail = () => {
             <EventAbout event={event} />
         </div>
 
-        {/* Map Section */}
-        <EventMapSection places={relatedPlaces} />
-        
-        {/* Related Content Tabs */}
-        <EventRelatedContent 
+        {/* Related Content Tabs - Added spacing */}
+        <div className="mt-8 mb-8">
+          <EventRelatedContent 
             relatedPlaces={relatedPlaces} 
             relatedRoutes={relatedRoutes} 
-        />
+          />
+        </div>
+
+        {/* Map Section */}
+        <EventMapSection places={relatedPlaces} />
 
         {/* Comments Section */}
         {id && (

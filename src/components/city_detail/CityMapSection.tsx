@@ -39,7 +39,7 @@ const CityMapSection: React.FC<CityMapSectionProps> = ({ places }) => {
         <div className="mb-10">
             <div className="flex items-center mb-4">
                 <MapIcon size={20} className="mr-2" />
-                <h2 className="text-xl md:text-2xl font-bold text-[#09332A] font-[Laudatio]">{t('explore_on_map')}</h2>
+                <h2 className="text-xl md:text-2xl font-bold text-[#09332A] font-[LaudatioC]">{t('explore_on_map')}</h2>
             </div>
             <div className="rounded-xl overflow-hidden shadow-lg h-96">
                 <CityMapView

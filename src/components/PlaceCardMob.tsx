@@ -78,8 +78,7 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
              {/* Title */}
              <h3
                 className={cn(
-                   "font-['Laudatio']",
-                   "text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
+                   "font-[LaudatioC] text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
                 )}
                 title={placeName}
              >

@@ -22,7 +22,7 @@ export default {
             // --- START: Add fontFamily ---
             fontFamily: {
                 sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono], // Основной текст (используем 'sans' для простоты применения по умолчанию)
-                heading: ['"LaudatioC Debian"', ...fontFamily.sans], // Заголовки
+                heading: ['LaudatioC', ...fontFamily.sans], // Заголовки
             },
             // --- END: Add fontFamily ---
             colors: {

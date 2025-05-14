@@ -36,7 +36,7 @@ const CityDetail: React.FC = (): JSX.Element => {
   // console.log('CityDetail: Hooks initialized', { id, loading, city: !!city, language }); // Removed log
 
   useEffect(() => {
-    // console.log('CityDetail: useEffect [id, language] triggered', { id, language }); // Removed log
+    window.scrollTo(0, 0);
     const loadCityData = async () => {
         if (!id) {
             // console.log('CityDetail: ID is missing, stopping load.'); // Removed log
@@ -119,10 +119,8 @@ const CityDetail: React.FC = (): JSX.Element => {
   // console.log('CityDetail: Before render checks', { loading, city: !!city }); // Removed log
 
   if (loading) {
-    // console.log('CityDetail: Rendering Loading skeleton.'); // Removed log
-     // Layout is kept here as it might render before App.tsx applies the main Layout during suspense
-     return (
-      <Layout>
+    return (
+      <Layout hideNavbar>
         <div className="app-container py-10">
           <div className="animate-pulse">
              <div className="h-8 w-48 bg-gray-300 rounded mb-6"></div>
@@ -195,20 +193,24 @@ const CityDetail: React.FC = (): JSX.Element => {
         {/* console.log('CityDetail: Attempting to render AudioPlayer', { id }); // Removed log */}
         {id && <AudioPlayer entityType="city" entityId={id} />}
 
-        {/* Map Section */}
-        <CityMapSection places={places} />
-
-        {/* Tabs Section */}
-        <CityTabsContent
+        {/* Tabs Section - Added mt-8 for spacing */}
+        <div className="mt-8">
+          <CityTabsContent
             places={places}
             routes={routes}
             events={events}
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onSearch={handleSearchPlaces}
-        />
+          />
+        </div>
 
-        {/* Comments Section */} 
+                {/* Map Section - Added spacing */}
+                <div className="mt-8 bg-white rounded-xl shadow-sm p-6 mb-10">
+                    <CityMapSection places={places} />
+                </div>
+
+                {/* Comments Section */}
         {city && id && (
           <CommentsSection entityType="city" entityId={id} />
         )}

@@ -5,9 +5,10 @@ import Navbar from './Navbar';
 interface LayoutProps {
   children: ReactNode;
   hideNavbar?: boolean;
+  hideSecondaryNav?: boolean;
 }
 
-const Layout = ({ children, hideNavbar = false }: LayoutProps) => {
+const Layout = ({ children, hideNavbar = false, hideSecondaryNav = false }: LayoutProps) => {
   // Assume navbar height is 4rem (64px)
   const navbarHeight = '4rem'; 
   return (
