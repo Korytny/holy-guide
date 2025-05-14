@@ -47,19 +47,19 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
   return (
     <div
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200", 
+            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200",
             className
         )}
     >
-      <Link to={`/cities/${city.id}`} className="flex p-3 gap-3 items-start"> 
+      <Link to={`/cities/${city.id}`} className="flex p-3 gap-3 items-start">
         {/* Image Section */}
-        <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden"> 
+        <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
             src={city.imageUrl || '/placeholder.svg'}
             alt={cityName}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {city.id && ( 
+          {city.id && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -73,11 +73,17 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
         </div>
 
         {/* Content Section */}
-        <div className="flex-grow flex flex-col min-w-0"> 
+        <div className="flex-grow flex flex-col min-w-0">
           {/* Top Row: Title and Stats */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 font-[Laudatio] text-[#09332A]" title={cityName}> 
+             <h3
+                className={cn(
+                   "font-heading",
+                   "text-base font-semibold line-clamp-2 flex-grow mr-1"
+                )}
+                title={cityName}
+             >
                 {cityName}
              </h3>
              {/* Stats and Rating Container */}
@@ -96,7 +102,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1 font-['Monaco']"> 
+          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1">
             {infoDescription || t('no_description_available')}
           </p>
         </div>

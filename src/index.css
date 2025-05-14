@@ -1,3 +1,25 @@
+/* --- START: Add @font-face rules --- */
+@font-face {
+  font-family: 'Share Tech Mono Cyr';
+  font-style: normal;
+  font-weight: 400; /* Или другое значение, если у шрифта есть разные веса */
+  font-display: swap;
+  src: url('/fonts/ShareTechMonoCyr.woff2') format('woff2'); /* Предполагаемый путь и формат */
+  /* Добавьте другие форматы (ttf, otf), если они у вас есть, например:
+     src: url('/fonts/ShareTechMonoCyr.woff2') format('woff2'),
+          url('/fonts/ShareTechMonoCyr.ttf') format('truetype');
+  */
+}
+
+@font-face {
+  font-family: 'LaudatioC Debian';
+  font-style: normal;
+  font-weight: 400; /* Или другое значение */
+  font-display: swap;
+  src: url('/fonts/LaudatioCDebian.woff2') format('woff2'); /* Предполагаемый путь и формат */
+  /* Добавьте другие форматы при необходимости */
+}
+/* --- END: Add @font-face rules --- */
 
 @tailwind base;
 @tailwind components;
@@ -91,7 +113,7 @@
     --border: 217.2 32.6% 17.5%;
     --input: 217.2 32.6% 17.5%;
     --ring: 37 81% 69%; /* Updated Ring to match primary */
-    
+
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;
@@ -110,21 +132,25 @@
 
   body {
     @apply bg-background text-foreground;
-    font-family: "Poppins", system-ui, sans-serif;
+    /* --- START: Apply base font --- */
+    @apply font-sans; /* 'font-sans' теперь использует 'Share Tech Mono Cyr' из-за настроек tailwind.config.ts */
+    /* --- END: Apply base font --- */
   }
-  
+
   h1, h2, h3, h4, h5, h6 {
-    @apply font-semibold tracking-tight;
+    /* --- START: Apply heading font --- */
+    @apply font-heading font-semibold tracking-tight; /* Добавили font-heading */
+    /* --- END: Apply heading font --- */
   }
-  
+
   h1 {
     @apply text-3xl lg:text-4xl;
   }
-  
+
   h2 {
     @apply text-2xl lg:text-3xl;
   }
-  
+
   h3 {
     @apply text-xl lg:text-2xl;
   }
@@ -134,25 +160,25 @@
   .india-card {
     @apply bg-white rounded-lg shadow-md overflow-hidden transition-all duration-300 hover:shadow-lg;
   }
-  
+
   .india-card-image {
     @apply w-full h-40 object-cover;
   }
-  
+
   .india-card-content {
     @apply p-4;
   }
-  
+
   .app-container {
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
-  
+
   /* These might need update/removal if Button component is used */
   .btn-primary {
     /* Consider replacing usage with <Button> or update this */
     @apply bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors;
   }
-  
+
   .btn-secondary {
     /* Consider replacing usage with <Button variant="secondary"> */
     @apply bg-secondary text-secondary-foreground py-2 px-4 rounded-md hover:bg-secondary/90 transition-colors;
