@@ -11,14 +11,6 @@
   */
 }
 
-@font-face {
-  font-family: 'LaudatioC Debian';
-  font-style: normal;
-  font-weight: 400; /* Или другое значение */
-  font-display: swap;
-  src: url('/fonts/LaudatioCDebian.woff2') format('woff2'); /* Предполагаемый путь и формат */
-  /* Добавьте другие форматы при необходимости */
-}
 /* --- END: Add @font-face rules --- */
 
 @tailwind base;
@@ -28,6 +20,7 @@
 @font-face {
   font-family: 'Laudatio';
   src: url('/LaudatioC.otf') format('opentype');
+  font-display: swap;
   font-weight: normal;
   font-style: normal;
   font-display: swap;

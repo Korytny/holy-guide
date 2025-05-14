@@ -48,7 +48,15 @@ const CityDetail: React.FC = (): JSX.Element => {
       setLoading(true);
       try {
         const [cityData, placesData, routesData, eventsData] = await Promise.all([
-          getCityById(id),
+          getCityById(id).then(city => {
+            // Ensure name doesn't contain UID
+            const name = getLocalizedText(city.name, language);
+            if (typeof name === 'string' && name.includes(id)) {
+              const cleanName = name.replace(id, '').trim();
+              city.name = { [language]: cleanName };
+            }
+            return city;
+          }),
           getPlacesByCityId(id),
           getRoutesByCityId(id),
           getEventsByCityId(id),
@@ -56,6 +64,11 @@ const CityDetail: React.FC = (): JSX.Element => {
 
         // console.log('CityDetail: Data loaded successfully', { cityLoaded: !!cityData, placesCount: placesData.length, routesCount: routesData.length, eventsCount: eventsData.length }); // Removed log
 
+        console.log('Processed city data:', {
+          id: cityData.id,
+          name: getLocalizedText(cityData.name, language),
+          country: cityData.country
+        });
         setCity(cityData);
         setPlaces(placesData);
         setOriginalPlaces(placesData);
@@ -168,7 +181,6 @@ const CityDetail: React.FC = (): JSX.Element => {
                 places={places}
                 routes={routes}
                 events={events}
-                id={id!}
                 onTabSelect={scrollToTab}
             />
             <CityAbout city={city} />

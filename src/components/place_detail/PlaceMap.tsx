@@ -22,7 +22,7 @@ const PlaceMap: React.FC<PlaceMapProps> = ({ place }) => {
 
     return (
         <div className="mb-10">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('location')}</h2>
+            <h2 className="text-2xl font-semibold mb-6 text-gray-900 font-['Laudatio']">{t('location')}</h2>
             <div className="rounded-xl overflow-hidden shadow-lg h-96">
                 <CityMapView
                     locations={mapLocations} 

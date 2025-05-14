@@ -13,24 +13,22 @@ const RouteAbout: React.FC<RouteAboutProps> = ({ route }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-             <h2 className="text-2xl font-semibold mb-4 text-gray-900">{t('about_route')}</h2>
-             {route.info ? (
-                <div className="prose max-w-none text-gray-700">
-                  {Object.entries(route.info)
+             <h2 className="text-xl md:text-2xl font-bold mb-4 text-[#09332A] font-[Laudatio]">{t('about_route')}</h2>
+             <div className="space-y-3 prose max-w-none text-black font-['Monaco']">
+                {routeDescription ? (
+                    <p>{routeDescription}</p>
+                ) : (
+                    <p className="text-gray-500 italic">{t('no_description_available')}</p>
+                )}
+                {route.info && Object.entries(route.info)
                     .filter(([key]) => key === language || !['en', 'ru', 'hi'].includes(key))
                     .map(([key, value], i) => (
-                      <p key={i} className="mb-2 last:mb-0">
-                        {!['en', 'ru', 'hi'].includes(key) && <strong className="mr-1">{key}:</strong>}
+                      <p key={i}>
+                        {!['en', 'ru', 'hi'].includes(key) && <strong>{key}: </strong>}
                         {typeof value === 'object' ? getLocalizedText(value, language) : String(value)}
                       </p>
                     ))}
-                     {routeDescription && <p className="mt-4 text-gray-600 italic">{routeDescription}</p>}
-                </div>
-              ) : routeDescription ? (
-                 <p className="text-gray-700 leading-relaxed">{routeDescription}</p>
-              ) : (
-                 <p className="text-gray-500 italic">{t('no_description_available')}</p>
-              )}
+             </div>
         </div>
     );
 }

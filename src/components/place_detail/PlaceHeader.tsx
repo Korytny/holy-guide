@@ -79,7 +79,7 @@ const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id }) => {
 
              {/* Title and Type */}
              <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
-                 <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md">{placeName}</h1>
+                 <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md font-['Laudatio']">{placeName}</h1>
                  <div className="flex items-center text-white/90">
                      <MapPin size={16} className="mr-1" />
                      <span>{t(placeTypeKey)}</span> 

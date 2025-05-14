@@ -78,7 +78,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         )}
       </div>
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-6 pointer-events-none">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-6 pointer-events-none transform translate-y-[40px]">
         {isTextLoading ? (
            <div className="space-y-2 pointer-events-auto">
              <Skeleton className="h-8 w-64 mx-auto bg-gray-400/50" />

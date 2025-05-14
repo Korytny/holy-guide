@@ -101,7 +101,7 @@ const EventDetail = () => {
   }
 
   return (
-    <Layout>
+    <Layout hideNavbar={true}>
       <div className="app-container py-6">
          {/* Back Button */}
           <div className="flex justify-between items-center mb-6">

@@ -1,4 +1,4 @@
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { City, Place, Route, Event } from '../../types'; // Adjust path
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path
 import { useAuth } from '../../context/AuthContext'; // Adjust path
@@ -12,16 +12,16 @@ interface CityHeaderProps {
   places: Place[];
   routes: Route[];
   events: Event[];
-  id: string;
   onTabSelect: (tabValue: string, tabId: string) => void;
 }
 
-const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, id, onTabSelect }) => {
+const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, onTabSelect }) => {
     const { language, t } = useLanguage();
     const { isFavorite, toggleFavorite } = useAuth();
 
-    const isCityFavorite = city ? isFavorite('city', city.id) : false;
-    const cityName = getLocalizedText(city.name, language);
+    const isCityFavorite = useMemo(() => city ? isFavorite('city', city.id) : false, [city, isFavorite]);
+    const cleanName = (name: string) => name.replace(new RegExp(city.id, 'g'), '').trim();
+    const cityName = cleanName(getLocalizedText(city.name, language));
 
     return (
         <div className="relative w-full h-64 md:h-96"> 
@@ -73,12 +73,12 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, i
             </div>
              
             {/* Favorite Button */}
-            {city && id && (
+            {city && (
               <Button 
                 variant="ghost" 
                 size="icon"
                 className="absolute top-4 right-4 rounded-full bg-black/40 hover:bg-black/60 text-white z-10"
-                onClick={() => toggleFavorite('city', id)} 
+                onClick={() => toggleFavorite('city', city.id)} 
                 aria-label={isCityFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
               >
                 <Heart size={20} className={isCityFavorite ? "fill-red-500 text-red-500" : ""} />
@@ -87,7 +87,9 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, i
              
             {/* City Name & Country */}
             <div className="absolute bottom-0 left-0 p-4 md:p-6 pointer-events-none">
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 drop-shadow-md">{getLocalizedText(city.name, language)}</h1>
+                <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 drop-shadow-md">
+                  {cityName}
+                </h1>
                 <div className="flex items-center text-white/90">
                   <MapPin size={14} className="mr-1" /> 
                   <span className="text-sm md:text-base">{city.country}</span>

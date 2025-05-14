@@ -36,12 +36,9 @@ const EventMapSection: React.FC<EventMapSectionProps> = ({ places }) => {
     }
 
     return (
-        <div className="mb-10">
-            <div className="flex items-center mb-4">
-              <MapPin size={20} className="mr-2" />
-              <h2 className="text-xl md:text-2xl font-semibold text-gray-900">{t('event_locations')}</h2>
-            </div>
-            <div className="rounded-xl overflow-hidden shadow-lg h-96">
+        <div className="mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
+            <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Места проведения</h2>
+            <div className="rounded-xl overflow-hidden shadow-lg h-96 mt-4">
               <CityMapView
                 locations={mapLocations}
                 maintainZoom={false} // Adjust zoom to fit markers

@@ -31,9 +31,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ places }) => {
     }
 
     return (
-        <div className="mb-10">
-            <h2 className="text-2xl font-semibold mb-6 text-gray-900">{t('route_on_map_title')}</h2>
-            <div className="rounded-xl overflow-hidden shadow-lg h-96">
+        <div className="mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
+            <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Маршрут на карте</h2>
+            <div className="rounded-xl overflow-hidden shadow-lg h-96 mt-4">
                 <CityMapView 
                     locations={mapLocations} 
                     polylinePoints={polylinePoints} // Pass the points for the line

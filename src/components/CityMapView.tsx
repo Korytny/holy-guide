@@ -124,7 +124,7 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
         // --- Add Polyline --- 
         if (polylinePoints && polylinePoints.length > 1) {
           polylineRef.current = L.polyline(polylinePoints, { 
-              color: '#3388ff', // Blue color
+              color: '#ff0000', // Red color
               weight: 3, 
               opacity: 0.7,
               dashArray: '5, 5' // Dashed line
