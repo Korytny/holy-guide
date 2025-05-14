@@ -6,12 +6,13 @@ import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
-import { Heart, MapPin } from 'lucide-react';
+import { Heart, MapPin, Route as RouteIcon, CalendarDays } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils'; // Adjust path as needed
 
 interface PlaceHeaderProps {
   place: Place;
   id: string; // Place ID
+  onTabSelect: (tabValue: string, tabId: string) => void;
 }
 
 // Helper function from PlaceDetail (can be moved to a utils file later if needed)
@@ -25,7 +26,7 @@ const getPlaceTypeKey = (type: number | undefined): string => {
     }
 };
 
-const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id }) => {
+const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id, onTabSelect }) => {
     const { language, t } = useLanguage();
     const { isFavorite, toggleFavorite } = useAuth();
 
@@ -77,12 +78,40 @@ const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id }) => {
                  </Button>
              )}
 
-             {/* Title and Type */}
-             <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
-                 <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md font-['Laudatio']">{placeName}</h1>
-                 <div className="flex items-center text-white/90">
-                     <MapPin size={16} className="mr-1" />
-                     <span>{t(placeTypeKey)}</span> 
+             {/* Badges for related items */}
+             <div className="absolute top-4 left-4 flex flex-col sm:flex-row gap-2 md:gap-3 z-10">
+                {place.routesCount > 0 && (
+                  <button 
+                    onClick={() => onTabSelect('routes', 'routes-content')} 
+                    className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                    aria-label={`${t('routes_through_place')}: ${place.routesCount}`}
+                  >
+                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
+                      <RouteIcon size={14} />
+                      <span>{place.routesCount}</span>
+                    </Badge>
+                  </button>
+                )}
+                {place.eventsCount > 0 && (
+                  <button 
+                    onClick={() => onTabSelect('events', 'events-content')} 
+                    className="p-0 bg-transparent border-none cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-full"
+                    aria-label={`${t('events_at_place')}: ${place.eventsCount}`}
+                  >
+                    <Badge variant="secondary" className="bg-black/60 text-white flex items-center gap-1 px-2 py-1 text-xs md:px-3 md:text-sm hover:bg-black/80 transition-colors">
+                      <CalendarDays size={14} />
+                      <span>{place.eventsCount}</span>
+                    </Badge>
+                  </button>
+                )}
+             </div>
+
+             {/* Title */}
+             <div className="absolute bottom-0 left-0 p-4 md:p-6 pointer-events-none">
+                 <div className="bg-black/60 rounded-lg px-3 py-2 inline-block">
+                     <h1 className="text-2xl md:text-3xl font-[Laudatio] font-bold text-white mb-1 md:mb-2 drop-shadow-md">
+                       {placeName}
+                     </h1>
                  </div>
              </div>
         </div>

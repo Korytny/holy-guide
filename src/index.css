@@ -17,14 +17,6 @@
 @tailwind components;
 @tailwind utilities;
 
-@font-face {
-  font-family: 'Laudatio';
-  src: url('/LaudatioC.otf') format('opentype');
-  font-display: swap;
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
 
 @font-face {
   font-family: 'Monaco';

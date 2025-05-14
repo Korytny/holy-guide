@@ -28,15 +28,20 @@ const PlaceDetail = () => {
             setLoading(true);
             try {
                 const placeData = await getPlaceById(id);
-                setPlace(placeData);
-
                 if (placeData) {
                     const [routesData, eventsData] = await Promise.all([
                         getRoutesByPlaceId(id),
                         getEventsByPlaceId(id)
                     ]);
+                    setPlace({
+                        ...placeData,
+                        routesCount: routesData.length,
+                        eventsCount: eventsData.length
+                    });
                     setRelatedRoutes(routesData);
                     setRelatedEvents(eventsData);
+                } else {
+                    setPlace(null);
                 }
             } catch (error) {
                 console.error('Failed to load place data:', error);
@@ -108,7 +113,16 @@ const PlaceDetail = () => {
 
                  {/* Grid for Header and About */}
                  <div className="grid md:grid-cols-2 gap-8 mb-10">
-                    <PlaceHeader place={place} id={id!} />
+                    <PlaceHeader 
+                      place={place} 
+                      id={id!}
+                      onTabSelect={(tabValue, tabId) => {
+                        const element = document.getElementById(tabId);
+                        if (element) {
+                          element.scrollIntoView({ behavior: 'smooth' });
+                        }
+                      }}
+                    />
                     <PlaceAbout place={place} />
                 </div>
 

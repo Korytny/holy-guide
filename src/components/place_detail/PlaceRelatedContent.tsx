@@ -31,13 +31,13 @@ const PlaceRelatedContent: React.FC<PlaceRelatedContentProps> = ({
                 {/* Routes Tab */}
                 <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <RouteIconUi size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[Laudatio]">{t('related_routes')}</span>
+                    <span className="font-bold text-[#09332A] font-[Laudatio]">{t('routes')}</span>
                     {relatedRoutes.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{relatedRoutes.length}</Badge>}
                 </TabsTrigger>
                 {/* Events Tab */}
                 <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                      <CalendarDays size={16} className="flex-shrink-0" />
-                     <span className="font-bold text-[#09332A] font-[Laudatio]">{t('related_events')}</span>
+                     <span className="font-bold text-[#09332A] font-[Laudatio]">{t('events')}</span>
                      {relatedEvents.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{relatedEvents.length}</Badge>}
                 </TabsTrigger>
             </TabsList>

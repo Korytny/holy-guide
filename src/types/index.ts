@@ -43,6 +43,8 @@ export interface Place {
     longitude: number;
   };
   order?: number; // Added order field for routes
+  routesCount?: number;
+  eventsCount?: number;
   // Database fields
   city?: string;
   coordinates?: any;

@@ -20,7 +20,30 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
     const { isFavorite, toggleFavorite } = useAuth();
 
     const isCityFavorite = useMemo(() => city ? isFavorite('city', city.id) : false, [city, isFavorite]);
-    const cleanName = (name: string) => name.replace(new RegExp(city.id, 'g'), '').trim();
+    const cleanName = (name: string) => {
+      // First remove any ID patterns that might have slipped through
+      let cleaned = name
+        .replace(/\[[^\]]+\]/g, '')  // Remove anything in brackets
+        .replace(/\([^)]+\)/g, '')   // Remove anything in parentheses
+        .replace(/\b(id|uid|uuid)[:\s-]*[^\s]+\b/gi, '') // Remove id:xxx patterns
+        .replace(/\s{2,}/g, ' ')      // Normalize whitespace
+        .trim();
+
+      // If we have a city ID, ensure it's removed
+      if (city?.id) {
+        cleaned = cleaned.replace(new RegExp(city.id, 'gi'), '');
+      }
+      
+      // Final cleanup of any remaining artifacts
+      return cleaned
+        .replace(/\([0-9a-f-]+\)/gi, '') // (uuid) format
+        .replace(/\b[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}\b/gi, '') // standalone UUID
+        .replace(/\b(id|uid|uuid)[:\s]*[^\s]+/gi, '') // id:xxx or uid=xxx formats
+        .replace(/\s{2,}/g, ' ')
+        .trim();
+      
+      return cleaned;
+    };
     const cityName = cleanName(getLocalizedText(city.name, language));
 
     return (
@@ -87,12 +110,10 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
              
             {/* City Name & Country */}
             <div className="absolute bottom-0 left-0 p-4 md:p-6 pointer-events-none">
-                <h1 className="text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 drop-shadow-md">
-                  {cityName}
-                </h1>
-                <div className="flex items-center text-white/90">
-                  <MapPin size={14} className="mr-1" /> 
-                  <span className="text-sm md:text-base">{city.country}</span>
+                <div className="bg-black/60 rounded-lg px-3 py-2 inline-block">
+                    <h1 className="text-2xl md:text-3xl font-[Laudatio] font-bold text-white mb-1 md:mb-2 drop-shadow-md">
+                      {cityName}
+                    </h1>
                 </div>
             </div>
         </div>

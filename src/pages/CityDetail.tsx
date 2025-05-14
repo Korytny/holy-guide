@@ -49,11 +49,16 @@ const CityDetail: React.FC = (): JSX.Element => {
       try {
         const [cityData, placesData, routesData, eventsData] = await Promise.all([
           getCityById(id).then(city => {
-            // Ensure name doesn't contain UID
-            const name = getLocalizedText(city.name, language);
-            if (typeof name === 'string' && name.includes(id)) {
-              const cleanName = name.replace(id, '').trim();
-              city.name = { [language]: cleanName };
+            // Deep clean name from any UID formats
+            const localizedName = getLocalizedText(city.name, language);
+            if (typeof localizedName === 'string') {
+              const cleanName = localizedName
+                .replace(new RegExp(id, 'gi'), '')
+                .replace(/\[[^\]]+\]/g, '')
+                .replace(/\([^)]+\)/g, '')
+                .replace(/\s{2,}/g, ' ')
+                .trim();
+              city.name = { ...city.name, [language]: cleanName };
             }
             return city;
           }),
