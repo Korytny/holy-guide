@@ -35,9 +35,6 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
   const placeTypeKey = getPlaceTypeKey(place.type);
   const placeTypeText = t(placeTypeKey);
 
-  // Assuming place might have a rating, similar to City
-  const placeRating = place.rating || null; // Use null if no rating
-
   const handleFavoriteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
     event.preventDefault();
     event.stopPropagation();
@@ -79,7 +76,13 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
           {/* Top Row: Title and Type/Rating */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 font-[Laudatio] text-[#09332A]" title={placeName}>
+             <h3
+                className={cn(
+                   "font-['Laudatio']",
+                   "text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
+                )}
+                title={placeName}
+             >
                 {placeName}
              </h3>
              {/* Type and Rating Container */}
@@ -90,17 +93,11 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
                      {/* Optionally show text if short enough, or just icon */}
                      {/* <span className="hidden sm:inline">{placeTypeText}</span> */}
                  </Badge>
-                 {/* Rating Badge */}
-                {placeRating && (
-                    <Badge variant="default" className="bg-orange-500 text-white text-xs px-1.5 py-0.5 flex-shrink-0">
-                        {placeRating.toFixed(1)}
-                    </Badge>
-                )}
              </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
+          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
             {placeDescription || t('no_description_available')}
           </p>
         </div>

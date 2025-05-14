@@ -66,8 +66,8 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         <div>
           <h3
              className={cn(
-                 "font-heading",
-                 "text-lg font-semibold mb-1 truncate"
+                 "font-['Laudatio']",
+                 "text-lg font-semibold mb-1 truncate text-[#09332A]"
              )}
              title={cityName}
           >
@@ -79,7 +79,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
           </p>
 
           {/* Vertical Stats Section */}
-          <div className="space-y-3 mb-4">
+          <div className="space-y-3 mb-4 px-[108px] font-['Laudatio']">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
                    <div className="flex items-center text-sm text-gray-700">
                        <MapPin size={16} className="mr-2 text-gray-500"/>

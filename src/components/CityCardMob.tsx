@@ -36,7 +36,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
   const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | undefined }) => {
       if (count === undefined || count === null || count <= 0) return null; // Also check for null
       return (
-          <Badge variant="outline" className="text-xs px-2 py-0.5 flex items-center gap-2 border-[#09332A] text-[#09332A] font-['Monaco']">
+          <Badge variant="outline" className="text-xs px-2 py-0.5 flex items-center gap-2 border-[#09332A] text-[#09332A] font-['Laudatio']">
               <Icon size={12} className="flex-shrink-0" />
               <span className="text-xs">{count}</span>
           </Badge>
@@ -79,15 +79,15 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
              {/* Title */}
              <h3
                 className={cn(
-                   "font-heading",
-                   "text-base font-semibold line-clamp-2 flex-grow mr-1"
+                   "font-['Laudatio']",
+                   "text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
                 )}
                 title={cityName}
              >
                 {cityName}
              </h3>
              {/* Stats and Rating Container */}
-             <div className="flex items-center flex-shrink-0 gap-1.5">
+             <div className="flex items-center flex-shrink-0 gap-1.5 px-[108px] font-['Laudatio']">
                  {/* Stats Badges - Now first */}
                  <StatBadge icon={MapPin} count={city.spotsCount} />
                  <StatBadge icon={RouteIcon} count={city.routesCount} />
@@ -102,7 +102,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1">
+          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
             {infoDescription || t('no_description_available')}
           </p>
         </div>
