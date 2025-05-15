@@ -1,12 +1,13 @@
 import { useEffect, useState, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext";
+import { useAuth, type AuthContextType } from "../context/AuthContext"; // Import AuthContextType
 import { Button } from "@/components/ui/button";
 import Layout from "../components/Layout";
 import { useLanguage } from "../context/LanguageContext";
 import ProfileHeader from "../components/profile/ProfileHeader";
 import FavoritesSection from "../components/profile/FavoritesSection";
 import UserCommentsSection from "../components/profile/UserCommentsSection";
+import { PilgrimagePlanner } from "../components/profile/PilgrimagePlanner"; // Import the new planner component
 
 interface FavoriteCounts {
   citiesCount: number;
@@ -21,20 +22,21 @@ interface CommentPhotoCounts {
 }
 
 const Profile = () => {
-  const { auth } = useAuth();
+  const authContextValue = useAuth(); // authContextValue is of type AuthContextType
   const navigate = useNavigate();
-  const { t } = useLanguage();
+  const { language, t } = useLanguage();
 
-  // State for counts
+  // State for counts (remains in Profile, as it's for ProfileHeader)
   const [favoriteCounts, setFavoriteCounts] = useState<FavoriteCounts | null>(null);
   const [commentPhotoCounts, setCommentPhotoCounts] = useState<CommentPhotoCounts | null>(null);
 
   useEffect(() => {
     // Redirect if not authenticated and loading is finished
-    if (!auth.isLoading && !auth.session) {
+    // Access auth state via authContextValue.auth
+    if (!authContextValue.auth.isLoading && !authContextValue.auth.session) {
       navigate('/auth');
     }
-  }, [auth.isLoading, auth.session, navigate]);
+  }, [authContextValue.auth.isLoading, authContextValue.auth.session, navigate]);
 
   // Callbacks to receive counts from child components
   const handleFavoriteCountsLoaded = useCallback((counts: FavoriteCounts) => {
@@ -45,7 +47,8 @@ const Profile = () => {
     setCommentPhotoCounts(counts);
   }, []);
 
-  if (auth.isLoading) {
+
+  if (authContextValue.auth.isLoading) {
     // Layout is kept here for loading state
     return (
       <Layout>
@@ -60,10 +63,10 @@ const Profile = () => {
   }
 
   // Only render profile content if authenticated
-  if (!auth.session || !auth.user) {
+  if (!authContextValue.auth.session || !authContextValue.auth.user) {
     // This should technically not be reached due to the redirect effect
     // but serves as an extra guard.
-    return null; 
+    return null;
   }
 
   // Combine all counts for ProfileHeader
@@ -76,18 +79,20 @@ const Profile = () => {
     photosCount: commentPhotoCounts?.photosCount || 0,
   };
 
-  // REMOVED Layout wrapper from the main return statement
   return (
       <div className="min-h-screen bg-gradient-to-b from-orange-50 to-purple-50 p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           
-          {/* Pass counts to ProfileHeader */}
-          <ProfileHeader 
-            favoriteCounts={allCounts}
-            // Add other props if needed in the future
-          />
+          <ProfileHeader favoriteCounts={allCounts} />
           
-          {/* Pass callbacks to FavoritesSection and UserCommentsSection */}
+          {/* Personal Pilgrimage Planner Section */}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">{t('personal_pilgrimage_planner')}</h2>
+            {/* Pass the whole authContextValue which is of type AuthContextType */}
+            <PilgrimagePlanner auth={authContextValue} language={language} t={t} />
+          </div>
+
+          {/* Favorites and Comments Sections */}
           <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
           <UserCommentsSection onCommentsAndPhotosCountLoaded={handleCommentsAndPhotosCountLoaded} />
           

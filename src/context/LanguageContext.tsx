@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { Language } from '../types'; // Assuming Language type is defined here
 
-interface LanguageContextType {
+export interface LanguageContextType { // Added export
   language: Language;
   setLanguage: (lang: Language) => void;
   t: (key: string, options?: { [key: string]: string | number }) => string;

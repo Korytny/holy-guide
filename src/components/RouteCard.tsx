@@ -64,8 +64,16 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
       </div>
       <Link to={`/routes/${route.id}`} className="p-3 flex-grow flex flex-col justify-between"> 
           <div>
-             <h3 className="text-base font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={routeName}>{routeName}</h3>
-            <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
+             <h3
+                className={cn( // Use cn for combining classes
+                   "font-heading", // Apply heading font class
+                   "text-lg font-semibold mb-1 truncate"
+                )}
+                title={routeName}
+             >
+                {routeName}
+             </h3>
+            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
               {routeDescription || t('no_description_available')}
             </p>
           </div>
