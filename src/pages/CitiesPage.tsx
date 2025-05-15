@@ -8,15 +8,17 @@ import SearchBar from '../components/SearchBar';
 import HeroSection from '../components/HeroSection';
 import { ImageCloudItem } from '../components/ui/image-cloud'; 
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext';
+import { useAuth, AuthContextType } from '../context/AuthContext'; // Imported AuthContextType
 import { useIsSmallScreen } from '../hooks/use-small-screen';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLocalizedText } from '../utils/languageUtils';
 import { motion } from 'framer-motion'; // Import motion
+import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner'; // Corrected import
+// Removed import for PlannedItemsTable as it's handled by PilgrimagePlanner
 
 const CitiesPage = () => {
   const { language, t } = useLanguage();
-  const { auth: { isLoading: isAuthLoading } } = useAuth();
+  const authContext = useAuth(); // Renamed to authContext for clarity
   const isSmallScreen = useIsSmallScreen();
   const [cities, setCities] = useState<City[]>([]);
   const [areCitiesLoading, setAreCitiesLoading] = useState(true);
@@ -35,9 +37,10 @@ const CitiesPage = () => {
 
   // Fetch Cities & Prepare Image Cloud Items
   useEffect(() => {
-    console.log(`[CitiesPage] Fetch Effect Triggered. isAuthLoading: ${isAuthLoading}, language: ${language}`);
+    // Access isLoading from the nested auth object within the context value
+    console.log(`[CitiesPage] Fetch Effect Triggered. isAuthLoading: ${authContext.auth.isLoading}, language: ${language}`);
 
-    if (!isAuthLoading) {
+    if (!authContext.auth.isLoading) {
       console.log('[CitiesPage] Auth loaded, attempting to fetch cities...');
       setAreCitiesLoading(true); // Set loading true when starting fetch
 
@@ -80,7 +83,7 @@ const CitiesPage = () => {
       setAreCitiesLoading(true);
     }
     // Fetch depends on auth status and language (for image cloud alt text)
-  }, [isAuthLoading, language]);
+  }, [authContext.auth.isLoading, language]);
 
   // Filter Cities based on Search (Runs whenever searchTerm or allCities changes)
   useEffect(() => {
@@ -131,8 +134,8 @@ const CitiesPage = () => {
   */
 
   // Derive loading state: show skeleton if auth is loading OR cities are loading
-  const showLoadingSkeleton = isAuthLoading || areCitiesLoading;
-  console.log(`[CitiesPage] Render. isAuthLoading: ${isAuthLoading}, areCitiesLoading: ${areCitiesLoading}, showLoadingSkeleton: ${showLoadingSkeleton}, cities count: ${cities.length}`);
+  const showLoadingSkeleton = authContext.auth.isLoading || areCitiesLoading;
+  console.log(`[CitiesPage] Render. isAuthLoading: ${authContext.auth.isLoading}, areCitiesLoading: ${areCitiesLoading}, showLoadingSkeleton: ${showLoadingSkeleton}, cities count: ${cities.length}`);
 
   const CardComponent = isSmallScreen ? CityCardMob : CityCard;
 
@@ -182,6 +185,17 @@ const CitiesPage = () => {
             </div>
           )}
         </div>
+      </div>
+      {/* Added Pilgrimage Planner section */}
+      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+        <section aria-labelledby="pilgrimage-planner-heading" className="mb-8">
+          <h2 id="pilgrimage-planner-heading" className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
+            {t('pilgrimage_plan', { defaultValue: 'Pilgrimage Plan' })}
+          </h2>
+          {/* Pass the entire authContext as the auth prop */}
+          <PilgrimagePlanner auth={authContext} language={language} t={t} /> 
+        </section>
+        {/* Removed standalone PlannedItemsTable as its functionality is within PilgrimagePlanner */}
       </div>
     </>
   );
