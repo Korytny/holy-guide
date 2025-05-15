@@ -78,23 +78,23 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
           </p>
 
           {/* Vertical Stats Section */}
-          <div className="space-y-3 mb-4 px-[108px] font-['Monaco']">
+          <div className="space-y-3 mb-4 px-10 py-3 bg-gray-100/50 rounded-lg font-[LaudatioC]">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
-                   <div className="flex items-center text-base font-medium text-gray-700">
+                   <div className="flex items-center text-base font-medium text-gray-700 px-20">
                        <MapPin size={16} className="mr-2 text-gray-500"/>
                        <span>{t('spots_label')}:</span>
                        <span className="font-medium ml-auto">{city.spotsCount}</span>
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
-                   <div className="flex items-center text-sm font-medium text-gray-700">
+                   <div className="flex items-center text-sm font-medium text-gray-700 px-20">
                        <RouteIcon size={16} className="mr-2 text-gray-500"/>
                        <span>{t('routes_label')}:</span>
                        <span className="font-medium ml-auto">{city.routesCount}</span>
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
-                   <div className="flex items-center text-sm font-medium text-gray-700">
+                   <div className="flex items-center text-sm font-medium text-gray-700 px-20">
                        <CalendarDays size={16} className="mr-2 text-gray-500"/>
                        <span>{t('events_label')}:</span>
                        <span className="font-medium ml-auto">{city.eventsCount}</span>

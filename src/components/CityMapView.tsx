@@ -60,13 +60,25 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
   // Initialize map
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return; // Initialize only once
+    
     const defaultCenter = center || [55.751244, 37.618423];
-    mapInstance.current = L.map(mapContainer.current, { center: defaultCenter, zoom });
+    mapInstance.current = L.map(mapContainer.current, { 
+      center: defaultCenter, 
+      zoom,
+      preferCanvas: true // Better performance for many markers
+    });
+    
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
       attribution: '&copy; OpenStreetMap contributors'
     }).addTo(mapInstance.current);
+    
     setIsMapReady(true);
-    return () => { mapInstance.current?.remove(); mapInstance.current = null; };
+    return () => { 
+      if (mapInstance.current) {
+        mapInstance.current.remove(); 
+        mapInstance.current = null;
+      }
+    };
   }, []);
 
   // Add/Update markers and polyline

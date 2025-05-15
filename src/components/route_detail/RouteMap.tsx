@@ -22,8 +22,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
         order: place.order
     }));
 
-    const polylinePoints = places
-        .filter(place => place.location?.latitude && place.location?.longitude)
+    const validPlaces = places.filter(place => place.location?.latitude && place.location?.longitude);
+    console.log('Valid places for map:', validPlaces);
+    const polylinePoints = validPlaces
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map(place => [place.location.latitude, place.location.longitude] as [number, number]);
 
@@ -34,11 +35,11 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
     return (
         <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Маршрут на карте</h2>
-            <div className="flex-grow rounded-xl overflow-hidden shadow-lg mt-4">
+            <div className="flex-grow rounded-xl overflow-hidden shadow-lg mt-4" style={{ height: '500px' }}>
                 <CityMapView 
                     locations={mapLocations} 
                     polylinePoints={polylinePoints}
-                    maintainZoom={maintainZoom} // Pass down the maintainZoom prop
+                    maintainZoom={maintainZoom}
                 />
             </div>
         </div>

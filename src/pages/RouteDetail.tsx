@@ -35,6 +35,8 @@ const RouteDetail = () => {
            getPlacesByRouteId(id),
            getEventsByRouteId(id)
         ]);
+        console.log('Places data:', placesData);
+        console.log('Events data:', eventsData);
         setPlaces(placesData);
         setEvents(eventsData);
       }
