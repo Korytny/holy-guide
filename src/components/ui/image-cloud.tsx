@@ -31,8 +31,8 @@ export const imageCloudProps: Omit<ICloud, "children"> = {
     clickToFront: 500,
     tooltipDelay: 0,
     outlineColour: "#0000",
-    maxSpeed: 0.03,
-    minSpeed: 0.01,
+    maxSpeed: 0.015, // Reduced maxSpeed for slower animation
+    minSpeed: 0.005, // Reduced minSpeed for slower animation
     radius: 2000, // Large radius
   },
 };

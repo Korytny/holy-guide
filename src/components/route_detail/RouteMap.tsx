@@ -5,9 +5,10 @@ import { useLanguage } from '../../context/LanguageContext'; // Adjust path as n
 
 interface RouteMapProps {
   places: Place[];
+  maintainZoom?: boolean; // Added maintainZoom prop
 }
 
-const RouteMap: React.FC<RouteMapProps> = ({ places }) => {
+const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => { // Added prop and default value
     const { t } = useLanguage();
 
     const mapLocations = places.map(place => ({
@@ -31,13 +32,13 @@ const RouteMap: React.FC<RouteMapProps> = ({ places }) => {
     }
 
     return (
-        <div className="mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
+        <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
             <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Маршрут на карте</h2>
-            <div className="rounded-xl overflow-hidden shadow-lg h-96 mt-4">
+            <div className="flex-grow rounded-xl overflow-hidden shadow-lg mt-4">
                 <CityMapView 
                     locations={mapLocations} 
-                    polylinePoints={polylinePoints} // Pass the points for the line
-                    maintainZoom={false} // Allow map to fit bounds for route
+                    polylinePoints={polylinePoints}
+                    maintainZoom={maintainZoom} // Pass down the maintainZoom prop
                 />
             </div>
         </div>

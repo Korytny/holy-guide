@@ -73,20 +73,20 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
         </div>
 
         {/* Content Section */}
-        <div className="flex-grow flex flex-col min-w-0">
+        <div className="flex-grow flex flex-col min-w-0"> {/* min-w-0 is important for flex children truncation */}
           {/* Top Row: Title and Stats */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
              <h3
                 className={cn(
-                   "font-[LaudatioC] text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
+                   "font-[LaudatioC] text-base font-semibold line-clamp-2 flex-grow text-[#09332A]"
                 )}
                 title={cityName}
              >
                 {cityName}
              </h3>
              {/* Stats and Rating Container */}
-             <div className="flex items-center flex-shrink-0 gap-1.5 px-[108px] font-heading">
+             <div className="flex items-center flex-shrink-0 gap-1.5 font-heading"> {/* Removed px-[108px] */}
                  {/* Stats Badges - Now first */}
                  <StatBadge icon={MapPin} count={city.spotsCount} />
                  <StatBadge icon={RouteIcon} count={city.routesCount} />

@@ -17,7 +17,7 @@ import { useToast } from '@/hooks/use-toast';
 
 type FavoriteType = 'city' | 'route' | 'event' | 'place';
 
-interface AuthContextType {
+export interface AuthContextType { // Added export
   auth: AuthState;
   // Make session argument optional in the type definition
   refreshProfile: (session?: Session | null) => Promise<void>; 
