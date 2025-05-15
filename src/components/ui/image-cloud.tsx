@@ -33,7 +33,7 @@ export const imageCloudProps: Omit<ICloud, "children"> = {
     outlineColour: "#0000",
     maxSpeed: 0.015, // Reduced maxSpeed for slower animation
     minSpeed: 0.005, // Reduced minSpeed for slower animation
-    radiusX: 2000, // Changed from radius to radiusX
+    radius: 2000, // Large radius
   },
 };
 
