@@ -43,6 +43,7 @@ export interface Place {
     longitude: number;
   };
   order?: number; // Added order field for routes
+  rating?: number; // Added rating field
   routesCount?: number;
   eventsCount?: number;
   // Database fields
@@ -66,6 +67,7 @@ export interface MapLocation extends Partial<Place> {
     longitude: number;
     };
   order?: number; // Also added here for consistency
+  rating?: number; // Also added here for consistency
   // Database fields
   city?: string;
   coordinates?: any;
@@ -148,4 +150,5 @@ export interface PlannedItem {
   city_id_for_grouping: string; // To associate items with a city in the plan
   date?: string; // Optional: for specific date planning
   time?: string; // Optional: for specific time planning
+  order?: number; // Added order field
 }
