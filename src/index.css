@@ -5,18 +5,7 @@
   font-weight: 400; /* Или другое значение, если у шрифта есть разные веса */
   font-display: swap;
   src: url('/fonts/ShareTechMonoCyr.woff2') format('woff2'); /* Предполагаемый путь и формат */
-  /* Добавьте другие форматы (ttf, otf), если они у вас есть, например:
-     src: url('/fonts/ShareTechMonoCyr.woff2') format('woff2'),
-          url('/fonts/ShareTechMonoCyr.ttf') format('truetype');
-  */
 }
-
-/* --- END: Add @font-face rules --- */
-
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
-
 
 @font-face {
   font-family: 'Monaco';
@@ -33,6 +22,21 @@
   font-style: normal;
   font-display: swap;
 }
+
+@font-face {
+  font-family: 'Rubik'; /* Даем имя шрифту */
+  src: url('/Rubik-Medium.ttf') format('truetype'); /* Путь к вашему файлу */
+  font-weight: 500; /* Medium обычно соответствует 500 */
+  font-style: normal;
+  font-display: swap; /* Улучшает производительность загрузки */
+}
+
+/* --- END: Add @font-face rules --- */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
 
 @layer base {
   :root {
@@ -125,15 +129,11 @@
 
   body {
     @apply bg-background text-foreground;
-    /* --- START: Apply base font --- */
-    @apply font-sans; /* 'font-sans' теперь использует 'Share Tech Mono Cyr' из-за настроек tailwind.config.ts */
-    /* --- END: Apply base font --- */
+    @apply font-sans;
   }
 
   h1, h2, h3, h4, h5, h6 {
-    /* --- START: Apply heading font --- */
-    @apply font-heading font-semibold tracking-tight; /* Добавили font-heading */
-    /* --- END: Apply heading font --- */
+    @apply font-heading tracking-tight; /* Используем font-weight: 500 из @font-face для Rubik */
   }
 
   h1 {
@@ -166,14 +166,11 @@
     @apply max-w-7xl mx-auto px-4 sm:px-6 lg:px-8;
   }
 
-  /* These might need update/removal if Button component is used */
   .btn-primary {
-    /* Consider replacing usage with <Button> or update this */
     @apply bg-primary text-primary-foreground py-2 px-4 rounded-md hover:bg-primary/90 transition-colors;
   }
 
   .btn-secondary {
-    /* Consider replacing usage with <Button variant="secondary"> */
     @apply bg-secondary text-secondary-foreground py-2 px-4 rounded-md hover:bg-secondary/90 transition-colors;
   }
 }

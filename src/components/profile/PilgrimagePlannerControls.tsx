@@ -1,58 +1,133 @@
-import React from 'react';
+import React, { useEffect } from 'react'; // Removed useState as inputFromDate/ToDate are removed
 import { Language, City } from '../../types';
-import { DateRange } from 'react-day-picker';
+import { type DateRange } from 'react-day-picker';
 import { PilgrimageCalendar } from './PilgrimageCalendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge"; // Import Badge
-import { X } from 'lucide-react'; // Import X icon for remove button
+import { Badge } from "@/components/ui/badge";
+import { X } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
+// Removed Input import
+import { format } from 'date-fns'; // format is still used for PilgrimageCalendar selectedRange prop
+import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
+
+// Imports for new DateFieldComponent
+import { DateFieldComponent } from '@/components/ui/date-field';
+import {
+  parseDate,
+  CalendarDate,
+  getLocalTimeZone,
+  today
+} from '@internationalized/date';
+import type { DateValue } from '@internationalized/date';
+
+const dateFnsLocales: Record<string, DateFnsLocale> = {
+  en: enUS, ru: ru, hi: hi,
+};
 
 interface PilgrimagePlannerControlsProps {
   availableCities: City[];
-  stagedCities: City[]; // New: cities selected but not yet added to main plan
+  stagedCities: City[];
   selectedDateRange?: DateRange;
-  displayedDateRange: string;
   language: Language;
-  t: (key: string) => string;
+  t: (key: string, params?: object) => string;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  onCitySelect: (cityId: string) => void; // This will now be onStageCity
-  onRemoveStagedCity: (cityId: string) => void; // New: to remove a city from staged list
-  onAddStagedCities: () => void; // New: to add all staged cities to the main plan (was suggest_route)
+  onCitySelect: (cityId: string) => void;
+  onRemoveStagedCity: (cityId: string) => void;
+  onAddStagedCities: () => void;
   onAddFavoritesToPlan: () => void;
-  onDistributeDates: () => void; 
+  onDistributeDates: () => void;
 }
 
 export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
   availableCities,
   stagedCities,
-  displayedDateRange,
+  selectedDateRange,
   language,
   t,
   onDateRangeChange,
-  onCitySelect, // This is for onStageCity
+  onCitySelect,
   onRemoveStagedCity,
   onAddStagedCities,
   onAddFavoritesToPlan,
   onDistributeDates,
 }) => {
+  const currentLocale = dateFnsLocales[language] || enUS;
+
+  // Helper to convert JS Date to DateValue
+  const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
+    if (!date) return null;
+    try {
+      return parseDate(format(date, 'yyyy-MM-dd'));
+    } catch (e) {
+      console.error("Error parsing date for DateValue:", e);
+      return null;
+    }
+  };
+
+  // Helper to convert DateValue to JS Date
+  const convertToJSDate = (dateValue: DateValue | null): Date | undefined => {
+    if (!dateValue) return undefined;
+    try {
+      return dateValue.toDate(getLocalTimeZone());
+    } catch (e) {
+      console.error("Error converting DateValue to JS Date:", e);
+      return undefined;
+    }
+  };
+
+  const handleDateFieldChange = (dateValue: DateValue | null, field: 'from' | 'to') => {
+    const jsDate = convertToJSDate(dateValue);
+    let newRange: DateRange;
+
+    if (field === 'from') {
+      newRange = { from: jsDate, to: selectedDateRange?.to };
+      // Ensure 'from' is not after 'to' if 'to' exists
+      if (newRange.to && jsDate && jsDate > newRange.to) {
+        newRange.to = jsDate; // Or set to undefined, or keep old, depending on desired UX
+      }
+    } else { // field === 'to'
+      newRange = { from: selectedDateRange?.from, to: jsDate };
+      // Ensure 'to' is not before 'from' if 'from' exists
+      if (newRange.from && jsDate && jsDate < newRange.from) {
+        newRange.from = jsDate; // Or set to undefined, or keep old
+      }
+    }
+     // If both become undefined, pass undefined to clear the range
+    if (!newRange.from && !newRange.to) {
+        onDateRangeChange(undefined);
+    } else {
+        onDateRangeChange(newRange);
+    }
+  };
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
       <div>
         <h3 className="text-lg font-semibold mb-2">{t('select_dates')}</h3>
-        <PilgrimageCalendar onDateRangeChange={onDateRangeChange} />
+        <PilgrimageCalendar 
+            selectedRange={selectedDateRange} 
+            onDateRangeChange={onDateRangeChange} // Calendar directly updates the parent state
+            locale={currentLocale}
+        />
       </div>
       <div className="border rounded-md p-4 bg-white">
         <h3 className="text-lg font-semibold mb-4">{t('plan_your_pilgrimage')}</h3>
         
-        <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('selected_dates')}:</label>
-          <div className="w-full p-2 border rounded-md bg-gray-100 text-gray-700">
-            {displayedDateRange}
-          </div>
+        <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <DateFieldComponent
+            label={t('start_date_label')}
+            value={convertToDateValue(selectedDateRange?.from)}
+            onChange={(dateValue) => handleDateFieldChange(dateValue, 'from')}
+          />
+          <DateFieldComponent
+            label={t('end_date_label')}
+            value={convertToDateValue(selectedDateRange?.to)}
+            onChange={(dateValue) => handleDateFieldChange(dateValue, 'to')}
+          />
         </div>
 
-        {displayedDateRange !== t('select_dates_placeholder') && (
+        {selectedDateRange && selectedDateRange.from && (
             <div className="mb-4">
                 <Button variant="outline" className="w-full" onClick={onDistributeDates}>
                     {t('distribute_dates_to_cities_button')}
@@ -61,10 +136,10 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         )}
 
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('select_cities_to_stage')}</label> {/* Changed key for clarity */}
-          <Select onValueChange={onCitySelect}> {/* This now calls onStageCity (passed as onCitySelect) */}
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('select_cities_to_stage')}</label>
+          <Select onValueChange={onCitySelect}>
             <SelectTrigger className="w-full">
-              <SelectValue placeholder={t('select_a_city_to_stage')} /> {/* Changed key */}
+              <SelectValue placeholder={t('select_a_city_to_stage')} />
             </SelectTrigger>
             <SelectContent>
               {availableCities.map((city) => (
@@ -74,7 +149,6 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               ))}
             </SelectContent>
           </Select>
-          {/* Display Staged Cities */}
           {stagedCities.length > 0 && (
             <div className="mt-2 space-y-1">
               <p className="text-xs text-gray-600">{t('cities_staged_for_plan')}:</p>
@@ -92,11 +166,10 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
           )}
         </div>
         
-        {/* Button to add staged cities to the main plan */} 
         {stagedCities.length > 0 && (
             <div className="mb-4">
                 <Button className="w-full" onClick={onAddStagedCities}>
-                    {t('add_selected_cities_to_plan_button')} {/* New translation key */}
+                    {t('add_selected_cities_to_plan_button')}
                 </Button>
             </div>
         )}
@@ -107,11 +180,6 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
             {t('add_favorites_to_plan')}
           </Button>
         </div>
-        
-        {/* Suggest Route button can be kept for future or removed if add_staged_cities replaces its immediate role */}
-        {/* <div className="mt-2">
-          <Button className="w-full">{t('suggest_route')}</Button> 
-        </div>*/}
       </div>
     </div>
   );

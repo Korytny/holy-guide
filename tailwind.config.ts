@@ -19,12 +19,12 @@ export default {
             }
         },
         extend: {
-            // --- START: Add fontFamily ---
             fontFamily: {
-                sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono], // Основной текст (используем 'sans' для простоты применения по умолчанию)
-                heading: ['LaudatioC', ...fontFamily.sans], // Заголовки
+                sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono], // Основной текст
+                heading: ['Rubik', ...fontFamily.sans], // Заголовки теперь Rubik
+                // Мы также можем явно определить Rubik, если захотим использовать его где-то еще отдельно:
+                // rubik: ['Rubik', ...fontFamily.sans],
             },
-            // --- END: Add fontFamily ---
             colors: {
                 border: 'hsl(var(--border))',
                 input: 'hsl(var(--input))',

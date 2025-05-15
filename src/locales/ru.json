@@ -181,5 +181,8 @@
     "select_cities_to_stage": "Выберите города для добавления в план",
     "select_a_city_to_stage": "Выберите город для добавления...",
     "cities_staged_for_plan": "Города, готовые к добавлению в план:",
-    "add_selected_cities_to_plan_button": "Добавить выбранные города в план"
+    "add_selected_cities_to_plan_button": "Добавить выбранные города в план",
+    "start_date_label": "Дата начала",
+    "end_date_label": "Дата окончания",
+    "date_format_placeholder": "{format}"
 }

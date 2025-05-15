@@ -5,16 +5,14 @@ import { City, Place, Route, Event, Language, PlannedItem } from "../../types";
 import { getCities } from "../../services/citiesApi";
 import { getPlacesByCityId } from "../../services/placesApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
-import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
+// Removed date-fns/locale imports from here as they are now in PilgrimagePlannerControls
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api';
 
 import { PilgrimagePlannerControls } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
 import PilgrimageRouteMap from "./PilgrimageRouteMap";
 
-const dateFnsLocales: Record<string, DateFnsLocale> = {
-  en: enUS, ru: ru, hi: hi,
-};
+// Removed dateFnsLocales as it's moved to PilgrimagePlannerControls
 
 interface PilgrimagePlannerProps {
   auth: AuthContextType;
@@ -23,11 +21,10 @@ interface PilgrimagePlannerProps {
   onItemsChange?: (items: PlannedItem[]) => void;
 }
 
-// State for place suggestions per city
 interface CitySuggestionState {
   places: Place[];
   currentIndex: number;
-  fullyLoaded: boolean; // To track if all places for a city have been fetched and processed
+  fullyLoaded: boolean;
 }
 
 const getRandomTime = () => {
@@ -43,8 +40,6 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(undefined);
   const [sortedItemsForDisplay, setSortedItemsForDisplay] = useState<PlannedItem[]>([]);
   const [isPlanInitiated, setIsPlanInitiated] = useState<boolean>(false);
-
-  // New state for city-specific place suggestions
   const [cityPlaceSuggestions, setCityPlaceSuggestions] = useState<Record<string, CitySuggestionState>>({});
 
   useEffect(() => {
@@ -94,8 +89,6 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
   const handleAddPlacesForCity = async (cityId: string) => {
     let currentSuggestions = cityPlaceSuggestions[cityId];
-
-    // Fetch and prepare suggestions if not already done for this city
     if (!currentSuggestions || !currentSuggestions.fullyLoaded) {
       try {
         const placesData = await getPlacesByCityId(cityId);
@@ -111,10 +104,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       }
     }
 
-    // Find the next available place to add
     let placeToAdd: Place | null = null;
     let nextIndex = currentSuggestions.currentIndex;
-
     const plannedPlaceIdsForCity = new Set(
         plannedItems
             .filter(item => item.type === 'place' && item.city_id_for_grouping === cityId)
@@ -136,13 +127,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         type: 'place',
         data: placeToAdd,
         city_id_for_grouping: cityId,
-        order: nextIndex, // Use nextIndex for order, or derive differently if needed
+        order: nextIndex,
         time: getRandomTime(),
         date: dateOfCity,
       };
-
       setPlannedItems(prevItems => [...prevItems, newPlannedItem]);
-      // Update currentIndex for this city in suggestions
       setCityPlaceSuggestions(prev => ({
         ...prev,
         [cityId]: { ...currentSuggestions!, currentIndex: nextIndex + 1 },
@@ -284,12 +273,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     } 
   }, [plannedItems]);
 
-  const currentLocale = dateFnsLocales[language] || enUS;
-  const displayedDateRange = selectedDateRange?.from ? 
-    (selectedDateRange.to ? 
-      `${format(selectedDateRange.from, "PPP", { locale: currentLocale })} - ${format(selectedDateRange.to, "PPP", { locale: currentLocale })}` 
-      : format(selectedDateRange.from, "PPP", { locale: currentLocale })) 
-    : t('select_dates_placeholder');
+  // Removed displayedDateRange calculation
 
   return (
     <>
@@ -297,8 +281,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         availableCities={availableCities}
         stagedCities={stagedForPlanningCities}
         onRemoveStagedCity={handleRemoveStagedCity}
-        selectedDateRange={selectedDateRange}
-        displayedDateRange={displayedDateRange}
+        selectedDateRange={selectedDateRange} // Pass selectedDateRange directly
+        // displayedDateRange prop removed
         language={language}
         t={t}
         onDateRangeChange={handleDateRangeChange}
