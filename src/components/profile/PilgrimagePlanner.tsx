@@ -3,12 +3,14 @@ import { type AuthContextType } from "../../context/AuthContext";
 import { type LanguageContextType } from "../../context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem } from "../../types";
 import { getCities } from "../../services/citiesApi";
+import { getPlacesByCityId } from "../../services/placesApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api';
 
 import { PilgrimagePlannerControls } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
+import PilgrimageRouteMap from "./PilgrimageRouteMap";
 
 const dateFnsLocales: Record<string, DateFnsLocale> = {
   en: enUS, ru: ru, hi: hi,
@@ -18,22 +20,38 @@ interface PilgrimagePlannerProps {
   auth: AuthContextType;
   language: Language;
   t: LanguageContextType['t'];
+  onItemsChange?: (items: PlannedItem[]) => void;
+}
+
+// State for place suggestions per city
+interface CitySuggestionState {
+  places: Place[];
+  currentIndex: number;
+  fullyLoaded: boolean; // To track if all places for a city have been fetched and processed
 }
 
 const getRandomTime = () => {
   const hour = Math.floor(Math.random() * 12) + 8;
-  const minute = Math.floor(Math.random() * 60);
+  const minute = Math.floor(Math.random() * 4) * 15;
   return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 };
 
-export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: authContext, language, t }) => {
+export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: authContext, language, t, onItemsChange }) => {
   const [availableCities, setAvailableCities] = useState<City[]>([]);
   const [stagedForPlanningCities, setStagedForPlanningCities] = useState<City[]>([]);
   const [plannedItems, setPlannedItems] = useState<PlannedItem[]>([]);
   const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(undefined);
-  const [cityDurationSums, setCityDurationSums] = useState<Record<string, number>>({});
   const [sortedItemsForDisplay, setSortedItemsForDisplay] = useState<PlannedItem[]>([]);
   const [isPlanInitiated, setIsPlanInitiated] = useState<boolean>(false);
+
+  // New state for city-specific place suggestions
+  const [cityPlaceSuggestions, setCityPlaceSuggestions] = useState<Record<string, CitySuggestionState>>({});
+
+  useEffect(() => {
+    if (onItemsChange) {
+      onItemsChange(plannedItems);
+    }
+  }, [plannedItems, onItemsChange]);
 
   useEffect(() => {
     const fetchCities = async () => {
@@ -44,23 +62,12 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   }, []);
 
   useEffect(() => {
-    const newCityDurationSums: Record<string, number> = {};
-    const cityItems = plannedItems.filter(item => item.type === 'city');
-    cityItems.forEach(cityItem => {
-      let durationSum = 0;
-      plannedItems.forEach(item => {
-        if (item.type !== 'city' && item.city_id_for_grouping === cityItem.data.id) {
-          durationSum += 30;
-        }
-      });
-      newCityDurationSums[cityItem.data.id] = durationSum;
-    });
-    setCityDurationSums(newCityDurationSums);
-
     const finalSortedList: PlannedItem[] = [];
     const processedItemIds = new Set<string>();
-    const sortedCities = cityItems.sort((a,b) => (a.time || a.data.id).localeCompare(b.time || b.data.id));
-    sortedCities.forEach(cityItem => {
+    const cityItems = plannedItems.filter(item => item.type === 'city')
+                                .sort((a,b) => (a.time || a.data.id).localeCompare(b.time || b.data.id));
+    
+    cityItems.forEach(cityItem => {
       if (!processedItemIds.has(cityItem.data.id + '-' + cityItem.type)) {
         finalSortedList.push(cityItem);
         processedItemIds.add(cityItem.data.id + '-' + cityItem.type);
@@ -75,21 +82,75 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         });
       }
     });
-    const remainingItems = plannedItems.filter(item => !processedItemIds.has(item.data.id + '-' + item.type));
-    remainingItems.sort((a,b) => (a.time || "").localeCompare(b.time || ""));
+    const remainingItems = plannedItems.filter(item => !processedItemIds.has(item.data.id + '-' + item.type))
+                                   .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
     finalSortedList.push(...remainingItems);
     setSortedItemsForDisplay(finalSortedList);
 
-    // Update isPlanInitiated based on whether there are any items to display
-    // This ensures the plan section is shown if there are items, and hidden if not (unless explicitly kept open)
     if (finalSortedList.length > 0 ){
         if(!isPlanInitiated) setIsPlanInitiated(true);
-    } else {
-        // Optionally hide if all items are removed after being initiated:
-        // if(isPlanInitiated) setIsPlanInitiated(false);
+    } 
+  }, [plannedItems]); 
+
+  const handleAddPlacesForCity = async (cityId: string) => {
+    let currentSuggestions = cityPlaceSuggestions[cityId];
+
+    // Fetch and prepare suggestions if not already done for this city
+    if (!currentSuggestions || !currentSuggestions.fullyLoaded) {
+      try {
+        const placesData = await getPlacesByCityId(cityId);
+        if (!placesData) throw new Error("Failed to fetch places.");
+        
+        const sortedPlaces = [...placesData].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
+        currentSuggestions = { places: sortedPlaces, currentIndex: 0, fullyLoaded: true };
+        setCityPlaceSuggestions(prev => ({ ...prev, [cityId]: currentSuggestions! }));
+      } catch (error) {
+        console.error("Error fetching or sorting places for city:", cityId, error);
+        alert(t('error_fetching_places_for_city', { city: cityId, defaultValue: `Error fetching places for city ${cityId}.`}));
+        return;
+      }
     }
 
-  }, [plannedItems]); // Removed isPlanInitiated to avoid re-triggering on its own change
+    // Find the next available place to add
+    let placeToAdd: Place | null = null;
+    let nextIndex = currentSuggestions.currentIndex;
+
+    const plannedPlaceIdsForCity = new Set(
+        plannedItems
+            .filter(item => item.type === 'place' && item.city_id_for_grouping === cityId)
+            .map(item => item.data.id)
+    );
+
+    while (nextIndex < currentSuggestions.places.length) {
+      const candidatePlace = currentSuggestions.places[nextIndex];
+      if (!plannedPlaceIdsForCity.has(candidatePlace.id)) {
+        placeToAdd = candidatePlace;
+        break;
+      }
+      nextIndex++;
+    }
+
+    if (placeToAdd) {
+      const dateOfCity = plannedItems.find(item => item.type === 'city' && item.data.id === cityId)?.date;
+      const newPlannedItem: PlannedItem = {
+        type: 'place',
+        data: placeToAdd,
+        city_id_for_grouping: cityId,
+        order: nextIndex, // Use nextIndex for order, or derive differently if needed
+        time: getRandomTime(),
+        date: dateOfCity,
+      };
+
+      setPlannedItems(prevItems => [...prevItems, newPlannedItem]);
+      // Update currentIndex for this city in suggestions
+      setCityPlaceSuggestions(prev => ({
+        ...prev,
+        [cityId]: { ...currentSuggestions!, currentIndex: nextIndex + 1 },
+      }));
+    } else {
+      alert(t('no_more_places_to_add_for_city', {city: cityId, defaultValue: `No more available places to add for this city.`}));
+    }
+  };
 
   const handleDistributeDates = () => {
     if (!selectedDateRange || !selectedDateRange.from) {
@@ -184,30 +245,28 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
     const { cities_like, places_like, routes_like, events_like } = authContext.auth.user;
     const itemsToAdd: PlannedItem[] = [];
-    let baseTime = 8;
-    const generateSequentialTime = () => {
-      const hour = Math.floor(baseTime);
-      const minute = Math.floor((baseTime % 1) * 60);
-      baseTime += 0.5;
-      if (baseTime >= 23.5) baseTime = 8;
-      return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
-    };
+    const cityDatesMap = new Map<string, string | undefined>();
+    plannedItems.forEach(item => {
+      if (item.type === 'city' && item.date) {
+        cityDatesMap.set(item.data.id, item.date);
+      }
+    });
 
     if (cities_like && cities_like.length > 0) {
       const favCities = await getCitiesByIds(cities_like);
-      favCities.forEach(city => itemsToAdd.push({ type: 'city', data: city, city_id_for_grouping: city.id, time: generateSequentialTime() }));
+      favCities.forEach(city => itemsToAdd.push({ type: 'city', data: city, city_id_for_grouping: city.id, time: getRandomTime() }));
     }
     if (places_like && places_like.length > 0) {
       const favPlaces = await fetchPlaceData(places_like);
-      favPlaces.forEach(place => itemsToAdd.push({ type: 'place', data: place, city_id_for_grouping: place.cityId, time: generateSequentialTime() }));
+      favPlaces.forEach(place => itemsToAdd.push({ type: 'place', data: place, city_id_for_grouping: place.cityId, time: getRandomTime(), date: cityDatesMap.get(place.cityId) }));
     }
     if (routes_like && routes_like.length > 0) {
       const favRoutes = await getRoutesByIds(routes_like);
-      favRoutes.forEach(route => itemsToAdd.push({ type: 'route', data: route, city_id_for_grouping: route.cityId, time: generateSequentialTime() }));
+      favRoutes.forEach(route => itemsToAdd.push({ type: 'route', data: route, city_id_for_grouping: route.cityId, time: getRandomTime(), date: cityDatesMap.get(route.cityId) }));
     }
     if (events_like && events_like.length > 0) {
       const favEvents = await getEventsByIds(events_like);
-      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: generateSequentialTime() }));
+      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: getRandomTime(), date: cityDatesMap.get(event.cityId) }));
     }
     
     if (itemsToAdd.length > 0) {
@@ -219,14 +278,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
   };
   
-  // This useEffect now solely controls the visibility of the plan display area
   useEffect(() => {
     if (plannedItems.length > 0) {
       setIsPlanInitiated(true);
-    } else {
-      // Decide if you want to hide it again if all items are removed
-      // setIsPlanInitiated(false); 
-    }
+    } 
   }, [plannedItems]);
 
   const currentLocale = dateFnsLocales[language] || enUS;
@@ -253,14 +308,23 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onDistributeDates={handleDistributeDates}
       />
       {isPlanInitiated && (
-        <PilgrimagePlanDisplay
-            plannedItems={sortedItemsForDisplay}
-            cityDurationSums={cityDurationSums}
-            language={language}
-            t={t}
-            onUpdateDateTime={handleUpdatePlannedItemDateTime}
-            onRemoveItem={handleRemovePlannedItem}
-        />
+        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 
+          <div className="md:col-span-1"> 
+            <PilgrimagePlanDisplay
+                plannedItems={sortedItemsForDisplay}
+                language={language}
+                t={t}
+                onUpdateDateTime={handleUpdatePlannedItemDateTime}
+                onRemoveItem={handleRemovePlannedItem}
+                onAddPlacesForCity={handleAddPlacesForCity}
+            />
+          </div>
+          <div className="md:col-span-1"> 
+            {plannedItems.length > 0 && (
+              <PilgrimageRouteMap plannedItems={plannedItems} />
+            )}
+          </div>
+        </div>
       )}
     </>
   );

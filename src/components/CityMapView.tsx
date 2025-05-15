@@ -149,7 +149,7 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
   }, [locations, polylinePoints, language, isMapReady, maintainZoom, navigate, center, zoom]);
 
   return (
-    <div className="h-[400px] w-full rounded-lg overflow-hidden relative">
+    <div className="h-full w-full rounded-lg overflow-hidden relative"> {/* Changed h-[400px] to h-full */}
       <div ref={mapContainer} className="h-full w-full" />
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100"><p>Loading map...</p></div>

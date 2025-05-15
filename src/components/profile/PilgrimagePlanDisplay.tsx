@@ -4,41 +4,38 @@ import { PlannedItemsTable } from './PlannedItemsTable';
 
 interface PilgrimagePlanDisplayProps {
   plannedItems: PlannedItem[];
-  cityDurationSums: Record<string, number>; // CityID -> total duration of its items
   language: Language;
-  t: (key: string) => string;
+  t: (key: string, options?: any) => string;
   onUpdateDateTime: (itemToUpdate: PlannedItem, date?: string, time?: string) => void;
   onRemoveItem: (itemToRemove: PlannedItem) => void;
+  onAddPlacesForCity?: (cityId: string) => void; // New prop
 }
 
 export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   plannedItems,
-  cityDurationSums,
   language,
   t,
   onUpdateDateTime,
   onRemoveItem,
+  onAddPlacesForCity, // Destructure new prop
 }) => {
 
-  // We will sort items directly in PilgrimagePlanner and pass the sorted list
-  // Or, if we want to display cities as headers and then their items, the logic would differ.
-  // For a single flat table where cities are rows, plannedItems should be pre-sorted.
-
   return (
-    <div className="mt-8 border rounded-md p-0 bg-white overflow-hidden"> {/* p-0 for table to fit nicely */}
-      <h3 className="text-lg font-semibold mb-0 p-4">{t('pilgrimage_plan')}</h3> {/* mb-0 if table is directly below */}
+    <div className="border rounded-md p-0 bg-white overflow-hidden h-full"> {/* Added h-full */}
+      <h3 className="text-lg font-semibold mb-0 p-4 sticky top-0 bg-white z-10">{t('pilgrimage_plan')}</h3> {/* Made header sticky */}
       {plannedItems.length === 0 ? (
         <div className="p-4 text-gray-500">{t('plan_results_placeholder')}</div>
       ) : (
-        <PlannedItemsTable
-            itemsToRender={plannedItems} // Pass all items
-            // No title for the whole table, titles were for groups previously
-            cityDurationSums={cityDurationSums} // Pass sums for city rows
-            language={language}
-            t={t}
-            onUpdateDateTime={onUpdateDateTime}
-            onRemoveItem={onRemoveItem}
-        />
+        <div className="overflow-y-auto h-[calc(100%-theme(space.16))]"> {/* Made table scrollable, adjust 4rem (space.16) if header padding changes */}
+            <PlannedItemsTable
+                itemsToRender={plannedItems}
+                language={language}
+                t={t}
+                onUpdateDateTime={onUpdateDateTime}
+                onRemoveItem={onRemoveItem}
+                onAddPlacesForCity={onAddPlacesForCity} // Pass new prop
+            />
+        </div>
       )}
     </div>
   );

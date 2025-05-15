@@ -141,3 +141,11 @@ export interface AuthState {
   user: UserProfile | null; // This is the UserProfile from your DB
   session: Session | null; // Add Supabase Session object
 }
+
+export interface PlannedItem {
+  type: 'city' | 'place' | 'route' | 'event';
+  data: City | Place | Route | Event;
+  city_id_for_grouping: string; // To associate items with a city in the plan
+  date?: string; // Optional: for specific date planning
+  time?: string; // Optional: for specific time planning
+}

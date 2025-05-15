@@ -1,8 +1,8 @@
 import React from 'react';
-import { Language, PlannedItem } from '../../types';
+import { Language, PlannedItem, City } from '../../types'; // Added City type
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2 } from 'lucide-react';
+import { Trash2, PlusCircle } from 'lucide-react'; // Added PlusCircle icon
 import {
   Table,
   TableBody,
@@ -12,29 +12,27 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { getLocalizedText } from '../../utils/languageUtils';
-import { cn } from '@/lib/utils'; // For conditional classes
+import { cn } from '@/lib/utils';
 
 interface PlannedItemsTableProps {
   itemsToRender: PlannedItem[];
-  cityDurationSums?: Record<string, number>; // Optional, used if items include cities
   language: Language;
-  t: (key: string) => string;
+  t: (key: string, options?: any) => string; // Adjusted t for defaultValue
   onUpdateDateTime: (itemToUpdate: PlannedItem, date?: string, time?: string) => void;
   onRemoveItem: (itemToRemove: PlannedItem) => void;
-  // title prop removed as table is now flat
+  onAddPlacesForCity?: (cityId: string) => void; // New prop for adding places
 }
 
 export const PlannedItemsTable: React.FC<PlannedItemsTableProps> = ({
   itemsToRender,
-  cityDurationSums,
   language,
   t,
   onUpdateDateTime,
   onRemoveItem,
+  onAddPlacesForCity,
 }) => {
 
   if (itemsToRender.length === 0) {
-    // This case might not be hit if PilgrimagePlanDisplay handles the placeholder
     return (
         <div className="p-4 text-gray-500 text-sm">{t('no_items_in_plan')}</div>
     );
@@ -44,21 +42,14 @@ export const PlannedItemsTable: React.FC<PlannedItemsTableProps> = ({
     <Table className="bg-white">
         <TableHeader>
             <TableRow>
-                <TableHead>{t('city_or_object_column_header')}</TableHead>
+                <TableHead>{t('object_name_column_header', {defaultValue: 'Object'})}</TableHead>
                 <TableHead>{t('date')}</TableHead>
-                <TableHead>{t('time')}</TableHead>
-                <TableHead>{t('duration')}</TableHead>
-                <TableHead>{t('distance')}</TableHead>
                 <TableHead className="text-right">{t('actions')}</TableHead>
             </TableRow>
         </TableHeader>
         <TableBody>
             {itemsToRender.map((item, index) => {
                 const isCityRow = item.type === 'city';
-                const duration = isCityRow 
-                                    ? (cityDurationSums && cityDurationSums[item.data.id] ? `${cityDurationSums[item.data.id]} ${t('minutes_short')}` : '0 ' + t('minutes_short')) 
-                                    : "30 " + t('minutes_short');
-
                 return (
                     <TableRow key={`${item.type}-${item.data.id}-${index}`}>
                         <TableCell className={cn("font-medium", isCityRow ? "font-semibold text-blue-600" : "pl-6")}>
@@ -68,28 +59,29 @@ export const PlannedItemsTable: React.FC<PlannedItemsTableProps> = ({
                             <Input 
                                 type="date" 
                                 value={item.date || ''} 
-                                onChange={(e) => onUpdateDateTime(item, e.target.value, undefined)} 
+                                onChange={(e) => onUpdateDateTime(item, e.target.value, item.time)} 
                                 className="w-auto p-1 text-sm"
                                 placeholder={t('date_placeholder')} 
                             />
                         </TableCell>
-                        <TableCell>
-                            <Input 
-                                type="time" 
-                                value={item.time || ''} 
-                                onChange={(e) => onUpdateDateTime(item, undefined, e.target.value)} 
-                                className="w-auto p-1 text-sm" 
-                                placeholder={t('time_placeholder')} 
-                            />
-                        </TableCell>
-                        <TableCell>{duration}</TableCell>
-                        <TableCell>{"N/A"}</TableCell> {/* Distance placeholder */}
-                        <TableCell className="text-right">
+                        <TableCell className="text-right flex items-center justify-end space-x-1">
+                            {isCityRow && onAddPlacesForCity && (
+                                <Button 
+                                    variant="ghost" 
+                                    size="icon" 
+                                    onClick={() => onAddPlacesForCity((item.data as City).id)} 
+                                    className="text-green-600 hover:text-green-800 h-8 w-8"
+                                    title={t('add_places_for_city_tooltip', {defaultValue: 'Add places for this city'})}
+                                >
+                                    <PlusCircle size={16} />
+                                </Button>
+                            )}
                             <Button 
                                 variant="ghost" 
                                 size="icon" 
                                 onClick={() => onRemoveItem(item)} 
                                 className="text-red-500 hover:text-red-700 h-8 w-8"
+                                title={t('remove_item_tooltip', {defaultValue: 'Remove item'})}
                             >
                                 <Trash2 size={16} />
                             </Button>
