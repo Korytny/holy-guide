@@ -1,9 +1,9 @@
 import { supabase } from '../integrations/supabase/client';
-import { Event, EventType } from '../types'; // Import EventType as well if needed for casting
+import { Event, EventType } from '../types';
 
 export interface EventFilters {
   cityId?: string;
-  eventCategory?: string; 
+  eventCategory?: string;
   culture?: string;
   hasOnlineStream?: boolean;
 }
@@ -11,69 +11,47 @@ export interface EventFilters {
 export const getEvents = async (filters?: EventFilters): Promise<Event[]> => {
   console.log('getEvents CALLED with filters:', filters);
   try {
-    // Ensure you select the database column that holds the event type, e.g., 'event_category'
-    // If your DB column is already 'eventTypeField', then 'select("*" )' is fine.
-    // Otherwise, you might need to alias or map it.
-    let query = supabase.from('events').select('*, event_category'); // Explicitly select event_category
+    let query = supabase.from('events').select('*, event_category');
 
     if (filters) {
       if (filters.cityId && filters.cityId !== 'all') {
         query = query.eq('city_id', filters.cityId);
       }
-      // Note: The filter key is eventCategory, but the DB column might be event_category
       if (filters.eventCategory) {
         query = query.eq('event_category', filters.eventCategory);
       }
       if (filters.culture) {
-        query = query.eq('culture', filters.culture); // Assuming DB column is 'culture'
+        query = query.eq('culture', filters.culture);
       }
       if (filters.hasOnlineStream !== undefined) {
         query = query.eq('has_online_stream', filters.hasOnlineStream);
       }
     }
-
     query = query.order('time', { ascending: true });
-
     const { data, error } = await query;
 
     if (error) {
       console.error('Error fetching events:', error.message);
       throw error;
     }
-    console.log('Events fetched from Supabase (raw):', data);
-
+    console.log('Events fetched from Supabase (raw in getEvents):', data);
     if (!data) return [];
 
-    // Manual mapping to ensure eventTypeField is populated from event_category
     const mappedData = data.map(dbEvent => {
-      const event: Partial<Event> = { ...dbEvent }; // Cast to Partial<Event> initially
-      // Assuming your DB column for event type is 'event_category'
-      // and your Event interface expects 'eventTypeField'
+      const event: Partial<Event> = { ...dbEvent };
       if (dbEvent.event_category) {
         event.eventTypeField = dbEvent.event_category as EventType;
       }
-      // Ensure other fields are correctly mapped if names differ or types need conversion
-      // For example, if your DB stores name as JSON but Event type expects LocalizedText directly:
-      // if (typeof dbEvent.name === 'string') { // Basic check, might need robust parsing
-      //   try { event.name = JSON.parse(dbEvent.name); } catch (e) { console.error('Failed to parse name', e); event.name = {}; }
-      // }
-      // if (typeof dbEvent.description === 'string') {
-      //   try { event.description = JSON.parse(dbEvent.description); } catch (e) { console.error('Failed to parse description', e); event.description = {}; }
-      // }
-
-      return event as Event; // Cast to full Event type after mapping
+      // Add any other necessary field mappings here if DB names differ from Event type
+      return event as Event;
     });
-    console.log('Events mapped with eventTypeField:', mappedData);
+    console.log('Events mapped in getEvents:', mappedData);
     return mappedData;
-
   } catch (error) {
     console.error('Error in getEvents:', error);
     return [];
   }
 };
-
-// ... (rest of the functions: getEventById, getEventsByIds, etc. 
-//      should also be checked if they need similar mapping for eventTypeField)
 
 export const getEventById = async (id: string): Promise<Event | null> => {
   console.log('getEventById CALLED with id:', id);
@@ -81,13 +59,13 @@ export const getEventById = async (id: string): Promise<Event | null> => {
   try {
     const { data: dbEvent, error } = await supabase
       .from('events')
-      .select('*, event_category') // Ensure event_category is selected
+      .select('*, event_category')
       .eq('id', id)
       .single();
 
     if (error) {
       console.error(`Error fetching event with id ${id}:`, error.message);
-      if (error.code === 'PGRST116') { 
+      if (error.code === 'PGRST116') {
         console.warn(`Event with id ${id} not found.`);
         return null;
       }
@@ -113,7 +91,7 @@ export const getEventsByIds = async (ids: string[]): Promise<Event[]> => {
   try {
     const { data, error } = await supabase
       .from('events')
-      .select('*, event_category') // Ensure event_category is selected
+      .select('*, event_category')
       .in('id', ids);
 
     if (error) {
@@ -121,7 +99,6 @@ export const getEventsByIds = async (ids: string[]): Promise<Event[]> => {
       throw error;
     }
     if (!data) return [];
-
     const mappedData = data.map(dbEvent => {
       const event: Partial<Event> = { ...dbEvent };
       if (dbEvent.event_category) {
@@ -131,20 +108,59 @@ export const getEventsByIds = async (ids: string[]): Promise<Event[]> => {
     });
     console.log('Events fetched by IDs and mapped:', mappedData);
     return mappedData;
-
   } catch (error) {
     console.error('Error in getEventsByIds:', error);
     return [];
   }
 };
 
+export const getEventsByCityId = async (cityId: string): Promise<Event[]> => {
+  console.log('getEventsByCityId CALLED with cityId:', cityId);
+  if (!cityId) {
+    console.warn('getEventsByCityId called with no cityId');
+    return [];
+  }
+  try {
+    let query = supabase
+      .from('events')
+      .select('*, event_category')
+      .eq('city_id', cityId);
+
+    query = query.order('time', { ascending: true });
+    const { data, error } = await query;
+
+    if (error) {
+      console.error(`Error fetching events for city ${cityId}:`, error.message);
+      throw error;
+    }
+    console.log(`Raw events for city ${cityId} from Supabase:`, data);
+    if (!data) return [];
+
+    const mappedData = data.map(dbEvent => {
+      const event: Partial<Event> = { ...dbEvent };
+      if (dbEvent.event_category) {
+        event.eventTypeField = dbEvent.event_category as EventType;
+      }
+      return event as Event;
+    });
+    console.log(`Events for city ${cityId} fetched and mapped:`, mappedData);
+    return mappedData;
+  } catch (error) {
+    console.error('Error in getEventsByCityId:', error);
+    return [];
+  }
+};
 
 export const getEventsByPlaceId = async (placeId: string): Promise<Event[]> => {
-    console.warn("getEventsByPlaceId is not fully implemented yet. Update with actual Supabase call if needed.");
-    return [];
-}
+  console.warn("getEventsByPlaceId is not implemented yet. Returning empty array.");
+  // TODO: Implement if needed, similar to getEventsByCityId but with place_id filter
+  // Ensure mapping for eventTypeField if data is fetched.
+  return [];
+};
 
 export const getEventsByRouteId = async (routeId: string): Promise<Event[]> => {
-    console.warn("getEventsByRouteId is not fully implemented yet. Update with actual Supabase call if needed.");
-    return [];
-}
+  console.warn("getEventsByRouteId is not implemented yet. Returning empty array.");
+  // TODO: Implement if needed, similar to getEventsByCityId but with route_id filter
+  // Ensure mapping for eventTypeField if data is fetched.
+  return [];
+};
