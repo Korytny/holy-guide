@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'; // Removed useState as inputFromDate/ToDate are removed
+import React, { useState, useEffect } from 'react';
 import { Language, City } from '../../types';
 import { type DateRange } from 'react-day-picker';
 import { PilgrimageCalendar } from './PilgrimageCalendar';
@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { X } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
-// Removed Input import
+import { Input } from "@/components/ui/input";
 import { format } from 'date-fns'; // format is still used for PilgrimageCalendar selectedRange prop
 import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
 
@@ -37,7 +37,13 @@ interface PilgrimagePlannerControlsProps {
   onAddStagedCities: () => void;
   onAddFavoritesToPlan: () => void;
   onDistributeDates: () => void;
-  onSaveAsGoal: () => void;
+  onSaveAsGoal: (goalName: string) => void;
+  onLoadGoal: (goalId: string) => void;
+  savedGoals: Array<{
+    id: string;
+    title: string;
+    created_at: string;
+  }>;
 }
 
 export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
@@ -53,8 +59,11 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   onAddFavoritesToPlan,
   onDistributeDates,
   onSaveAsGoal,
+  onLoadGoal,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
+  const [goalName, setGoalName] = useState('');
+  const [savedGoals, setSavedGoals] = useState([]);
 
   // Helper to convert JS Date to DateValue
   const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
@@ -115,6 +124,27 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
       </div>
       <div className="border rounded-md p-4 bg-white">
         <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('plan_your_pilgrimage')}</h3>
+        {savedGoals.length > 0 && (
+          <div className="mb-4">
+            <h4 className="text-sm font-medium mb-2 text-gray-700">{t('saved_goals')}</h4>
+            <ul className="space-y-1">
+              {savedGoals.map(goal => (
+                <li 
+                  key={goal.id}
+                  className="cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
+                  onClick={() => onLoadGoal(goal.id)}
+                >
+                  <div className="flex justify-between">
+                    <span>{goal.title}</span>
+                    <span className="text-xs text-gray-500">
+                      {format(new Date(goal.created_at), 'dd.MM.yyyy')}
+                    </span>
+                  </div>
+                </li>
+              ))}
+            </ul>
+          </div>
+        )}
         
         <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DateFieldComponent
@@ -183,15 +213,27 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
           </Button>
           
           <div className="mt-4">
+            <div className="mb-2">
+              <Input
+                placeholder={t('goal_name_placeholder')}
+                value={goalName}
+                onChange={(e) => setGoalName(e.target.value)}
+              />
+            </div>
             <Button 
               className="w-full bg-orange-500 hover:bg-orange-600 text-white"
-              onClick={onSaveAsGoal}
+              onClick={() => {
+                onSaveAsGoal(goalName);
+                setGoalName('');
+              }}
+              disabled={!goalName.trim()}
             >
               {t('save_as_goal')}
             </Button>
           </div>
         </div>
       </div>
+
     </div>
   );
 };

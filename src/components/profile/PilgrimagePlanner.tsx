@@ -229,7 +229,53 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     );
   };
 
-  const onSaveAsGoal = async () => {
+  const [savedGoals, setSavedGoals] = useState([]);
+
+  useEffect(() => {
+    const fetchGoals = async () => {
+      try {
+        // First check if we have an active session
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.user?.id) {
+          console.log('No active session found');
+          setSavedGoals([]);
+          return;
+        }
+
+        // Then fetch goals for the authenticated user
+        const { data, error } = await supabase
+          .from('goals')
+          .select('*')
+          .eq('user_id', session.user.id)
+          .order('created_at', { ascending: false });
+        
+        if (error) {
+          console.error('Error fetching goals:', error);
+          return;
+        }
+
+        if (data) {
+          console.log('Fetched goals:', data.length);
+          setSavedGoals(data);
+        }
+      } catch (error) {
+        console.error('Error in fetchGoals:', error);
+      }
+    };
+    
+    fetchGoals();
+    
+    // Set up auth state listener
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
+        fetchGoals();
+      }
+    });
+
+    return () => subscription.unsubscribe();
+  }, []);
+
+  const onSaveAsGoal = async (goalName: string) => {
     if (!authContext?.auth?.user?.id) {
       console.error("User not authenticated");
       return;
@@ -240,7 +286,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         .from('goals')
         .insert({
           user_id: authContext.auth.user.id,
-          title: `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
+          title: goalName || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
           cities: plannedItems
             .filter(item => item.type === 'city')
             .map(city => ({
@@ -348,6 +394,87 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onAddStagedCities={handleAddStagedCitiesToMainPlan} 
         onDistributeDates={handleDistributeDates}
         onSaveAsGoal={onSaveAsGoal}
+        onLoadGoal={async (goalId) => {
+          try {
+            const { data: goal, error } = await supabase
+              .from('goals')
+              .select('*')
+              .eq('id', goalId)
+              .single();
+
+            if (error) throw error;
+            if (!goal) {
+              console.log('Goal not found');
+              return;
+            }
+
+            // Clear current plan
+            setPlannedItems([]);
+            
+            // Load cities from goal
+            const cityItems = (goal.cities || []).map((city: any) => ({
+              type: 'city',
+              data: {
+                id: city.id,
+                name: city.name
+              },
+              city_id_for_grouping: city.id,
+              date: city.dates?.[0],
+              time: getRandomTime()
+            }));
+
+            // Load places from goal
+            const placeItems = (goal.places || []).map((place: any) => ({
+              type: 'place',
+              data: {
+                id: place.id,
+                name: place.name
+              },
+              city_id_for_grouping: place.city_id,
+              date: place.dates?.[0],
+              time: getRandomTime()
+            }));
+
+            // Load routes from goal
+            const routeItems = (goal.routes || []).map((route: any) => ({
+              type: 'route',
+              data: {
+                id: route.id,
+                name: route.name
+              },
+              city_id_for_grouping: route.city_id,
+              date: route.dates?.[0],
+              time: getRandomTime()
+            }));
+
+            // Load events from goal
+            const eventItems = (goal.events || []).map((event: any) => ({
+              type: 'event',
+              data: {
+                id: event.id,
+                name: event.name
+              },
+              city_id_for_grouping: event.city_id,
+              date: event.dates?.[0],
+              time: getRandomTime()
+            }));
+
+            // Combine all items
+            setPlannedItems([...cityItems, ...placeItems, ...routeItems, ...eventItems]);
+            
+            // Update date range if available
+            if (goal.start_date || goal.end_date) {
+              setSelectedDateRange({
+                from: goal.start_date ? new Date(goal.start_date) : undefined,
+                to: goal.end_date ? new Date(goal.end_date) : undefined
+              });
+            }
+
+          } catch (error) {
+            console.error('Error loading goal:', error);
+          }
+        }}
+        savedGoals={savedGoals}
       />
       {isPlanInitiated && (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 
