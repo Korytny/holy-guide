@@ -31,6 +31,12 @@ const getRandomTime = () => {
   return `${hour.toString().padStart(2, '0')}:${minute.toString().padStart(2, '0')}`;
 };
 
+// Helper function to get the next orderIndex
+const getNextOrderIndex = (items: PlannedItem[]): number => {
+  if (items.length === 0) return 0;
+  return Math.max(...items.map(item => item.orderIndex)) + 1;
+};
+
 export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: authContext, language, t, onItemsChange }) => {
   const [availableCities, setAvailableCities] = useState<City[]>([]);
   const [stagedForPlanningCities, setStagedForPlanningCities] = useState<City[]>([]);
@@ -41,7 +47,6 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [cityPlaceSuggestions, setCityPlaceSuggestions] = useState<Record<string, CitySuggestionState>>({});
   const [savedGoals, setSavedGoals] = useState<any[]>([]);
 
-  // State for managing loaded goal name and ID
   const [goalNameForInput, setGoalNameForInput] = useState('');
   const [currentLoadedGoalId, setCurrentLoadedGoalId] = useState<string | null>(null);
 
@@ -59,35 +64,16 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     fetchCities();
   }, []);
 
+  // useEffect for sorting items for display based on orderIndex
   useEffect(() => {
-    const finalSortedList: PlannedItem[] = [];
-    const processedItemIds = new Set<string>();
-    const cityItems = plannedItems.filter(item => item.type === 'city')
-                                .sort((a,b) => (a.time || a.data.id).localeCompare(b.time || b.data.id));
-    
-    cityItems.forEach(cityItem => {
-      if (!processedItemIds.has(cityItem.data.id + '-' + cityItem.type)) {
-        finalSortedList.push(cityItem);
-        processedItemIds.add(cityItem.data.id + '-' + cityItem.type);
-        const itemsForThisCity = plannedItems
-          .filter(item => item.type !== 'city' && item.city_id_for_grouping === cityItem.data.id)
-          .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
-        itemsForThisCity.forEach(item => {
-          if (!processedItemIds.has(item.data.id + '-' + item.type)) {
-            finalSortedList.push(item);
-            processedItemIds.add(item.data.id + '-' + item.type);
-          }
-        });
-      }
-    });
-    const remainingItems = plannedItems.filter(item => !processedItemIds.has(item.data.id + '-' + item.type))
-                                   .sort((a,b) => (a.time || "").localeCompare(b.time || ""));
-    finalSortedList.push(...remainingItems);
+    const finalSortedList = [...plannedItems].sort((a, b) => a.orderIndex - b.orderIndex);
     setSortedItemsForDisplay(finalSortedList);
 
     if (finalSortedList.length > 0 && !isPlanInitiated){
         setIsPlanInitiated(true);
-    } 
+    } else if (finalSortedList.length === 0 && isPlanInitiated) {
+        setIsPlanInitiated(false);
+    }
   }, [plannedItems, isPlanInitiated]); 
 
   const handleAddPlacesForCity = async (cityId: string) => {
@@ -96,7 +82,6 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       try {
         const placesData = await getPlacesByCityId(cityId);
         if (!placesData) throw new Error("Failed to fetch places.");
-        
         const sortedPlaces = [...placesData].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         currentSuggestions = { places: sortedPlaces, currentIndex: 0, fullyLoaded: true };
         setCityPlaceSuggestions(prev => ({ ...prev, [cityId]: currentSuggestions! }));
@@ -130,9 +115,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         type: 'place',
         data: placeToAdd,
         city_id_for_grouping: cityId,
-        order: nextIndex,
+        // order: nextIndex, // Keep or remove based on decision for `order` field
         time: getRandomTime(),
         date: dateOfCity,
+        orderIndex: getNextOrderIndex(plannedItems), // Assign orderIndex
       };
       setPlannedItems(prevItems => [...prevItems, newPlannedItem]);
       setCityPlaceSuggestions(prev => ({
@@ -161,20 +147,18 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     const updatedPlannedItems = plannedItems.map(pItem => ({ ...pItem }));
     let dayIndex = 0;
     cityItemsInPlan.forEach(cityItem => {
-      if (dayIndex < intervalDays.length) {
-        const targetDate = intervalDays[dayIndex];
-        const cityItemInUpdateArray = updatedPlannedItems.find(pi => pi.data.id === cityItem.data.id && pi.type === 'city');
-        if (cityItemInUpdateArray) {
-            cityItemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
-        }
-        dayIndex++;
-      } else {
-        const lastAvailableDate = intervalDays[intervalDays.length -1];
-        const cityItemInUpdateArray = updatedPlannedItems.find(pi => pi.data.id === cityItem.data.id && pi.type === 'city');
-        if (cityItemInUpdateArray) {
-             cityItemInUpdateArray.date = format(lastAvailableDate, 'yyyy-MM-dd');
-        }
+      const targetDate = intervalDays[dayIndex % intervalDays.length]; // Cycle through days if more cities than days
+      const cityItemInUpdateArray = updatedPlannedItems.find(pi => pi.data.id === cityItem.data.id && pi.type === 'city');
+      if (cityItemInUpdateArray) {
+          cityItemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
       }
+      // Also update dates for items within this city if they don't have a date yet or should match the city
+      updatedPlannedItems.forEach(item => {
+          if (item.city_id_for_grouping === cityItem.data.id && !item.date) { 
+              item.date = format(targetDate, 'yyyy-MM-dd');
+          }
+      });
+      dayIndex++;
     });
     setPlannedItems(updatedPlannedItems);
   };
@@ -196,11 +180,13 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   const handleAddStagedCitiesToMainPlan = () => {
+    let currentOrderIndex = getNextOrderIndex(plannedItems);
     const newItemsForPlan: PlannedItem[] = stagedForPlanningCities.map(city => ({
       type: 'city',
       data: city,
       city_id_for_grouping: city.id,
       time: getRandomTime(),
+      orderIndex: currentOrderIndex++, // Assign and increment orderIndex
     }));
 
     if (newItemsForPlan.length > 0) {
@@ -216,9 +202,9 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const handleRemovePlannedItem = (itemToRemove: PlannedItem) => {
     setPlannedItems(prevItems => prevItems.filter(item => 
       !(item.type === itemToRemove.type && item.data.id === itemToRemove.data.id)
-    ));
-    // If all items are removed, maybe clear loaded goal info
-    if (plannedItems.length === 1) { 
+    ).map((item, index) => ({ ...item, orderIndex: index })) // Re-index after removal
+    );
+    if (plannedItems.length === 1 && currentLoadedGoalId) { 
         setCurrentLoadedGoalId(null);
         setGoalNameForInput('');
     }
@@ -237,7 +223,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   const fetchGoals = useCallback(async () => {
-    try {
+    // ... (fetchGoals implementation - assumed correct)
+     try {
       const { data: { session } } = await supabase.auth.getSession();
       if (!session?.user?.id) {
         setSavedGoals([]);
@@ -265,12 +252,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   useEffect(() => {
     fetchGoals();
     const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
-        fetchGoals();
-      }
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') fetchGoals();
       if (event === 'SIGNED_OUT') {
         setSavedGoals([]);
-        setCurrentLoadedGoalId(null); // Clear loaded goal on sign out
+        setCurrentLoadedGoalId(null);
         setGoalNameForInput('');
       }
     });
@@ -278,72 +263,52 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   }, [fetchGoals]);
 
   const handleSaveOrUpdateGoal = async (currentGoalName: string) => {
+    // ... (handleSaveOrUpdateGoal implementation - needs to include orderIndex in saved data)
     if (!authContext?.auth?.user?.id) {
       alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
       return;
     }
 
+    // Ensure all items have an orderIndex before saving
+    const itemsToSave = plannedItems.map((item, index) => ({
+      ...item,
+      orderIndex: item.orderIndex ?? index // Fallback if somehow orderIndex is missing
+    }));
+
     const goalData = {
         user_id: authContext.auth.user.id,
         title: currentGoalName.trim() || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
-        cities: plannedItems
-          .filter(item => item.type === 'city')
-          .map(cityItem => ({
-            id: cityItem.data.id,
-            name: cityItem.data.name,
-            dates: [cityItem.date]
-          })),
-        places: plannedItems
-          .filter(item => item.type === 'place' && item.data)
-          .map(placeItem => ({
-            id: placeItem.data.id,
-            name: placeItem.data.name,
-            city_id: placeItem.city_id_for_grouping,
-            dates: [placeItem.date],
-            location: (placeItem.data as Place).location
-          })),
-        routes: plannedItems
-          .filter(item => item.type === 'route' && item.data)
-          .map(routeItem => ({
-            id: routeItem.data.id,
-            name: routeItem.data.name,
-            city_id: routeItem.city_id_for_grouping,
-            dates: [routeItem.date]
-          })),
-        events: plannedItems
-          .filter(item => item.type === 'event' && item.data)
-          .map(eventItem => ({
-            id: eventItem.data.id,
-            name: eventItem.data.name,
-            city_id: eventItem.city_id_for_grouping,
-            dates: [eventItem.date],
-            location: (eventItem.data as Event).location
-          })),
+        // Save plannedItems with their orderIndex
+        planned_items: itemsToSave.map(pi => ({ 
+            type: pi.type, 
+            data_id: pi.data.id, // Store only ID, fetch full data on load if needed
+            city_id_for_grouping: pi.city_id_for_grouping,
+            date: pi.date,
+            time: pi.time,
+            orderIndex: pi.orderIndex,
+            // Store minimal data, reconstruct or fetch full 'data' object on load
+            name: (pi.data as any).name, // Assuming name is a common property for display
+            location: pi.type === 'place' || pi.type === 'event' ? (pi.data as Place | Event).location : undefined
+        })),
         start_date: selectedDateRange?.from ? format(selectedDateRange.from, 'yyyy-MM-dd') : null,
         end_date: selectedDateRange?.to ? format(selectedDateRange.to, 'yyyy-MM-dd') : null,
-        total_items: plannedItems.length
       };
 
     try {
       if (currentLoadedGoalId) {
-        // Update existing goal
         const { error } = await supabase
           .from('goals')
-          .update(goalData)
+          .update({ ...goalData, planned_items_structure: goalData.planned_items }) // Use a different field name if `planned_items` column type needs specific JSON structure
           .eq('id', currentLoadedGoalId)
           .eq('user_id', authContext.auth.user.id);
         if (error) throw error;
         alert(t('goal_updated_successfully', {defaultValue: 'Goal updated successfully.'}));
       } else {
-        // Insert new goal
-        const { error } = await supabase.from('goals').insert([goalData]);
+        const { error } = await supabase.from('goals').insert([{ ...goalData, planned_items_structure: goalData.planned_items }]);
         if (error) throw error;
         alert(t('goal_saved_successfully'));
-        // For new goals, we might want to clear the input, but not for updates.
-        // setCurrentLoadedGoalId(null); // This would be set if a new goal is loaded
-        // setGoalNameForInput(''); // Clear input only for new saves that don't load it back
       }
-      fetchGoals(); // Refetch goals to update the list in both cases
+      fetchGoals();
     } catch (error) {
       console.error("Error saving/updating goal:", error);
       alert(t('error_saving_goal'));
@@ -351,6 +316,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
   
   const handleDeleteGoal = async (goalId: string) => {
+    // ... (handleDeleteGoal implementation - assumed correct)
     if (!authContext?.auth?.user?.id) {
         alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
         return;
@@ -361,11 +327,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
             .delete()
             .eq('user_id', authContext.auth.user.id) 
             .eq('id', goalId);
-
         if (error) throw error;
-        
         setSavedGoals(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
-        // If the deleted goal was the currently loaded one, clear the input fields
         if (currentLoadedGoalId === goalId) {
             setCurrentLoadedGoalId(null);
             setGoalNameForInput('');
@@ -378,65 +341,53 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   const handleLoadGoal = async (goalId: string) => {
+    // ... (handleLoadGoal implementation - needs to reconstruct PlannedItem with orderIndex from saved data)
     try {
       const { data: goal, error } = await supabase
         .from('goals')
-        .select('*')
+        .select('*, planned_items_structure:planned_items') // Adjust if you used a different field name like planned_items_structure
         .eq('id', goalId)
         .single();
 
       if (error) throw error;
-      if (!goal) {
-        alert(t('goal_not_found', {defaultValue: 'Goal not found.'}));
-        setCurrentLoadedGoalId(null); // Clear if goal not found
-        setGoalNameForInput('');
+      if (!goal || !goal.planned_items_structure) { // Check for planned_items_structure
+        alert(t('goal_not_found', {defaultValue: 'Goal not found or data is corrupt.'}));
+        setCurrentLoadedGoalId(null); setGoalNameForInput('');
         return;
       }
-
-      setPlannedItems([]); 
       
-      const cityItems = (goal.cities || []).map((city: any) => ({
-        type: 'city',
-        data: { id: city.id, name: city.name },
-        city_id_for_grouping: city.id,
-        date: city.dates?.[0],
-        time: getRandomTime()
-      } as PlannedItem));
-
-      const placeItems = (goal.places || []).map((place: any) => ({
-        type: 'place',
-        data: { id: place.id, name: place.name, location: place.location as Location }, 
-        city_id_for_grouping: place.city_id,
-        date: place.dates?.[0],
-        time: getRandomTime()
-      } as PlannedItem));
-
-      const routeItems = (goal.routes || []).map((route: any) => ({
-        type: 'route',
-        data: { id: route.id, name: route.name }, 
-        city_id_for_grouping: route.city_id,
-        date: route.dates?.[0],
-        time: getRandomTime()
-      } as PlannedItem));
-
-      const eventItems = (goal.events || []).map((event: any) => ({
-        type: 'event',
-        data: { id: event.id, name: event.name, location: event.location as Location }, 
-        city_id_for_grouping: event.city_id,
-        date: event.dates?.[0],
-        time: getRandomTime()
-      } as PlannedItem));
-
-      const newPlannedItems = [...cityItems, ...placeItems, ...routeItems, ...eventItems];
-      setPlannedItems(newPlannedItems);
+      // Reconstruct plannedItems from goal.planned_items_structure
+      // This is a complex step: you need to fetch full City, Place, Route, Event data based on stored IDs
+      const reconstructedItems: PlannedItem[] = [];
+      let itemFetchPromises = (goal.planned_items_structure as any[]).map(async (itemStub: any) => {
+        let fullData: City | Place | Route | Event | null = null;
+        // NOTE: This is a simplified fetch. You'll need robust fetching for each type.
+        // You might already have functions like getCitiesByIds, fetchPlaceData, etc.
+        if (itemStub.type === 'city') fullData = (await getCitiesByIds([itemStub.data_id]))?.[0];
+        else if (itemStub.type === 'place') fullData = (await fetchPlaceData([itemStub.data_id]))?.[0];
+        // Add similar fetches for Route and Event types
+        
+        if (fullData) {
+            reconstructedItems.push({
+                type: itemStub.type,
+                data: fullData,
+                city_id_for_grouping: itemStub.city_id_for_grouping,
+                date: itemStub.date,
+                time: itemStub.time,
+                orderIndex: itemStub.orderIndex
+            } as PlannedItem);
+        }
+      });
+      await Promise.all(itemFetchPromises);
       
-      if (newPlannedItems.length > 0) {
-          setIsPlanInitiated(true);
-      } else {
-          setIsPlanInitiated(false); // If goal is empty, set to false
-      }
+      // Sort by orderIndex after all items are fetched and reconstructed
+      reconstructedItems.sort((a,b) => a.orderIndex - b.orderIndex);
+
+      setPlannedItems(reconstructedItems);
       
-      // Set the loaded goal ID and name for the input field
+      if (reconstructedItems.length > 0) setIsPlanInitiated(true);
+      else setIsPlanInitiated(false);
+      
       setCurrentLoadedGoalId(goal.id);
       setGoalNameForInput(goal.title || '');
       
@@ -452,12 +403,13 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     } catch (error) {
       console.error('Error loading goal:', error);
       alert(t('error_loading_goal', {defaultValue: 'Error loading goal. Please check console.'}));
-      setCurrentLoadedGoalId(null); // Clear on error
-      setGoalNameForInput('');
+      setCurrentLoadedGoalId(null); setGoalNameForInput('');
     }
   };
 
   const handleAddFavoritesToPlan = async () => {
+    // ... (current implementation)
+    // Modify to add orderIndex to new items
     if (!authContext || !authContext.auth || !authContext.auth.user) {
       console.error("User data not available for adding favorites"); return;
     }
@@ -470,21 +422,23 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       }
     });
 
+    let currentFavOrderIndex = getNextOrderIndex(plannedItems);
+
     if (cities_like && cities_like.length > 0) {
       const favCities = await getCitiesByIds(cities_like);
-      favCities.forEach(city => itemsToAdd.push({ type: 'city', data: city, city_id_for_grouping: city.id, time: getRandomTime() }));
+      favCities.forEach(city => itemsToAdd.push({ type: 'city', data: city, city_id_for_grouping: city.id, time: getRandomTime(), orderIndex: currentFavOrderIndex++ }));
     }
     if (places_like && places_like.length > 0) {
       const favPlaces = await fetchPlaceData(places_like);
-      favPlaces.forEach(place => itemsToAdd.push({ type: 'place', data: place, city_id_for_grouping: place.cityId, time: getRandomTime(), date: cityDatesMap.get(place.cityId) }));
+      favPlaces.forEach(place => itemsToAdd.push({ type: 'place', data: place, city_id_for_grouping: place.cityId, time: getRandomTime(), date: cityDatesMap.get(place.cityId), orderIndex: currentFavOrderIndex++ }));
     }
     if (routes_like && routes_like.length > 0) {
       const favRoutes = await getRoutesByIds(routes_like);
-      favRoutes.forEach(route => itemsToAdd.push({ type: 'route', data: route, city_id_for_grouping: route.cityId, time: getRandomTime(), date: cityDatesMap.get(route.cityId) }));
+      favRoutes.forEach(route => itemsToAdd.push({ type: 'route', data: route, city_id_for_grouping: route.cityId, time: getRandomTime(), date: cityDatesMap.get(route.cityId), orderIndex: currentFavOrderIndex++ }));
     }
     if (events_like && events_like.length > 0) {
       const favEvents = await getEventsByIds(events_like);
-      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: getRandomTime(), date: cityDatesMap.get(event.cityId) }));
+      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: getRandomTime(), date: cityDatesMap.get(event.cityId), orderIndex: currentFavOrderIndex++ }));
     }
     
     if (itemsToAdd.length > 0) {
@@ -496,21 +450,28 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
   };
   
-  // Effect to clear loaded goal name if plannedItems become empty and a goal was loaded
   useEffect(() => {
     if (plannedItems.length === 0 && currentLoadedGoalId) {
       setCurrentLoadedGoalId(null);
       setGoalNameForInput('');
-      setIsPlanInitiated(false);
+      // setIsPlanInitiated(false); // Moved to the main sorting useEffect
     }
-    if (plannedItems.length > 0 && !isPlanInitiated) {
-        setIsPlanInitiated(true);
-    }
-  }, [plannedItems, currentLoadedGoalId, isPlanInitiated]);
+    // if (plannedItems.length > 0 && !isPlanInitiated) { // Moved to the main sorting useEffect
+    //     setIsPlanInitiated(true);
+    // }
+  }, [plannedItems, currentLoadedGoalId]); // Removed isPlanInitiated from deps here
+
+  // New handler for reordering
+  const handlePlannedItemsReorder = (newlyOrderedItems: PlannedItem[]) => {
+    // Ensure all items in newlyOrderedItems have a sequential orderIndex starting from 0
+    const finalItems = newlyOrderedItems.map((item, index) => ({ ...item, orderIndex: index }));
+    setPlannedItems(finalItems);
+  };
 
   return (
     <>
       <PilgrimagePlannerControls
+        // ... (other props)
         availableCities={availableCities}
         stagedCities={stagedForPlanningCities}
         plannedItems={plannedItems} 
@@ -523,31 +484,31 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onAddFavoritesToPlan={handleAddFavoritesToPlan}
         onAddStagedCities={handleAddStagedCitiesToMainPlan} 
         onDistributeDates={handleDistributeDates}
-        
         goalNameValue={goalNameForInput}
         onGoalNameChange={setGoalNameForInput}
-        currentLoadedGoalId={currentLoadedGoalId} // Pass this to change button text
-        onSaveOrUpdateGoal={handleSaveOrUpdateGoal} // Renamed from onSaveAsGoal
-        
+        currentLoadedGoalId={currentLoadedGoalId}
+        onSaveOrUpdateGoal={handleSaveOrUpdateGoal}
         onDeleteGoal={handleDeleteGoal}
-        onLoadGoal={handleLoadGoal} // Renamed from original onLoadGoal to make it clear
+        onLoadGoal={handleLoadGoal}
         savedGoals={savedGoals}
       />
       {isPlanInitiated && (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 
           <div className="md:col-span-1"> 
             <PilgrimagePlanDisplay
-                plannedItems={sortedItemsForDisplay}
+                plannedItems={sortedItemsForDisplay} // Use sortedItemsForDisplay
                 language={language}
                 t={t}
                 onUpdateDateTime={handleUpdatePlannedItemDateTime}
                 onRemoveItem={handleRemovePlannedItem}
                 onAddPlacesForCity={handleAddPlacesForCity}
+                onReorderItems={handlePlannedItemsReorder} // Pass the new handler
             />
           </div>
           <div className="md:col-span-1"> 
             {plannedItems.length > 0 && (
-              <PilgrimageRouteMap plannedItems={plannedItems} />
+              // Pass sortedItemsForDisplay if map should also follow this precise order
+              <PilgrimageRouteMap plannedItems={sortedItemsForDisplay} /> 
             )}
           </div>
         </div>

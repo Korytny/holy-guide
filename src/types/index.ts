@@ -38,15 +38,11 @@ export interface Place {
   description: string | { [key in Language]?: string };
   imageUrl: string;
   cityId: string;
-  location: {
-    latitude: number;
-    longitude: number;
-  };
-  order?: number; // Added order field for routes
-  rating?: number; // Added rating field
+  location: Location; // Use defined Location type
+  order?: number; 
+  rating?: number; 
   routesCount?: number;
   eventsCount?: number;
-  // Database fields
   city?: string;
   coordinates?: any;
   info?: any;
@@ -54,7 +50,6 @@ export interface Place {
   type?: number;
   point?: unknown;
   created_at?: string;
-  // Added new properties to avoid circular references
   events?: string[];
   routes?: string[];
 }
@@ -62,13 +57,9 @@ export interface Place {
 export interface MapLocation extends Partial<Place> {
   id: string;
   name: string | { [key in Language]?: string };
-  location: {
-    latitude: number;
-    longitude: number;
-    };
-  order?: number; // Also added here for consistency
-  rating?: number; // Also added here for consistency
-  // Database fields
+  location: Location; // Use defined Location type
+  order?: number; 
+  rating?: number; 
   city?: string;
   coordinates?: any;
   info?: any;
@@ -76,7 +67,6 @@ export interface MapLocation extends Partial<Place> {
   type?: number;
   point?: unknown;
   created_at?: string;
-  // Added new properties to avoid circular references
   events?: string[];
   routes?: string[];
 }
@@ -89,13 +79,15 @@ export interface Route {
   cityId: string;
   placeIds: string[];
   eventIds: string[];
-  // Database fields
   info?: any;
   images?: any;
-  // Added new properties to avoid circular references
   places?: Place[];
   events?: Event[];
 }
+
+// Types for GuruPlanner filters
+export type EventType = "festival" | "practice" | "retreat" | "vipassana" | "puja" | "lecture";
+export type EventCulture = "atheism" | "hinduism" | "christianity" | "judaism" | "islam" | "advaita" | "syncretism";
 
 export interface Event {
   id: string;
@@ -106,12 +98,13 @@ export interface Event {
   placeIds: string[];
   routeIds: string[];
   date?: string;
-  // Database fields
   time?: string;
   info?: any;
   images?: any;
-  type?: boolean;
-  // Added new properties to avoid circular references
+  eventTypeField?: EventType; 
+  hasOnlineStream?: boolean; 
+  cultureField?: EventCulture; 
+  location?: Location; 
   places?: Place[];
   routes?: Route[];
 }
@@ -130,25 +123,30 @@ export interface UserProfile {
   cities_like?: string[];
   routes_like?: string[];
   events_like?: string[];
-  places_like?: string[]; // Added
+  places_like?: string[];
 }
 
-// Import and EXPORT Session type from supabase-js
 import { Session } from '@supabase/supabase-js';
-export type { Session }; // Export the Session type
+export type { Session };
 
 export interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
-  user: UserProfile | null; // This is the UserProfile from your DB
-  session: Session | null; // Add Supabase Session object
+  user: UserProfile | null; 
+  session: Session | null; 
+}
+
+export interface Location {
+    latitude: number;
+    longitude: number;
 }
 
 export interface PlannedItem {
   type: 'city' | 'place' | 'route' | 'event';
   data: City | Place | Route | Event;
-  city_id_for_grouping: string; // To associate items with a city in the plan
-  date?: string; // Optional: for specific date planning
-  time?: string; // Optional: for specific time planning
-  order?: number; // Added order field
+  city_id_for_grouping: string; 
+  date?: string; 
+  time?: string; 
+  order?: number; 
+  orderIndex: number; 
 }
