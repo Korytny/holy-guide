@@ -181,5 +181,6 @@
     "select_cities_to_stage": "Select cities to stage for planning",
     "select_a_city_to_stage": "Select a city to stage...",
     "cities_staged_for_plan": "Cities staged for plan:",
-    "add_selected_cities_to_plan_button": "Add Selected Cities to Plan"
+    "add_selected_cities_to_plan_button": "Add Selected Cities to Plan",
+    "object_name_column_header": "Name"
 }

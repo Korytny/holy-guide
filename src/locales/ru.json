@@ -184,5 +184,6 @@
     "add_selected_cities_to_plan_button": "Добавить выбранные города в план",
     "start_date_label": "Дата начала",
     "end_date_label": "Дата окончания",
-    "date_format_placeholder": "{format}"
+    "date_format_placeholder": "{format}",
+    "object_name_column_header": "Название"
 }

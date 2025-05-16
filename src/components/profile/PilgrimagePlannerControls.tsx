@@ -37,6 +37,7 @@ interface PilgrimagePlannerControlsProps {
   onAddStagedCities: () => void;
   onAddFavoritesToPlan: () => void;
   onDistributeDates: () => void;
+  onSaveAsGoal: () => void;
 }
 
 export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
@@ -51,6 +52,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   onAddStagedCities,
   onAddFavoritesToPlan,
   onDistributeDates,
+  onSaveAsGoal,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
 
@@ -103,16 +105,16 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div>
-        <h3 className="text-lg font-semibold mb-2">{t('select_dates')}</h3>
+      <div className="bg-white p-6 rounded-lg shadow-sm">
+        <h3 className="text-lg font-semibold mb-4">{t('select_dates')}</h3>
         <PilgrimageCalendar 
             selectedRange={selectedDateRange} 
-            onDateRangeChange={onDateRangeChange} // Calendar directly updates the parent state
+            onDateRangeChange={onDateRangeChange}
             locale={currentLocale}
         />
       </div>
       <div className="border rounded-md p-4 bg-white">
-        <h3 className="text-lg font-semibold mb-4">{t('plan_your_pilgrimage')}</h3>
+        <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('plan_your_pilgrimage')}</h3>
         
         <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DateFieldComponent
@@ -154,10 +156,10 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               <p className="text-xs text-gray-600">{t('cities_staged_for_plan')}:</p>
               <div className="flex flex-wrap gap-1">
                 {stagedCities.map(city => (
-                  <Badge key={city.id} variant="secondary" className="flex items-center">
+                  <Badge key={city.id} className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded-md">
                     {getLocalizedText(city.name, language)}
-                    <Button variant="ghost" size="icon" className="h-4 w-4 ml-1 rounded-full" onClick={() => onRemoveStagedCity(city.id)}>
-                      <X size={12} />
+                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1.5 rounded-full" onClick={() => onRemoveStagedCity(city.id)}>
+                      <X size={14} />
                     </Button>
                   </Badge>
                 ))}
@@ -179,6 +181,15 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
           <Button variant="outline" className="w-full" onClick={onAddFavoritesToPlan}>
             {t('add_favorites_to_plan')}
           </Button>
+          
+          <div className="mt-4">
+            <Button 
+              className="w-full bg-orange-500 hover:bg-orange-600 text-white"
+              onClick={onSaveAsGoal}
+            >
+              {t('save_as_goal')}
+            </Button>
+          </div>
         </div>
       </div>
     </div>

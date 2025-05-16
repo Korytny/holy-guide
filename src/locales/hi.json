@@ -181,5 +181,6 @@
     "select_cities_to_stage": "योजना के लिए शहरों का चयन करें",
     "select_a_city_to_stage": "मंचन के लिए एक शहर चुनें...",
     "cities_staged_for_plan": "योजना के लिए मंचित शहर:",
-    "add_selected_cities_to_plan_button": "चयनित शहरों को योजना में जोड़ें"
+    "add_selected_cities_to_plan_button": "चयनित शहरों को योजना में जोड़ें",
+    "object_name_column_header": "नाम"
 }

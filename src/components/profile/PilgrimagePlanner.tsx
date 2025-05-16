@@ -7,6 +7,7 @@ import { getPlacesByCityId } from "../../services/placesApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 // Removed date-fns/locale imports from here as they are now in PilgrimagePlannerControls
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api';
+import { supabase } from '../../integrations/supabase/client';
 
 import { PilgrimagePlannerControls } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
@@ -228,6 +229,62 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     );
   };
 
+  const onSaveAsGoal = async () => {
+    if (!authContext?.auth?.user?.id) {
+      console.error("User not authenticated");
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('goals')
+        .insert({
+          user_id: authContext.auth.user.id,
+          title: `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
+          cities: plannedItems
+            .filter(item => item.type === 'city')
+            .map(city => ({
+              id: city.data.id,
+              name: city.data.name,
+              dates: [city.date]
+            })),
+          places: plannedItems
+            .filter(item => item.type === 'place')
+            .map(place => ({
+              id: place.data.id,
+              name: place.data.name,
+              city_id: place.city_id_for_grouping,
+              dates: [place.date]
+            })),
+          routes: plannedItems
+            .filter(item => item.type === 'route')
+            .map(route => ({
+              id: route.data.id,
+              name: route.data.name,
+              city_id: route.city_id_for_grouping,
+              dates: [route.date]
+            })),
+          events: plannedItems
+            .filter(item => item.type === 'event')
+            .map(event => ({
+              id: event.data.id,
+              name: event.data.name,
+              city_id: event.city_id_for_grouping,
+              dates: [event.date]
+            })),
+          start_date: selectedDateRange?.from,
+          end_date: selectedDateRange?.to,
+          total_items: plannedItems.length
+        });
+
+      if (error) throw error;
+      alert(t('goal_saved_successfully'));
+    } catch (error) {
+      console.error("Error saving goal:", error);
+      alert(t('error_saving_goal'));
+    }
+  };
+
   const handleAddFavoritesToPlan = async () => {
     if (!authContext || !authContext.auth || !authContext.auth.user) {
       console.error("User data not available"); return;
@@ -290,6 +347,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onAddFavoritesToPlan={handleAddFavoritesToPlan}
         onAddStagedCities={handleAddStagedCitiesToMainPlan} 
         onDistributeDates={handleDistributeDates}
+        onSaveAsGoal={onSaveAsGoal}
       />
       {isPlanInitiated && (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 

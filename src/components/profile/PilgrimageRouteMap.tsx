@@ -49,8 +49,10 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
   }
 
   return (
-    <div className="pilgrimage-route-map-container mt-8 h-full">
-      <RouteMap places={placesForRoute} maintainZoom={mapShouldMaintainZoom} />
+    <div className="bg-white p-6 rounded-lg shadow-sm">
+      <div className="pilgrimage-route-map-container flex items-start h-full w-full max-w-none ml-0 pl-0 pr-0 mr-0">
+        <RouteMap places={placesForRoute} maintainZoom={mapShouldMaintainZoom} />
+      </div>
     </div>
   );
 };

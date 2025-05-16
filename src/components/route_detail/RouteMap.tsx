@@ -33,9 +33,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
     }
 
     return (
-        <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Маршрут на карте</h2>
-            <div className="flex-grow rounded-xl overflow-hidden shadow-lg mt-4" style={{ height: '500px' }}>
+        <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-0 w-full max-w-none">
+            <h2 className="text-lg font-semibold mb-4 text-gray-900">Маршрут на карте</h2>
+            <div className="flex-grow rounded-none overflow-hidden w-full" style={{ height: '500px' }}>
                 <CityMapView 
                     locations={mapLocations} 
                     polylinePoints={polylinePoints}
