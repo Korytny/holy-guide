@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Language, City } from '../../types';
+import React, { useMemo } from 'react'; // Removed useState as goalName is now a prop
+import { Language, City, PlannedItem } from '../../types';
 import { type DateRange } from 'react-day-picker';
 import { PilgrimageCalendar } from './PilgrimageCalendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -8,16 +8,12 @@ import { Badge } from "@/components/ui/badge";
 import { X } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { Input } from "@/components/ui/input";
-import { format } from 'date-fns'; // format is still used for PilgrimageCalendar selectedRange prop
+import { format } from 'date-fns';
 import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
-
-// Imports for new DateFieldComponent
 import { DateFieldComponent } from '@/components/ui/date-field';
 import {
   parseDate,
-  CalendarDate,
   getLocalTimeZone,
-  today
 } from '@internationalized/date';
 import type { DateValue } from '@internationalized/date';
 
@@ -28,6 +24,7 @@ const dateFnsLocales: Record<string, DateFnsLocale> = {
 interface PilgrimagePlannerControlsProps {
   availableCities: City[];
   stagedCities: City[];
+  plannedItems: PlannedItem[];
   selectedDateRange?: DateRange;
   language: Language;
   t: (key: string, params?: object) => string;
@@ -37,8 +34,15 @@ interface PilgrimagePlannerControlsProps {
   onAddStagedCities: () => void;
   onAddFavoritesToPlan: () => void;
   onDistributeDates: () => void;
-  onSaveAsGoal: (goalName: string) => void;
+  
+  // Props for goal name input and save/update logic
+  goalNameValue: string;
+  onGoalNameChange: (name: string) => void;
+  currentLoadedGoalId: string | null;
+  onSaveOrUpdateGoal: (name: string) => void; // Renamed from onSaveAsGoal
+
   onLoadGoal: (goalId: string) => void;
+  onDeleteGoal: (goalId: string) => void; 
   savedGoals: Array<{
     id: string;
     title: string;
@@ -49,6 +53,7 @@ interface PilgrimagePlannerControlsProps {
 export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
   availableCities,
   stagedCities,
+  plannedItems,
   selectedDateRange,
   language,
   t,
@@ -58,14 +63,19 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   onAddStagedCities,
   onAddFavoritesToPlan,
   onDistributeDates,
-  onSaveAsGoal,
+  
+  goalNameValue,
+  onGoalNameChange,
+  currentLoadedGoalId,
+  onSaveOrUpdateGoal,
+
   onLoadGoal,
+  onDeleteGoal,
+  savedGoals,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
-  const [goalName, setGoalName] = useState('');
-  const [savedGoals, setSavedGoals] = useState([]);
+  // const [goalName, setGoalName] = useState(''); // Removed, now a prop
 
-  // Helper to convert JS Date to DateValue
   const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
     if (!date) return null;
     try {
@@ -76,7 +86,6 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
     }
   };
 
-  // Helper to convert DateValue to JS Date
   const convertToJSDate = (dateValue: DateValue | null): Date | undefined => {
     if (!dateValue) return undefined;
     try {
@@ -93,18 +102,15 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
 
     if (field === 'from') {
       newRange = { from: jsDate, to: selectedDateRange?.to };
-      // Ensure 'from' is not after 'to' if 'to' exists
       if (newRange.to && jsDate && jsDate > newRange.to) {
-        newRange.to = jsDate; // Or set to undefined, or keep old, depending on desired UX
+        newRange.to = jsDate;
       }
-    } else { // field === 'to'
+    } else {
       newRange = { from: selectedDateRange?.from, to: jsDate };
-      // Ensure 'to' is not before 'from' if 'from' exists
       if (newRange.from && jsDate && jsDate < newRange.from) {
-        newRange.from = jsDate; // Or set to undefined, or keep old
+        newRange.from = jsDate;
       }
     }
-     // If both become undefined, pass undefined to clear the range
     if (!newRange.from && !newRange.to) {
         onDateRangeChange(undefined);
     } else {
@@ -112,41 +118,39 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
     }
   };
 
+  const plannedCityIdsInMainPlan = useMemo(() => 
+    new Set(plannedItems.filter(item => item.type === 'city').map(item => item.data.id)), 
+    [plannedItems]
+  );
+
+  const citiesToDisplayAsBadges = useMemo(() => {
+    const cityMap = new Map<string, City>();
+    stagedCities.forEach(city => cityMap.set(city.id, city));
+    plannedItems.forEach(item => {
+      if (item.type === 'city' && !cityMap.has(item.data.id)) {
+        cityMap.set(item.data.id, item.data as City);
+      }
+    });
+    return Array.from(cityMap.values());
+  }, [stagedCities, plannedItems]);
+
+  const saveButtonText = currentLoadedGoalId 
+    ? t('update_goal_button', { defaultValue: 'Update Goal' }) 
+    : t('save_as_goal', { defaultValue: 'Save as Goal' });
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="bg-white p-6 rounded-lg shadow-sm">
-        <h3 className="text-lg font-semibold mb-4">{t('select_dates')}</h3>
-        <PilgrimageCalendar 
-            selectedRange={selectedDateRange} 
-            onDateRangeChange={onDateRangeChange}
-            locale={currentLocale}
-        />
-      </div>
-      <div className="border rounded-md p-4 bg-white">
-        <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('plan_your_pilgrimage')}</h3>
-        {savedGoals.length > 0 && (
-          <div className="mb-4">
-            <h4 className="text-sm font-medium mb-2 text-gray-700">{t('saved_goals')}</h4>
-            <ul className="space-y-1">
-              {savedGoals.map(goal => (
-                <li 
-                  key={goal.id}
-                  className="cursor-pointer hover:bg-gray-50 px-2 py-1 rounded"
-                  onClick={() => onLoadGoal(goal.id)}
-                >
-                  <div className="flex justify-between">
-                    <span>{goal.title}</span>
-                    <span className="text-xs text-gray-500">
-                      {format(new Date(goal.created_at), 'dd.MM.yyyy')}
-                    </span>
-                  </div>
-                </li>
-              ))}
-            </ul>
-          </div>
-        )}
+      <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
+        <div>
+            <h3 className="text-lg font-semibold mb-4">{t('select_dates')}</h3>
+            <PilgrimageCalendar
+                selectedRange={selectedDateRange}
+                onDateRangeChange={onDateRangeChange}
+                locale={currentLocale}
+            />
+        </div>
         
-        <div className="mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DateFieldComponent
             label={t('start_date_label')}
             value={convertToDateValue(selectedDateRange?.from)}
@@ -160,13 +164,48 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         </div>
 
         {selectedDateRange && selectedDateRange.from && (
-            <div className="mb-4">
+            <div>
                 <Button variant="outline" className="w-full" onClick={onDistributeDates}>
                     {t('distribute_dates_to_cities_button')}
                 </Button>
             </div>
         )}
+      </div>
 
+      <div className="border rounded-md p-4 bg-white space-y-6">
+        <div>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('plan_your_pilgrimage')}</h3>
+    
+            {savedGoals && savedGoals.length > 0 && (
+              <div className="mb-6 mt-2">
+                <h4 className="text-md font-semibold mb-3 text-gray-800">{t('saved_goals')}</h4>
+                <div className="flex flex-wrap gap-2">
+                  {savedGoals.map(goal => (
+                    <div key={goal.id} className="flex items-center">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => onLoadGoal(goal.id)}
+                        className="text-xs rounded-r-none"
+                      >
+                        {goal.title}
+                      </Button>
+                      <Button
+                        variant="destructive"
+                        size="sm"
+                        onClick={() => onDeleteGoal(goal.id)}
+                        className="text-xs px-2 rounded-l-none"
+                        aria-label={t('delete_goal_label', { goalName: goal.title })}
+                      >
+                        <X size={16} />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+        </div>
+        
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">{t('select_cities_to_stage')}</label>
           <Select onValueChange={onCitySelect}>
@@ -174,30 +213,46 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               <SelectValue placeholder={t('select_a_city_to_stage')} />
             </SelectTrigger>
             <SelectContent>
-              {availableCities.map((city) => (
-                <SelectItem key={city.id} value={city.id || ''} disabled={stagedCities.some(sc => sc.id === city.id)}>
-                  {getLocalizedText(city.name, language)}
-                </SelectItem>
-              ))}
+              {availableCities.map((city) => {
+                const isStaged = stagedCities.some(sc => sc.id === city.id);
+                const isInMainPlan = plannedCityIdsInMainPlan.has(city.id);
+                const isDisabled = isStaged || isInMainPlan;
+                return (
+                  <SelectItem 
+                    key={city.id} 
+                    value={city.id || ''} 
+                    disabled={isDisabled}
+                  >
+                    {getLocalizedText(city.name, language)}
+                    {isInMainPlan && !isStaged && <span className="ml-2 text-xs text-gray-500">({t('city_already_in_plan')})</span>}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
-          {stagedCities.length > 0 && (
+          
+          {citiesToDisplayAsBadges.length > 0 && (
             <div className="mt-2 space-y-1">
-              <p className="text-xs text-gray-600">{t('cities_staged_for_plan')}:</p>
+              <p className="text-xs text-gray-600">{t('cities_staged_for_plan')}:</p> 
               <div className="flex flex-wrap gap-1">
-                {stagedCities.map(city => (
-                  <Badge key={city.id} className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded-md">
-                    {getLocalizedText(city.name, language)}
-                    <Button variant="ghost" size="icon" className="h-5 w-5 ml-1.5 rounded-full" onClick={() => onRemoveStagedCity(city.id)}>
-                      <X size={14} />
-                    </Button>
-                  </Badge>
-                ))}
+                {citiesToDisplayAsBadges.map(city => {
+                  const isStaged = stagedCities.some(sc => sc.id === city.id);
+                  return (
+                    <Badge key={city.id} className="flex items-center bg-gray-200 hover:bg-gray-300 text-gray-800 px-3 py-1.5 rounded-md">
+                      {getLocalizedText(city.name, language)}
+                      {isStaged && (
+                        <Button variant="ghost" size="icon" className="h-5 w-5 ml-1.5 rounded-full" onClick={() => onRemoveStagedCity(city.id)}>
+                          <X size={14} />
+                        </Button>
+                      )}
+                    </Badge>
+                  );
+                })}
               </div>
             </div>
           )}
         </div>
-        
+
         {stagedCities.length > 0 && (
             <div className="mb-4">
                 <Button className="w-full" onClick={onAddStagedCities}>
@@ -211,29 +266,28 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
           <Button variant="outline" className="w-full" onClick={onAddFavoritesToPlan}>
             {t('add_favorites_to_plan')}
           </Button>
-          
+
           <div className="mt-4">
             <div className="mb-2">
               <Input
                 placeholder={t('goal_name_placeholder')}
-                value={goalName}
-                onChange={(e) => setGoalName(e.target.value)}
+                value={goalNameValue} // Use prop value
+                onChange={(e) => onGoalNameChange(e.target.value)} // Use prop handler
               />
             </div>
             <Button 
               className="w-full bg-orange-500 hover:bg-orange-600 text-white"
               onClick={() => {
-                onSaveAsGoal(goalName);
-                setGoalName('');
+                onSaveOrUpdateGoal(goalNameValue);
+                // Do not clear goalNameValue here, parent component handles it
               }}
-              disabled={!goalName.trim()}
+              disabled={!goalNameValue.trim() && !currentLoadedGoalId} // Disable if input is empty AND no goal is loaded (to prevent saving empty new goal)
             >
-              {t('save_as_goal')}
+              {saveButtonText} {/* Dynamically set button text */}
             </Button>
           </div>
         </div>
       </div>
-
     </div>
   );
 };

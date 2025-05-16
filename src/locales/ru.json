@@ -185,5 +185,19 @@
     "start_date_label": "Дата начала",
     "end_date_label": "Дата окончания",
     "date_format_placeholder": "{format}",
-    "object_name_column_header": "Название"
+    "object_name_column_header": "Название",
+    "saved_goals": "Сохраненные цели",
+    "city_already_in_plan": "в плане",
+    "update_goal_button": "Обновить цель",
+    "goal_name_placeholder": "Введите название цели...",
+    "goal_saved_successfully": "Цель успешно сохранена",
+    "error_saving_goal": "Ошибка сохранения цели",
+    "goal_updated_successfully": "Цель успешно обновлена",
+    "goal_deleted_successfully": "Цель успешно удалена",
+    "error_deleting_goal": "Ошибка удаления цели",
+    "user_not_authenticated_error_message": "Пользователь не аутентифицирован.",
+    "goal_not_found": "Цель не найдена.",
+    "error_loading_goal": "Ошибка загрузки цели. Проверьте консоль.",
+    "delete_goal_label": "Удалить цель {{goalName}}",
+    "save_as_goal": "Сохранить как цель"
 }

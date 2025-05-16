@@ -182,5 +182,21 @@
     "select_a_city_to_stage": "Select a city to stage...",
     "cities_staged_for_plan": "Cities staged for plan:",
     "add_selected_cities_to_plan_button": "Add Selected Cities to Plan",
-    "object_name_column_header": "Name"
+    "object_name_column_header": "Name",
+    "saved_goals": "Saved Goals",
+    "city_already_in_plan": "in plan",
+    "update_goal_button": "Update Goal",
+    "goal_name_placeholder": "Enter goal name...",
+    "start_date_label": "Start Date",
+    "end_date_label": "End Date",
+    "goal_saved_successfully": "Goal saved successfully",
+    "error_saving_goal": "Error saving goal",
+    "goal_updated_successfully": "Goal updated successfully",
+    "goal_deleted_successfully": "Goal deleted successfully",
+    "error_deleting_goal": "Error deleting goal",
+    "user_not_authenticated_error_message": "User not authenticated.",
+    "goal_not_found": "Goal not found.",
+    "error_loading_goal": "Error loading goal. Please check console.",
+    "delete_goal_label": "Delete goal {{goalName}}",
+    "save_as_goal": "Save as Goal"
 }

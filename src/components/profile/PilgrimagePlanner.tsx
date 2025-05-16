@@ -1,19 +1,16 @@
 import { useEffect, useState, useCallback } from "react";
 import { type AuthContextType } from "../../context/AuthContext";
 import { type LanguageContextType } from "../../context/LanguageContext";
-import { City, Place, Route, Event, Language, PlannedItem } from "../../types";
+import { City, Place, Route, Event, Language, PlannedItem, Location } from "../../types";
 import { getCities } from "../../services/citiesApi";
 import { getPlacesByCityId } from "../../services/placesApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
-// Removed date-fns/locale imports from here as they are now in PilgrimagePlannerControls
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api';
 import { supabase } from '../../integrations/supabase/client';
 
 import { PilgrimagePlannerControls } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
 import PilgrimageRouteMap from "./PilgrimageRouteMap";
-
-// Removed dateFnsLocales as it's moved to PilgrimagePlannerControls
 
 interface PilgrimagePlannerProps {
   auth: AuthContextType;
@@ -42,6 +39,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [sortedItemsForDisplay, setSortedItemsForDisplay] = useState<PlannedItem[]>([]);
   const [isPlanInitiated, setIsPlanInitiated] = useState<boolean>(false);
   const [cityPlaceSuggestions, setCityPlaceSuggestions] = useState<Record<string, CitySuggestionState>>({});
+  const [savedGoals, setSavedGoals] = useState<any[]>([]);
+
+  // State for managing loaded goal name and ID
+  const [goalNameForInput, setGoalNameForInput] = useState('');
+  const [currentLoadedGoalId, setCurrentLoadedGoalId] = useState<string | null>(null);
 
   useEffect(() => {
     if (onItemsChange) {
@@ -83,10 +85,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     finalSortedList.push(...remainingItems);
     setSortedItemsForDisplay(finalSortedList);
 
-    if (finalSortedList.length > 0 ){
-        if(!isPlanInitiated) setIsPlanInitiated(true);
+    if (finalSortedList.length > 0 && !isPlanInitiated){
+        setIsPlanInitiated(true);
     } 
-  }, [plannedItems]); 
+  }, [plannedItems, isPlanInitiated]); 
 
   const handleAddPlacesForCity = async (cityId: string) => {
     let currentSuggestions = cityPlaceSuggestions[cityId];
@@ -215,6 +217,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setPlannedItems(prevItems => prevItems.filter(item => 
       !(item.type === itemToRemove.type && item.data.id === itemToRemove.data.id)
     ));
+    // If all items are removed, maybe clear loaded goal info
+    if (plannedItems.length === 1) { 
+        setCurrentLoadedGoalId(null);
+        setGoalNameForInput('');
+    }
   };
 
   const handleDateRangeChange = (range: import("react-day-picker").DateRange | undefined) => setSelectedDateRange(range);
@@ -229,111 +236,230 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     );
   };
 
-  const [savedGoals, setSavedGoals] = useState([]);
-
-  useEffect(() => {
-    const fetchGoals = async () => {
-      try {
-        // First check if we have an active session
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.user?.id) {
-          console.log('No active session found');
-          setSavedGoals([]);
-          return;
-        }
-
-        // Then fetch goals for the authenticated user
-        const { data, error } = await supabase
-          .from('goals')
-          .select('*')
-          .eq('user_id', session.user.id)
-          .order('created_at', { ascending: false });
-        
-        if (error) {
-          console.error('Error fetching goals:', error);
-          return;
-        }
-
-        if (data) {
-          console.log('Fetched goals:', data.length);
-          setSavedGoals(data);
-        }
-      } catch (error) {
-        console.error('Error in fetchGoals:', error);
+  const fetchGoals = useCallback(async () => {
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.user?.id) {
+        setSavedGoals([]);
+        return;
       }
-    };
-    
-    fetchGoals();
-    
-    // Set up auth state listener
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' || event === 'SIGNED_OUT') {
-        fetchGoals();
+      const { data, error } = await supabase
+        .from('goals')
+        .select('*')
+        .eq('user_id', session.user.id)
+        .order('created_at', { ascending: false });
+      if (error) {
+        console.error('Error fetching goals:', error);
+        setSavedGoals([]);
+        return;
       }
-    });
-
-    return () => subscription.unsubscribe();
+      if (data) {
+        setSavedGoals(data);
+      }
+    } catch (error) {
+      console.error('Error in fetchGoals:', error);
+      setSavedGoals([]);
+    }
   }, []);
 
-  const onSaveAsGoal = async (goalName: string) => {
+  useEffect(() => {
+    fetchGoals();
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event) => {
+      if (event === 'SIGNED_IN' || event === 'INITIAL_SESSION') {
+        fetchGoals();
+      }
+      if (event === 'SIGNED_OUT') {
+        setSavedGoals([]);
+        setCurrentLoadedGoalId(null); // Clear loaded goal on sign out
+        setGoalNameForInput('');
+      }
+    });
+    return () => subscription.unsubscribe();
+  }, [fetchGoals]);
+
+  const handleSaveOrUpdateGoal = async (currentGoalName: string) => {
     if (!authContext?.auth?.user?.id) {
-      console.error("User not authenticated");
+      alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
       return;
     }
 
+    const goalData = {
+        user_id: authContext.auth.user.id,
+        title: currentGoalName.trim() || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
+        cities: plannedItems
+          .filter(item => item.type === 'city')
+          .map(cityItem => ({
+            id: cityItem.data.id,
+            name: cityItem.data.name,
+            dates: [cityItem.date]
+          })),
+        places: plannedItems
+          .filter(item => item.type === 'place' && item.data)
+          .map(placeItem => ({
+            id: placeItem.data.id,
+            name: placeItem.data.name,
+            city_id: placeItem.city_id_for_grouping,
+            dates: [placeItem.date],
+            location: (placeItem.data as Place).location
+          })),
+        routes: plannedItems
+          .filter(item => item.type === 'route' && item.data)
+          .map(routeItem => ({
+            id: routeItem.data.id,
+            name: routeItem.data.name,
+            city_id: routeItem.city_id_for_grouping,
+            dates: [routeItem.date]
+          })),
+        events: plannedItems
+          .filter(item => item.type === 'event' && item.data)
+          .map(eventItem => ({
+            id: eventItem.data.id,
+            name: eventItem.data.name,
+            city_id: eventItem.city_id_for_grouping,
+            dates: [eventItem.date],
+            location: (eventItem.data as Event).location
+          })),
+        start_date: selectedDateRange?.from ? format(selectedDateRange.from, 'yyyy-MM-dd') : null,
+        end_date: selectedDateRange?.to ? format(selectedDateRange.to, 'yyyy-MM-dd') : null,
+        total_items: plannedItems.length
+      };
+
     try {
-      const { error } = await supabase
+      if (currentLoadedGoalId) {
+        // Update existing goal
+        const { error } = await supabase
+          .from('goals')
+          .update(goalData)
+          .eq('id', currentLoadedGoalId)
+          .eq('user_id', authContext.auth.user.id);
+        if (error) throw error;
+        alert(t('goal_updated_successfully', {defaultValue: 'Goal updated successfully.'}));
+      } else {
+        // Insert new goal
+        const { error } = await supabase.from('goals').insert([goalData]);
+        if (error) throw error;
+        alert(t('goal_saved_successfully'));
+        // For new goals, we might want to clear the input, but not for updates.
+        // setCurrentLoadedGoalId(null); // This would be set if a new goal is loaded
+        // setGoalNameForInput(''); // Clear input only for new saves that don't load it back
+      }
+      fetchGoals(); // Refetch goals to update the list in both cases
+    } catch (error) {
+      console.error("Error saving/updating goal:", error);
+      alert(t('error_saving_goal'));
+    }
+  };
+  
+  const handleDeleteGoal = async (goalId: string) => {
+    if (!authContext?.auth?.user?.id) {
+        alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
+        return;
+    }
+    try {
+        const { error } = await supabase
+            .from('goals')
+            .delete()
+            .eq('user_id', authContext.auth.user.id) 
+            .eq('id', goalId);
+
+        if (error) throw error;
+        
+        setSavedGoals(prevGoals => prevGoals.filter(goal => goal.id !== goalId));
+        // If the deleted goal was the currently loaded one, clear the input fields
+        if (currentLoadedGoalId === goalId) {
+            setCurrentLoadedGoalId(null);
+            setGoalNameForInput('');
+        }
+        alert(t('goal_deleted_successfully'));
+    } catch (error) {
+        console.error('Error deleting goal:', error);
+        alert(t('error_deleting_goal'));
+    }
+  };
+
+  const handleLoadGoal = async (goalId: string) => {
+    try {
+      const { data: goal, error } = await supabase
         .from('goals')
-        .insert({
-          user_id: authContext.auth.user.id,
-          title: goalName || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
-          cities: plannedItems
-            .filter(item => item.type === 'city')
-            .map(city => ({
-              id: city.data.id,
-              name: city.data.name,
-              dates: [city.date]
-            })),
-          places: plannedItems
-            .filter(item => item.type === 'place')
-            .map(place => ({
-              id: place.data.id,
-              name: place.data.name,
-              city_id: place.city_id_for_grouping,
-              dates: [place.date]
-            })),
-          routes: plannedItems
-            .filter(item => item.type === 'route')
-            .map(route => ({
-              id: route.data.id,
-              name: route.data.name,
-              city_id: route.city_id_for_grouping,
-              dates: [route.date]
-            })),
-          events: plannedItems
-            .filter(item => item.type === 'event')
-            .map(event => ({
-              id: event.data.id,
-              name: event.data.name,
-              city_id: event.city_id_for_grouping,
-              dates: [event.date]
-            })),
-          start_date: selectedDateRange?.from,
-          end_date: selectedDateRange?.to,
-          total_items: plannedItems.length
-        });
+        .select('*')
+        .eq('id', goalId)
+        .single();
 
       if (error) throw error;
-      alert(t('goal_saved_successfully'));
+      if (!goal) {
+        alert(t('goal_not_found', {defaultValue: 'Goal not found.'}));
+        setCurrentLoadedGoalId(null); // Clear if goal not found
+        setGoalNameForInput('');
+        return;
+      }
+
+      setPlannedItems([]); 
+      
+      const cityItems = (goal.cities || []).map((city: any) => ({
+        type: 'city',
+        data: { id: city.id, name: city.name },
+        city_id_for_grouping: city.id,
+        date: city.dates?.[0],
+        time: getRandomTime()
+      } as PlannedItem));
+
+      const placeItems = (goal.places || []).map((place: any) => ({
+        type: 'place',
+        data: { id: place.id, name: place.name, location: place.location as Location }, 
+        city_id_for_grouping: place.city_id,
+        date: place.dates?.[0],
+        time: getRandomTime()
+      } as PlannedItem));
+
+      const routeItems = (goal.routes || []).map((route: any) => ({
+        type: 'route',
+        data: { id: route.id, name: route.name }, 
+        city_id_for_grouping: route.city_id,
+        date: route.dates?.[0],
+        time: getRandomTime()
+      } as PlannedItem));
+
+      const eventItems = (goal.events || []).map((event: any) => ({
+        type: 'event',
+        data: { id: event.id, name: event.name, location: event.location as Location }, 
+        city_id_for_grouping: event.city_id,
+        date: event.dates?.[0],
+        time: getRandomTime()
+      } as PlannedItem));
+
+      const newPlannedItems = [...cityItems, ...placeItems, ...routeItems, ...eventItems];
+      setPlannedItems(newPlannedItems);
+      
+      if (newPlannedItems.length > 0) {
+          setIsPlanInitiated(true);
+      } else {
+          setIsPlanInitiated(false); // If goal is empty, set to false
+      }
+      
+      // Set the loaded goal ID and name for the input field
+      setCurrentLoadedGoalId(goal.id);
+      setGoalNameForInput(goal.title || '');
+      
+      if (goal.start_date || goal.end_date) {
+        setSelectedDateRange({
+          from: goal.start_date ? new Date(goal.start_date) : undefined,
+          to: goal.end_date ? new Date(goal.end_date) : undefined
+        });
+      } else {
+        setSelectedDateRange(undefined); 
+      }
+
     } catch (error) {
-      console.error("Error saving goal:", error);
-      alert(t('error_saving_goal'));
+      console.error('Error loading goal:', error);
+      alert(t('error_loading_goal', {defaultValue: 'Error loading goal. Please check console.'}));
+      setCurrentLoadedGoalId(null); // Clear on error
+      setGoalNameForInput('');
     }
   };
 
   const handleAddFavoritesToPlan = async () => {
     if (!authContext || !authContext.auth || !authContext.auth.user) {
-      console.error("User data not available"); return;
+      console.error("User data not available for adding favorites"); return;
     }
     const { cities_like, places_like, routes_like, events_like } = authContext.auth.user;
     const itemsToAdd: PlannedItem[] = [];
@@ -370,22 +496,26 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
   };
   
+  // Effect to clear loaded goal name if plannedItems become empty and a goal was loaded
   useEffect(() => {
-    if (plannedItems.length > 0) {
-      setIsPlanInitiated(true);
-    } 
-  }, [plannedItems]);
-
-  // Removed displayedDateRange calculation
+    if (plannedItems.length === 0 && currentLoadedGoalId) {
+      setCurrentLoadedGoalId(null);
+      setGoalNameForInput('');
+      setIsPlanInitiated(false);
+    }
+    if (plannedItems.length > 0 && !isPlanInitiated) {
+        setIsPlanInitiated(true);
+    }
+  }, [plannedItems, currentLoadedGoalId, isPlanInitiated]);
 
   return (
     <>
       <PilgrimagePlannerControls
         availableCities={availableCities}
         stagedCities={stagedForPlanningCities}
+        plannedItems={plannedItems} 
         onRemoveStagedCity={handleRemoveStagedCity}
-        selectedDateRange={selectedDateRange} // Pass selectedDateRange directly
-        // displayedDateRange prop removed
+        selectedDateRange={selectedDateRange} 
         language={language}
         t={t}
         onDateRangeChange={handleDateRangeChange}
@@ -393,87 +523,14 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onAddFavoritesToPlan={handleAddFavoritesToPlan}
         onAddStagedCities={handleAddStagedCitiesToMainPlan} 
         onDistributeDates={handleDistributeDates}
-        onSaveAsGoal={onSaveAsGoal}
-        onLoadGoal={async (goalId) => {
-          try {
-            const { data: goal, error } = await supabase
-              .from('goals')
-              .select('*')
-              .eq('id', goalId)
-              .single();
-
-            if (error) throw error;
-            if (!goal) {
-              console.log('Goal not found');
-              return;
-            }
-
-            // Clear current plan
-            setPlannedItems([]);
-            
-            // Load cities from goal
-            const cityItems = (goal.cities || []).map((city: any) => ({
-              type: 'city',
-              data: {
-                id: city.id,
-                name: city.name
-              },
-              city_id_for_grouping: city.id,
-              date: city.dates?.[0],
-              time: getRandomTime()
-            }));
-
-            // Load places from goal
-            const placeItems = (goal.places || []).map((place: any) => ({
-              type: 'place',
-              data: {
-                id: place.id,
-                name: place.name
-              },
-              city_id_for_grouping: place.city_id,
-              date: place.dates?.[0],
-              time: getRandomTime()
-            }));
-
-            // Load routes from goal
-            const routeItems = (goal.routes || []).map((route: any) => ({
-              type: 'route',
-              data: {
-                id: route.id,
-                name: route.name
-              },
-              city_id_for_grouping: route.city_id,
-              date: route.dates?.[0],
-              time: getRandomTime()
-            }));
-
-            // Load events from goal
-            const eventItems = (goal.events || []).map((event: any) => ({
-              type: 'event',
-              data: {
-                id: event.id,
-                name: event.name
-              },
-              city_id_for_grouping: event.city_id,
-              date: event.dates?.[0],
-              time: getRandomTime()
-            }));
-
-            // Combine all items
-            setPlannedItems([...cityItems, ...placeItems, ...routeItems, ...eventItems]);
-            
-            // Update date range if available
-            if (goal.start_date || goal.end_date) {
-              setSelectedDateRange({
-                from: goal.start_date ? new Date(goal.start_date) : undefined,
-                to: goal.end_date ? new Date(goal.end_date) : undefined
-              });
-            }
-
-          } catch (error) {
-            console.error('Error loading goal:', error);
-          }
-        }}
+        
+        goalNameValue={goalNameForInput}
+        onGoalNameChange={setGoalNameForInput}
+        currentLoadedGoalId={currentLoadedGoalId} // Pass this to change button text
+        onSaveOrUpdateGoal={handleSaveOrUpdateGoal} // Renamed from onSaveAsGoal
+        
+        onDeleteGoal={handleDeleteGoal}
+        onLoadGoal={handleLoadGoal} // Renamed from original onLoadGoal to make it clear
         savedGoals={savedGoals}
       />
       {isPlanInitiated && (
