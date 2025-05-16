@@ -231,7 +231,7 @@
     "add_favorite_events_to_plan_button": "Из Избранного",
     "save_current_guru_plan": "Сохранить Текущий План Гуру",
     "guru_plan_name_placeholder": "Введите имя плана Гуру...",
-    "guru_plan_title": "План Событий Гуру",
+    "guru_plan_title": "План развития",
     "guru_plan_placeholder": "Ваш план событий появится здесь.",
     "event_already_in_plan": "Событие '{{eventName}}' уже в плане.",
     "no_favorite_events_to_add": "Нет избранных событий для добавления.",
