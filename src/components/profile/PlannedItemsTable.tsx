@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 import { Language, PlannedItem, City } from '../../types'; // Added City type
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -53,7 +54,13 @@ export const PlannedItemsTable: React.FC<PlannedItemsTableProps> = ({
                 return (
                     <TableRow key={`${item.type}-${item.data.id}-${index}`}>
                         <TableCell className={cn("font-medium", isCityRow ? "font-semibold text-blue-600" : "pl-6")}>
-                            {getLocalizedText(item.data.name as any, language)}
+                            <Link 
+                              to={`/${item.type === 'city' ? 'cities' : item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
+                              target="_blank"
+                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                            >
+                              {getLocalizedText(item.data.name as any, language)}
+                            </Link>
                         </TableCell>
                         <TableCell>
                             <Input 
