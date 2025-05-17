@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { Place } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useFont } from '../context/FontContext';
 import { MapPin, Heart } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils";
@@ -27,6 +28,7 @@ const getPlaceTypeKey = (type: number | undefined): string => {
 const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
+  const { fonts } = useFont();
   
   const placeName = getLocalizedText(place.name, language);
   const placeDescription = getLocalizedText(place.description, language);
@@ -75,12 +77,18 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
       
       <Link to={`/places/${place.id}`} className="p-3 flex-grow flex flex-col justify-between">
           <div>
-            <h3 className="text-base font-bold mb-1 truncate font-[LaudatioC] text-[#09332A]" title={placeName}>{placeName}</h3>
-            <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
+            <h3 className={cn(
+              "text-base font-bold mb-1 truncate text-[#09332A]",
+              fonts.heading.className
+            )} title={placeName}>{placeName}</h3>
+            <p className={cn(
+              "text-sm text-black line-clamp-3 mb-3",
+              fonts.body.className
+            )}>
                 {placeDescription || t('no_description_available')}
             </p>
           </div>
-          <div className="flex items-center text-xs text-[#09332A] mt-1 font-['Monaco']">
+          <div className="flex items-center text-xs text-[#09332A] mt-1">
               <MapPin size={14} className="mr-1" />
               <span>{t(placeTypeKey)}</span>
           </div>

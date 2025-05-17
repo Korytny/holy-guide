@@ -2,15 +2,16 @@ import React, { useEffect, useState, ChangeEvent } from 'react'; // Import Chang
 import { Comment, getComments, addComment, editComment, deleteComment, likeComment, unlikeComment } from '../services/comments'; // Import from the new structure
 import { useAuth } from '../context/AuthContext';
 import { useLanguage } from '../context/LanguageContext';
+import { useFont } from '../context/FontContext';
 import { Button } from './ui/button';
 import { Textarea } from './ui/textarea';
 import { Avatar, AvatarFallback, AvatarImage } from './ui/avatar';
 import { Edit, Trash2, Save, X, Heart, Image as ImageIcon, Loader2, MinusCircle, PlusCircle, ChevronLeft, ChevronRight } from 'lucide-react'; // Import more icons
-import { cn } from '@/lib/utils'; // Assuming cn is available for conditional classnames
 import { Input } from './ui/input'; // Import Input for file input
 import { Checkbox } from './ui/checkbox'; // Import Checkbox for removing photo
 import { Label } from './ui/label'; // Import Label
 import { Dialog, DialogContent } from './ui/dialog'; // Import Dialog components
+import { cn } from "@/lib/utils";
 
 interface CommentsSectionProps {
   entityType: 'city' | 'place' | 'route' | 'event';
@@ -22,6 +23,7 @@ const MAX_PHOTOS = 3; // Define the maximum number of photos allowed
 const CommentsSection: React.FC<CommentsSectionProps> = ({ entityType, entityId }) => {
   const { t } = useLanguage();
   const { auth } = useAuth();
+  const { fonts } = useFont();
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [newCommentText, setNewCommentText] = useState('');
@@ -305,14 +307,14 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ entityType, entityId 
 
   return (
     <div className="mt-8">
-      <h2 className="text-2xl font-bold mb-2 font-[Laudatio] text-[#09332A]">{t('comments')}</h2>
+      <h2 className={`text-2xl font-bold mb-2 ${fonts.heading.className} text-[#09332A]`}>{t('comments')}</h2>
 
       {isLoading && <p>{t('loading_comments')}</p>}
       {error && <p className="text-red-500 mb-4">{error}</p>}
 
       <div className="space-y-4">
         {comments.length === 0 && !isLoading && !error && (
-          <p className="text-gray-600 font-['Monaco']">{t('no_comments_yet')}</p>
+          <p className={`text-gray-600 ${fonts.body.className}`}>{t('no_comments_yet')}</p>
         )}
 
         {comments.map((comment) => {
@@ -493,7 +495,7 @@ const CommentsSection: React.FC<CommentsSectionProps> = ({ entityType, entityId 
       </div>
 
       <div className="mt-6">
-        <h3 className="text-xl font-bold mb-3 font-[Laudatio] text-[#09332A]">{isAuthenticated ? t('leave_a_comment') : t('login_to_comment')}</h3>
+        <h3 className={`text-xl font-bold mb-3 ${fonts.heading.className} text-[#09332A]`}>{isAuthenticated ? t('leave_a_comment') : t('login_to_comment')}</h3>
 
         {isAuthenticated ? (
           <div className="flex flex-col space-y-3">

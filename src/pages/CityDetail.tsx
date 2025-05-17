@@ -9,6 +9,8 @@ import { getEventsByCityId } from '../services/eventsApi';
 import { getPlacesByCityId } from '../services/placesApi';
 import { City, Place, Route, Event } from '../types';
 import { useLanguage } from '../context/LanguageContext';
+import { useFont } from '../context/FontContext';
+import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import { ArrowLeft } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
@@ -31,6 +33,7 @@ const CityDetail: React.FC = (): JSX.Element => {
   const [loading, setLoading] = useState<boolean>(true);
   const [activeTab, setActiveTab] = useState<string>('places');
   const { language, t } = useLanguage();
+  const { fonts } = useFont();
   const navigate = useNavigate();
 
   // console.log('CityDetail: Hooks initialized', { id, loading, city: !!city, language }); // Removed log
@@ -152,7 +155,12 @@ const CityDetail: React.FC = (): JSX.Element => {
      return (
       <Layout>
         <div className="app-container py-10 text-center">
-          <h2 className="text-xl font-semibold mb-4">{t('city_not_found')}</h2>
+          <h2 className={cn(
+            "text-xl font-semibold mb-4",
+            fonts.heading.className
+          )}>
+            {t('city_not_found')}
+          </h2>
           <Link to="/" className="btn-primary">
             {t('back_to_home')}
           </Link>

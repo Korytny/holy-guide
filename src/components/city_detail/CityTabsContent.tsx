@@ -1,7 +1,9 @@
 import React from 'react';
-import { Place, Route, Event } from '../../types'; // Adjust path
-import { useLanguage } from '../../context/LanguageContext'; // Adjust path
+import { Place, Route, Event } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+import { useFont } from '../../context/FontContext';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { cn } from "@/lib/utils";
 import PlaceCard from '../PlaceCard'; // Adjust path
 import RouteCard from '../RouteCard'; // Adjust path
 import EventCard from '../EventCard'; // Adjust path
@@ -31,6 +33,7 @@ const CityTabsContent: React.FC<CityTabsContentProps> = ({
     onSearch
 }) => {
     const { t } = useLanguage();
+    const { fonts } = useFont();
     const isSmallScreen = useIsSmallScreen();
 
     const PlaceCardComponent = isSmallScreen ? PlaceCardMob : PlaceCard;
@@ -43,19 +46,28 @@ const CityTabsContent: React.FC<CityTabsContentProps> = ({
                 {/* Places Tab */}
                 <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <MapPin size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[LaudatioC] text-lg">{t('places_tab_title')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('places_tab_title')}</span>
                     {places.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{places.length}</Badge>}
                 </TabsTrigger>
                 {/* Routes Tab */}
                 <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <RouteIcon size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[LaudatioC] text-lg">{t('routes_tab_title')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('routes_tab_title')}</span>
                     {routes.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{routes.length}</Badge>}
                 </TabsTrigger>
                 {/* Events Tab */}
                 <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <CalendarDays size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[LaudatioC] text-lg">{t('events_tab_title')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('events_tab_title')}</span>
                     {events.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{events.length}</Badge>}
                 </TabsTrigger>
             </TabsList>

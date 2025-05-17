@@ -63,20 +63,20 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
           {/* Top Row: Title and Stats/Rating */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 font-[Laudatio] text-[#09332A]" title={routeName}>
+             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 text-[#09332A]" title={routeName}>
                 {routeName}
              </h3>
              {/* Stats and Rating Container */}
              <div className="flex items-center flex-shrink-0 gap-1.5">
                  {/* Route Icon Badge */}
-                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']" title={t('spiritual_route')}>
+                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]" title={t('spiritual_route')}>
                      <RouteIcon size={12} className="flex-shrink-0" />
                  </Badge>
              </div>
           </div>
 
           {/* Description */}
-          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
+          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1">
             {routeDescription || t('no_description_available')}
           </p>
         </div>

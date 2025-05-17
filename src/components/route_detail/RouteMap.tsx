@@ -2,6 +2,9 @@ import React from 'react';
 import CityMapView from '../CityMapView'; // Adjust path as needed
 import { Place } from '../../types'; // Adjust path as needed
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path as needed
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
+import { MapPin } from 'lucide-react';
 
 interface RouteMapProps {
   places: Place[];
@@ -10,6 +13,7 @@ interface RouteMapProps {
 
 const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => { // Added prop and default value
     const { t } = useLanguage();
+    const { fonts } = useFont();
 
     const mapLocations = places.map(place => ({
         id: place.id,
@@ -34,7 +38,13 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
 
     return (
         <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-0 w-full max-w-none">
-            <h2 className="text-lg font-semibold mb-4 text-gray-900">Маршрут на карте</h2>
+            <div className="flex items-center gap-2 mb-4">
+              <MapPin className="w-5 h-5 text-gray-900" />
+              <h2 className={cn(
+                "text-xl font-bold text-gray-900",
+                fonts.heading.className
+              )}>Маршрут на карте</h2>
+            </div>
             <div className="flex-grow rounded-none overflow-hidden w-full" style={{ height: '500px' }}>
                 <CityMapView 
                     locations={mapLocations} 

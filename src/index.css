@@ -1,37 +1,3 @@
-/* --- START: Add @font-face rules --- */
-@font-face {
-  font-family: 'Share Tech Mono Cyr';
-  font-style: normal;
-  font-weight: 400; /* Или другое значение, если у шрифта есть разные веса */
-  font-display: swap;
-  src: url('/fonts/ShareTechMonoCyr.woff2') format('woff2'); /* Предполагаемый путь и формат */
-}
-
-@font-face {
-  font-family: 'Monaco';
-  src: url('/Monaco.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'LaudatioC';
-  src: url('/LaudatioC.otf') format('opentype');
-  font-weight: normal;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: 'Rubik'; /* Даем имя шрифту */
-  src: url('/Rubik-Medium.ttf') format('truetype'); /* Путь к вашему файлу */
-  font-weight: 500; /* Medium обычно соответствует 500 */
-  font-style: normal;
-  font-display: swap; /* Улучшает производительность загрузки */
-}
-
-/* --- END: Add @font-face rules --- */
 
 @tailwind base;
 @tailwind components;

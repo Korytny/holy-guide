@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Route } from '../types';
+import { useFont } from '../context/FontContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { Route as RouteIcon, Heart } from 'lucide-react';
@@ -17,7 +18,8 @@ interface RouteCardProps {
 
 const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
   const { language, t } = useLanguage();
-  const { auth, isFavorite, toggleFavorite } = useAuth(); 
+  const { auth, isFavorite, toggleFavorite } = useAuth();
+  const { fonts } = useFont();
   
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = getLocalizedText(route.description, language);
@@ -65,24 +67,27 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
       <Link to={`/routes/${route.id}`} className="p-3 flex-grow flex flex-col justify-between"> 
           <div>
              <h3
-                className={cn( // Use cn for combining classes
-                   "font-heading", // Apply heading font class
-                   "text-lg font-semibold mb-1 truncate"
+                className={cn(
+                   "text-lg font-semibold mb-1 truncate",
+                   fonts.heading.className
                 )}
                 title={routeName}
              >
                 {routeName}
              </h3>
-            <p className="text-sm text-gray-600 line-clamp-2 mb-3">
+            <p className={cn(
+              "text-sm text-gray-600 line-clamp-2 mb-3",
+              fonts.body.className
+            )}>
               {routeDescription || t('no_description_available')}
             </p>
           </div>
-          <div className="flex items-center mt-1">
-            <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']">
-              <RouteIcon size={12} className="flex-shrink-0" />
-              <span>{t('spiritual_route')}</span>
-            </Badge>
-          </div>
+              <div className="flex items-center mt-1">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]">
+                      <RouteIcon size={12} className="flex-shrink-0" />
+                      <span>{t('spiritual_route')}</span>
+                  </Badge>
+              </div>
       </Link>
     </div>
   );

@@ -2,6 +2,8 @@ import React from 'react';
 import { Place } from '../../types'; // Adjust path as needed
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path as needed
 import { useAuth } from '../../context/AuthContext'; // Adjust path as needed
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -28,6 +30,7 @@ const getPlaceTypeKey = (type: number | undefined): string => {
 
 const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id, onTabSelect }) => {
     const { language, t } = useLanguage();
+    const { fonts } = useFont();
     const { isFavorite, toggleFavorite } = useAuth();
 
     const isPlaceFavorite = id ? isFavorite('place', id) : false;
@@ -109,7 +112,10 @@ const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id, onTabSelect }) => 
              {/* Title */}
              <div className="absolute bottom-0 left-0 p-4 md:p-6 pointer-events-none">
                  <div className="bg-black/60 rounded-lg px-3 py-2 inline-block">
-                     <h1 className="text-2xl md:text-3xl font-[Laudatio] font-bold text-white mb-1 md:mb-2 drop-shadow-md">
+                     <h1 className={cn(
+                       "text-2xl md:text-3xl font-bold text-white mb-1 md:mb-2 drop-shadow-md",
+                       fonts.heading.className
+                     )}>
                        {placeName}
                      </h1>
                  </div>

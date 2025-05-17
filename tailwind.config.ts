@@ -25,6 +25,8 @@ export default {
                 roboto: ['Roboto', ...fontFamily.sans],
                 'open-sans': ['Open Sans', ...fontFamily.sans],
                 montserrat: ['Montserrat', ...fontFamily.sans],
+                'card-title': ['LaudatioC', ...fontFamily.sans],
+                'card-subtitle': ['Monaco', ...fontFamily.mono],
             },
             colors: {
                 border: 'hsl(var(--border))',

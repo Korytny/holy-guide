@@ -1,7 +1,9 @@
 import React from 'react';
-import { City } from '../../types'; // Adjust path
-import { useLanguage } from '../../context/LanguageContext'; // Adjust path
-import { getLocalizedText } from '../../utils/languageUtils'; // Adjust path
+import { City } from '../../types';
+import { useLanguage } from '../../context/LanguageContext';
+import { getLocalizedText } from '../../utils/languageUtils';
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 
 interface CityAboutProps {
   city: City;
@@ -9,6 +11,7 @@ interface CityAboutProps {
 
 const CityAbout: React.FC<CityAboutProps> = ({ city }) => {
     const { language, t } = useLanguage();
+    const { fonts } = useFont();
 
     const infoFields = city.info 
         ? Object.entries(city.info)
@@ -22,8 +25,14 @@ const CityAbout: React.FC<CityAboutProps> = ({ city }) => {
 
     return (
         <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
-             <h2 className="text-xl md:text-2xl font-bold mb-4 text-[#09332A] font-[LaudatioC]">{t('about_city')}</h2>
-             <div className="space-y-3 prose max-w-none text-black font-['Monaco']">
+             <h2 className={cn(
+               "text-xl md:text-2xl font-bold mb-4 text-[#09332A]",
+               fonts.heading.className
+             )}>{t('about_city')}</h2>
+             <div className={cn(
+               "space-y-3 prose max-w-none text-black",
+               fonts.body.className
+             )}>
                 {infoFields.length > 0 ? (
                   infoFields.map((field, i) => (
                     <p key={i}>

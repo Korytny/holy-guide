@@ -3,12 +3,14 @@ import { useNavigate } from 'react-router-dom';
 import { Route, Place, Event } from '../../types'; // Path from src/components/route_detail
 import { useLanguage } from '../../context/LanguageContext'; // Path from src/components/route_detail
 import { useAuth } from '../../context/AuthContext'; // Path from src/components/route_detail
+import { useFont } from '../../context/FontContext';
 import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
 import { Card, CardContent } from "@/components/ui/card";
 import { ArrowLeft, Heart, MapPin, CalendarDays, Route as RouteIconUi } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils'; // Path from src/components/route_detail
+import { cn } from "@/lib/utils";
 
 interface RouteHeaderProps {
   route: Route;
@@ -21,6 +23,7 @@ interface RouteHeaderProps {
 const RouteHeader: React.FC<RouteHeaderProps> = ({ route, places, events, id, onTabSelect }) => {
     const { language, t } = useLanguage();
     const { isFavorite, toggleFavorite } = useAuth();
+    const { fonts } = useFont();
     // const navigate = useNavigate(); // Not used here
 
     const isRouteFavorite = route ? isFavorite('route', route.id) : false;
@@ -100,8 +103,14 @@ const RouteHeader: React.FC<RouteHeaderProps> = ({ route, places, events, id, on
 
              {/* Title and Type */}
              <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
-                 <h1 className="text-3xl font-bold text-white mb-2 drop-shadow-md font-['Laudatio']">{routeName}</h1>
-                 <div className="flex items-center text-white/90">
+                 <h1 className={cn(
+                   "text-3xl font-bold text-white mb-2 drop-shadow-md",
+                   fonts.heading.className
+                 )}>{routeName}</h1>
+                 <div className={cn(
+                   "flex items-center text-white/90",
+                   fonts.body.className
+                 )}>
                      <RouteIconUi size={16} className="mr-1" />
                      <span>{t('spiritual_route')}</span>
                  </div>

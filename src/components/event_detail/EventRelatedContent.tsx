@@ -1,6 +1,8 @@
 import React from 'react';
 import { Place, Route } from '../../types'; // Adjust path
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceCard from '../PlaceCard'; // Adjust path
 import RouteCard from '../RouteCard'; // Adjust path
@@ -20,6 +22,7 @@ const EventRelatedContent: React.FC<EventRelatedContentProps> = ({
     relatedRoutes, 
 }) => {
     const { t } = useLanguage();
+    const { fonts } = useFont();
     const isSmallScreen = useIsSmallScreen();
 
     const RelatedPlaceCardComponent = isSmallScreen ? PlaceCardMob : PlaceCard;
@@ -31,13 +34,19 @@ const EventRelatedContent: React.FC<EventRelatedContentProps> = ({
                 {/* Places Tab */}
                 <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <MapPin size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[LaudatioC] text-lg">{t('places')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('places')}</span>
                     {relatedPlaces.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{relatedPlaces.length}</Badge>}
                 </TabsTrigger>
                 {/* Routes Tab */}
                 <TabsTrigger value="routes" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                      <RouteIcon size={16} className="flex-shrink-0" />
-                     <span className="font-bold text-[#09332A] font-[LaudatioC] text-lg">{t('routes')}</span>
+                     <span className={cn(
+                       "font-bold text-[#09332A] text-lg", 
+                       fonts.heading.className
+                     )}>{t('routes')}</span>
                      {relatedRoutes.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{relatedRoutes.length}</Badge>}
                 </TabsTrigger>
             </TabsList>

@@ -2,6 +2,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Event } from '../types';
+import { useFont } from '../context/FontContext';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext'; 
 import { Calendar, Heart } from 'lucide-react';
@@ -17,7 +18,8 @@ interface EventCardProps {
 
 const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
   const { language, t } = useLanguage();
-  const { auth, isFavorite, toggleFavorite } = useAuth(); 
+  const { auth, isFavorite, toggleFavorite } = useAuth();
+  const { fonts } = useFont();
   
   const eventName = getLocalizedText(event.name, language);
   const eventDescription = getLocalizedText(event.description, language);
@@ -67,18 +69,27 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
       {/* Content Section */} 
       <Link to={`/events/${event.id}`} className="p-3 flex-grow flex flex-col justify-between">
            <div> 
-             <h3 className="text-base font-bold mb-1 truncate font-[Laudatio] text-[#09332A]" title={eventName}>{eventName}</h3>
-             <p className="text-sm text-black line-clamp-3 mb-3 font-['Monaco']">
+             <h3 className={cn(
+               "text-base font-bold mb-1 truncate text-[#09332A]",
+               fonts.heading.className
+             )} title={eventName}>{eventName}</h3>
+             <p className={cn(
+               "text-sm text-black line-clamp-3 mb-3",
+               fonts.body.className
+             )}>
                  {eventDescription || t('no_description_available')}
              </p>
            </div>
           {/* Footer with date info */} 
           {event.date && (
               <div className="flex items-center mt-1">
-                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']">
+                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]">
                       <Calendar size={12} className="flex-shrink-0" />
                       <span>{new Date(event.date).toLocaleDateString()}</span>
                   </Badge>
+                  <span className="ml-2 text-blue-600 hover:underline cursor-pointer">
+                    {t('explore_on_map')}
+                  </span>
               </div>
           )}
       </Link>

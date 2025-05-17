@@ -2,6 +2,8 @@ import React, { useCallback } from 'react';
 import { Event, Place, Route } from '../../types'; // Adjust path
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path
 import { useAuth } from '../../context/AuthContext'; // Adjust path
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
 import { Badge } from "@/components/ui/badge";
 import { Carousel, CarouselContent, CarouselItem, CarouselNext, CarouselPrevious } from "@/components/ui/carousel";
@@ -19,6 +21,7 @@ interface EventHeaderProps {
 
 const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, onTabSelect }) => {
     const { language, t } = useLanguage();
+    const { fonts } = useFont();
     const { isFavorite, toggleFavorite } = useAuth();
 
     const isEventFavorite = event ? isFavorite('event', event.id) : false;
@@ -98,7 +101,10 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
                  {/* Title and Date */}
                  <div className="absolute bottom-0 left-0 p-6 pointer-events-none">
                     <div className="bg-black/40 px-4 py-2 rounded-lg mb-2">
-                      <h1 className="text-3xl font-bold text-white font-[Laudatio]">{eventName}</h1>
+                      <h1 className={cn(
+                        "text-3xl font-bold text-white",
+                        fonts.heading.className
+                      )}>{eventName}</h1>
                     </div>
                      {event.date && (
                          <div className="flex items-center text-white/90 bg-black/40 px-3 py-1 rounded-full">

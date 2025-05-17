@@ -2,6 +2,8 @@ import React from 'react';
 import CityMapView from '../CityMapView'; // Adjust path
 import { Place } from '../../types'; // Adjust path
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 import { MapPin } from 'lucide-react';
 
 interface EventMapSectionProps {
@@ -20,6 +22,7 @@ interface MapLocation {
 
 const EventMapSection: React.FC<EventMapSectionProps> = ({ places }) => {
     const { t } = useLanguage();
+    const { fonts } = useFont();
 
     const mapLocations: MapLocation[] = places.map(place => ({
         id: place.id,
@@ -37,7 +40,10 @@ const EventMapSection: React.FC<EventMapSectionProps> = ({ places }) => {
 
     return (
         <div className="mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
-            <h2 className="text-xl md:text-2xl font-bold mb-6 text-[#09332A] font-[Laudatio]">Места проведения</h2>
+            <h2 className={cn(
+              "text-xl md:text-2xl font-bold mb-6 text-[#09332A]",
+              fonts.heading.className
+            )}>Места проведения</h2>
             <div className="rounded-xl overflow-hidden shadow-lg h-96 mt-4">
               <CityMapView
                 locations={mapLocations}

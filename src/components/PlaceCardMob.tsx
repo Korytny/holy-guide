@@ -78,7 +78,7 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
              {/* Title */}
              <h3
                 className={cn(
-                   "font-[LaudatioC] text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
+                   "text-base font-semibold line-clamp-2 flex-grow mr-1 text-[#09332A]"
                 )}
                 title={placeName}
              >
@@ -87,7 +87,7 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
              {/* Type and Rating Container */}
              <div className="flex items-center flex-shrink-0 gap-1.5">
                  {/* Place Type Badge */}
-                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] font-['Monaco']" title={placeTypeText}>
+                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]" title={placeTypeText}>
                      <MapPin size={12} className="flex-shrink-0" />
                      {/* Optionally show text if short enough, or just icon */}
                      {/* <span className="hidden sm:inline">{placeTypeText}</span> */}
@@ -96,7 +96,7 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1 font-['Monaco']">
+          <p className="text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1">
             {placeDescription || t('no_description_available')}
           </p>
         </div>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { City } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useFont } from '../context/FontContext';
 import { Button } from "@/components/ui/button";
 import { Heart, MapPin, Route as RouteIcon, CalendarDays } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
@@ -16,6 +17,7 @@ interface CityCardProps {
 const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
   const { language, t } = useLanguage(); // Assuming t function provides translations
   const { auth, isFavorite, toggleFavorite } = useAuth();
+  const { fonts } = useFont();
 
   const cityName = getLocalizedText(city.name, language);
   const cityIsFavorite = auth.isAuthenticated && auth.user ? isFavorite('city', city.id) : false;
@@ -66,35 +68,48 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         <div>
           <h3
              className={cn(
-                 "font-[LaudatioC] text-lg font-semibold mb-1 truncate text-[#09332A]"
+                 "text-lg font-semibold mb-1 truncate text-[#09332A]",
+                 fonts.heading.className
              )}
              title={cityName}
           >
              {cityName}
           </h3>
           {/* Added description back */}
-          <p className="text-sm text-black line-clamp-3 mb-3 font-[Monaco]">
+          <p className={cn(
+              "text-sm text-black line-clamp-3 mb-3",
+              fonts.body.className
+          )}>
              {infoDescription}
           </p>
 
           {/* Vertical Stats Section */}
-          <div className="space-y-3 mb-4 px-10 py-3 bg-gray-100/50 rounded-lg font-[LaudatioC]">
+          <div className="space-y-3 mb-4 px-10 py-3 bg-gray-100/50 rounded-lg">
               {city.spotsCount !== undefined && city.spotsCount > 0 && (
-                   <div className="flex items-center text-base font-medium text-gray-700 px-20">
+                   <div className={cn(
+                       "flex items-center text-sm font-medium text-gray-700 px-10",
+                       fonts.subheading.className
+                   )}>
                        <MapPin size={16} className="mr-2 text-gray-500"/>
                        <span>{t('spots_label')}:</span>
                        <span className="font-medium ml-auto">{city.spotsCount}</span>
                    </div>
               )}
               {city.routesCount !== undefined && city.routesCount > 0 && (
-                   <div className="flex items-center text-sm font-medium text-gray-700 px-20">
+                   <div className={cn(
+                       "flex items-center text-sm font-medium text-gray-700 px-10",
+                       fonts.subheading.className
+                   )}>
                        <RouteIcon size={16} className="mr-2 text-gray-500"/>
                        <span>{t('routes_label')}:</span>
                        <span className="font-medium ml-auto">{city.routesCount}</span>
                    </div>
               )}
               {city.eventsCount !== undefined && city.eventsCount > 0 && (
-                   <div className="flex items-center text-sm font-medium text-gray-700 px-20">
+                   <div className={cn(
+                       "flex items-center text-sm font-medium text-gray-700 px-10",
+                       fonts.subheading.className
+                   )}>
                        <CalendarDays size={16} className="mr-2 text-gray-500"/>
                        <span>{t('events_label')}:</span>
                        <span className="font-medium ml-auto">{city.eventsCount}</span>

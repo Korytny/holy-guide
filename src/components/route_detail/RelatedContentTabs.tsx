@@ -1,6 +1,8 @@
 import React from 'react';
 import { Place, Event } from '../../types'; // Adjust path as needed
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path as needed
+import { useFont } from '../../context/FontContext';
+import { cn } from "@/lib/utils";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import PlaceCard from '../PlaceCard'; // Adjust path as needed
 import EventCard from '../EventCard'; // Adjust path as needed
@@ -24,6 +26,7 @@ const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
     onTabChange 
 }) => {
     const { t } = useLanguage();
+    const { fonts } = useFont();
     const isSmallScreen = useIsSmallScreen();
 
     const RelatedPlaceCardComponent = isSmallScreen ? PlaceCardMob : PlaceCard;
@@ -35,13 +38,19 @@ const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
                 {/* Places Tab */}
                 <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <MapPin size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[Laudatio] text-lg">{t('places_tab_title')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('places_tab_title')}</span>
                     {places.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{places.length}</Badge>}
                 </TabsTrigger>
                 {/* Events Tab */}
                 <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
                     <CalendarDays size={16} className="flex-shrink-0" />
-                    <span className="font-bold text-[#09332A] font-[Laudatio] text-lg">{t('events_tab_title')}</span>
+                    <span className={cn(
+                      "font-bold text-[#09332A] text-lg",
+                      fonts.heading.className
+                    )}>{t('events_tab_title')}</span>
                     {events.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{events.length}</Badge>}
                 </TabsTrigger>
             </TabsList>
@@ -49,7 +58,10 @@ const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
             {/* Places Content */}
             <TabsContent value="places" id="places-content">
                {places.length === 0 ? (
-              <div className="text-center py-10 text-gray-500">{t('no_places_found')}</div>
+              <div className={cn(
+                "text-center py-10 text-gray-500",
+                fonts.body.className
+              )}>{t('no_places_found')}</div>
             ) : (
               <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                 {places.map(place =>
@@ -61,7 +73,10 @@ const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
           {/* Events Content */}
           <TabsContent value="events" id="events-content">
                 {events.length === 0 ? (
-              <div className="text-center py-10 text-gray-500">{t('no_events_found')}</div>
+              <div className={cn(
+                "text-center py-10 text-gray-500",
+                fonts.body.className
+              )}>{t('no_events_found')}</div>
             ) : (
                <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2'}`}>
                 {events.map(event =>
