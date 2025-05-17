@@ -8,6 +8,7 @@ import { User } from 'lucide-react'; // Removed LogOut as sign out is in profile
 // import { useToast } from '@/hooks/use-toast'; // No longer needed here
 import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
+import { FontSwitcher } from '@/components/ui/FontSwitcher';
 
 const Navbar = () => {
   // Removed refreshProfile and toast as handleSignOut is removed
@@ -21,8 +22,9 @@ const Navbar = () => {
     <div className="bg-white shadow-sm border-b">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center">
-          <div className="flex-1 flex justify-start">
+          <div className="flex-1 flex justify-start gap-4">
             <LanguageSwitcher />
+            <FontSwitcher />
           </div>
 
           <div className="flex-1 flex justify-center">

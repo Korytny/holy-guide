@@ -20,10 +20,11 @@ export default {
         },
         extend: {
             fontFamily: {
-                sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono], // Основной текст
-                heading: ['Rubik', ...fontFamily.sans], // Заголовки теперь Rubik
-                // Мы также можем явно определить Rubik, если захотим использовать его где-то еще отдельно:
-                // rubik: ['Rubik', ...fontFamily.sans],
+                sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono],
+                heading: ['Rubik', ...fontFamily.sans],
+                roboto: ['Roboto', ...fontFamily.sans],
+                'open-sans': ['Open Sans', ...fontFamily.sans],
+                montserrat: ['Montserrat', ...fontFamily.sans],
             },
             colors: {
                 border: 'hsl(var(--border))',
