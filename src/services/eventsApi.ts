@@ -1,150 +1,192 @@
 import { supabase } from '../integrations/supabase/client';
-import { Event, EventType } from '../types'; // Import EventType as well if needed for casting
+import { Event, EventType, Language, LocalizedText } from '../types';
 
 export interface EventFilters {
   cityId?: string;
-  eventCategory?: string; 
+  eventCategory?: string;
   culture?: string;
   hasOnlineStream?: boolean;
 }
 
+const mapDbEventToEvent = (dbEvent: any): Event => {
+  const event: Partial<Event> = { ...dbEvent };
+  if (dbEvent.event_category) {
+    event.eventTypeField = dbEvent.event_category as EventType;
+  }
+  if (dbEvent.info) { 
+    event.description = dbEvent.info; 
+  }
+  if (dbEvent.images && Array.isArray(dbEvent.images) && dbEvent.images.length > 0) {
+    event.imageUrl = dbEvent.images[0]; 
+  } else if (typeof dbEvent.images === 'string') { 
+    event.imageUrl = dbEvent.images;
+  }
+  return event as Event;
+};
+
 export const getEvents = async (filters?: EventFilters): Promise<Event[]> => {
-  console.log('getEvents CALLED with filters:', filters);
   try {
-    // Ensure you select the database column that holds the event type, e.g., 'event_category'
-    // If your DB column is already 'eventTypeField', then 'select("*" )' is fine.
-    // Otherwise, you might need to alias or map it.
-    let query = supabase.from('events').select('*, event_category'); // Explicitly select event_category
-
+    let query = supabase.from('events').select('*, event_category, info, images');
     if (filters) {
-      if (filters.cityId && filters.cityId !== 'all') {
-        query = query.eq('city_id', filters.cityId);
-      }
-      // Note: The filter key is eventCategory, but the DB column might be event_category
-      if (filters.eventCategory) {
-        query = query.eq('event_category', filters.eventCategory);
-      }
-      if (filters.culture) {
-        query = query.eq('culture', filters.culture); // Assuming DB column is 'culture'
-      }
-      if (filters.hasOnlineStream !== undefined) {
-        query = query.eq('has_online_stream', filters.hasOnlineStream);
-      }
+      if (filters.cityId && filters.cityId !== 'all') query = query.eq('city_id', filters.cityId);
+      if (filters.eventCategory) query = query.eq('event_category', filters.eventCategory);
+      if (filters.culture) query = query.eq('culture', filters.culture);
+      if (filters.hasOnlineStream !== undefined) query = query.eq('has_online_stream', filters.hasOnlineStream);
     }
-
     query = query.order('time', { ascending: true });
-
     const { data, error } = await query;
-
-    if (error) {
-      console.error('Error fetching events:', error.message);
-      throw error;
-    }
-    console.log('Events fetched from Supabase (raw):', data);
-
+    if (error) throw error;
     if (!data) return [];
-
-    // Manual mapping to ensure eventTypeField is populated from event_category
-    const mappedData = data.map(dbEvent => {
-      const event: Partial<Event> = { ...dbEvent }; // Cast to Partial<Event> initially
-      // Assuming your DB column for event type is 'event_category'
-      // and your Event interface expects 'eventTypeField'
-      if (dbEvent.event_category) {
-        event.eventTypeField = dbEvent.event_category as EventType;
-      }
-      // Ensure other fields are correctly mapped if names differ or types need conversion
-      // For example, if your DB stores name as JSON but Event type expects LocalizedText directly:
-      // if (typeof dbEvent.name === 'string') { // Basic check, might need robust parsing
-      //   try { event.name = JSON.parse(dbEvent.name); } catch (e) { console.error('Failed to parse name', e); event.name = {}; }
-      // }
-      // if (typeof dbEvent.description === 'string') {
-      //   try { event.description = JSON.parse(dbEvent.description); } catch (e) { console.error('Failed to parse description', e); event.description = {}; }
-      // }
-
-      return event as Event; // Cast to full Event type after mapping
-    });
-    console.log('Events mapped with eventTypeField:', mappedData);
-    return mappedData;
-
+    return data.map(mapDbEventToEvent);
   } catch (error) {
-    console.error('Error in getEvents:', error);
+    console.error(`Error in getEvents: ${error.message}`, error);
     return [];
   }
 };
 
-// ... (rest of the functions: getEventById, getEventsByIds, etc. 
-//      should also be checked if they need similar mapping for eventTypeField)
-
 export const getEventById = async (id: string): Promise<Event | null> => {
-  console.log('getEventById CALLED with id:', id);
   if (!id) return null;
   try {
-    const { data: dbEvent, error } = await supabase
-      .from('events')
-      .select('*, event_category') // Ensure event_category is selected
-      .eq('id', id)
-      .single();
-
+    const { data: dbEvent, error } = await supabase.from('events').select('*, event_category, info, images').eq('id', id).single();
     if (error) {
-      console.error(`Error fetching event with id ${id}:`, error.message);
-      if (error.code === 'PGRST116') { 
-        console.warn(`Event with id ${id} not found.`);
-        return null;
-      }
+      if (error.code === 'PGRST116') return null;
+      console.error(`Error in getEventById (${id}): ${error.message}`, error);
       throw error;
     }
-    if (!dbEvent) return null;
-
-    const event: Partial<Event> = { ...dbEvent };
-    if (dbEvent.event_category) {
-      event.eventTypeField = dbEvent.event_category as EventType;
-    }
-    console.log(`Event with id ${id} fetched and mapped:`, event);
-    return event as Event;
+    return dbEvent ? mapDbEventToEvent(dbEvent) : null;
   } catch (error) {
-    console.error('Error in getEventById:', error);
+    console.error(`Catch Error in getEventById (${id}): ${error.message}`, error);
     return null;
   }
 };
 
 export const getEventsByIds = async (ids: string[]): Promise<Event[]> => {
-  console.log('getEventsByIds CALLED with ids:', ids);
-  if (!ids || ids.length === 0) return [];
+  console.log('[eventsApi] getEventsByIds CALLED with ids:', ids);
+  if (!ids || ids.length === 0) {
+    console.log('[eventsApi] getEventsByIds: no IDs provided or empty array, returning [].');
+    return [];
+  }
   try {
-    const { data, error } = await supabase
-      .from('events')
-      .select('*, event_category') // Ensure event_category is selected
-      .in('id', ids);
-
+    const { data, error } = await supabase.from('events').select('*, event_category, info, images').in('id', ids);
     if (error) {
-      console.error('Error fetching events by ids:', error.message);
+      console.error(`[eventsApi] Error in getEventsByIds for IDs (${ids.join(',')}): ${error.message}`, error);
       throw error;
     }
-    if (!data) return [];
-
-    const mappedData = data.map(dbEvent => {
-      const event: Partial<Event> = { ...dbEvent };
-      if (dbEvent.event_category) {
-        event.eventTypeField = dbEvent.event_category as EventType;
-      }
-      return event as Event;
-    });
-    console.log('Events fetched by IDs and mapped:', mappedData);
+    if (!data) {
+      console.log('[eventsApi] getEventsByIds: no data returned from Supabase for IDs.');
+      return [];
+    }
+    const mappedData = data.map(mapDbEventToEvent);
+    console.log('[eventsApi] getEventsByIds: mapped data:', mappedData);
     return mappedData;
-
   } catch (error) {
-    console.error('Error in getEventsByIds:', error);
+    console.error(`[eventsApi] Catch Error in getEventsByIds: ${error.message}`, error);
     return [];
   }
 };
 
+export const getEventsByCityId = async (cityId: string): Promise<Event[]> => {
+  console.log(`[eventsApi] getEventsByCityId CALLED with cityId: ${cityId}`);
+  if (!cityId) return [];
+  try {
+    const { data: directEventsData, error: directEventsError } = await supabase
+      .from('events')
+      .select('id') 
+      .eq('city_id', cityId);
+
+    if (directEventsError) console.error(`[eventsApi] Error fetching direct event IDs for city ${cityId}:`, directEventsError.message);
+    const directEventIds = directEventsData?.map(e => e.id) || [];
+    console.log(`[eventsApi] Found direct event IDs for city ${cityId}:`, directEventIds);
+
+    const { data: spotsInCity, error: spotsError } = await supabase
+      .from('spots')
+      .select('id')
+      .eq('city', cityId);
+
+    let eventIdsFromSpots: string[] = [];
+    if (spotsError) {
+      console.error(`[eventsApi] Error fetching spots for city ${cityId}: ${spotsError.message}`);
+    } else if (spotsInCity && spotsInCity.length > 0) {
+      const spotIdsInCity = spotsInCity.map(s => s.id);
+      console.log(`[eventsApi] Found spot IDs in city ${cityId}:`, spotIdsInCity);
+      const { data: spotEventsLinks, error: spotEventsLinksError } = await supabase
+        .from('spot_event')
+        .select('event_id')
+        .in('spot_id', spotIdsInCity);
+      if (spotEventsLinksError) {
+        console.error(`[eventsApi] Error fetching event links for spots:`, spotEventsLinksError.message);
+      } else if (spotEventsLinks && spotEventsLinks.length > 0) {
+        eventIdsFromSpots = spotEventsLinks.map(se => se.event_id);
+        console.log(`[eventsApi] Found event IDs from spots for city ${cityId}:`, eventIdsFromSpots);
+      } else {
+        console.log('[eventsApi] No event links found for spots in city ', cityId);
+      }
+    } else {
+      console.log(`[eventsApi] No spots found in city ${cityId}.`);
+    }
+    
+    const allRelevantEventIds = [...new Set([...directEventIds, ...eventIdsFromSpots])];
+    console.log(`[eventsApi] All unique relevant event IDs for city ${cityId}:`, allRelevantEventIds);
+
+    if (allRelevantEventIds.length === 0) return [];
+    
+    const finalEvents = await getEventsByIds(allRelevantEventIds);
+    console.log("[eventsApi] Final events for city ${cityId} after all processing:", finalEvents);
+    return finalEvents;
+  } catch (error) {
+    console.error(`[eventsApi] General error in getEventsByCityId: ${error.message}`, error);
+    return [];
+  }
+};
 
 export const getEventsByPlaceId = async (placeId: string): Promise<Event[]> => {
-    console.warn("getEventsByPlaceId is not fully implemented yet. Update with actual Supabase call if needed.");
+  console.log('[eventsApi] getEventsByPlaceId CALLED with placeId:', placeId);
+  if (!placeId) return [];
+  try {
+    const { data: spotEvents, error: spotEventsError } = await supabase
+      .from('spot_event')
+      .select('event_id')
+      .eq('spot_id', placeId);
+
+    if (spotEventsError) {
+      console.error(`[eventsApi] Error fetching event_ids for place ${placeId}:`, spotEventsError.message);
+      throw spotEventsError;
+    }
+    if (!spotEvents || spotEvents.length === 0) {
+      console.log('[eventsApi] No event_ids found for place', placeId);
+      return [];
+    }
+    const eventIds = spotEvents.map(se => se.event_id);
+    console.log('[eventsApi] Event IDs found for place ', placeId, ':', eventIds);
+    return getEventsByIds(eventIds);
+  } catch (error) {
+    console.error(`[eventsApi] Error in getEventsByPlaceId: ${error.message}`, error);
     return [];
-}
+  }
+};
 
 export const getEventsByRouteId = async (routeId: string): Promise<Event[]> => {
-    console.warn("getEventsByRouteId is not fully implemented yet. Update with actual Supabase call if needed.");
+  console.log('[eventsApi] getEventsByRouteId CALLED with routeId:', routeId);
+  if (!routeId) return [];
+  try {
+    const { data: routeEvents, error: routeEventsError } = await supabase
+      .from('route_event')
+      .select('event_id')
+      .eq('route_id', routeId);
+
+    if (routeEventsError) {
+      console.error(`[eventsApi] Error fetching event_ids for route ${routeId}:`, routeEventsError.message);
+      throw routeEventsError;
+    }
+    if (!routeEvents || routeEvents.length === 0) {
+      console.log('[eventsApi] No event_ids found for route', routeId);
+      return [];
+    }
+    const eventIds = routeEvents.map(re => re.event_id);
+    console.log('[eventsApi] Event IDs found for route ', routeId, ':', eventIds);
+    return getEventsByIds(eventIds);
+  } catch (error) {
+    console.error(`[eventsApi] Error in getEventsByRouteId: ${error.message}`, error);
     return [];
-}
+  }
+};
