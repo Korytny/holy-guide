@@ -7,8 +7,12 @@ type FontConfig = {
 }
 
 type FontContextType = {
-  font: FontConfig
-  setFont: (fontName: string) => void
+  fonts: {
+    heading: FontConfig
+    subheading: FontConfig
+    body: FontConfig
+  }
+  setFont: (fontName: string, textType: 'heading' | 'subheading' | 'body') => void
   availableFonts: FontConfig[]
   loadFont: (font: FontConfig) => void
 }
@@ -34,7 +38,11 @@ const fontConfigs: FontConfig[] = [
 ]
 
 export function FontProvider({ children }: { children: ReactNode }) {
-  const [font, setFont] = useState<FontConfig>(fontConfigs[0])
+  const [fonts, setFonts] = useState({
+    heading: fontConfigs[0],
+    subheading: fontConfigs[0],
+    body: fontConfigs[0]
+  })
   const [availableFonts] = useState<FontConfig[]>(fontConfigs)
 
   const loadFont = (font: FontConfig) => {
@@ -45,30 +53,24 @@ export function FontProvider({ children }: { children: ReactNode }) {
   }
 
   useEffect(() => {
-    // Load initial font
-    loadFont(font)
-    
     // Load all fonts in background
     availableFonts.forEach(f => loadFont(f))
   }, [])
 
-  const handleSetFont = (fontName: string) => {
+  const handleSetFont = (fontName: string, textType: 'heading' | 'subheading' | 'body') => {
     const selectedFont = availableFonts.find(f => f.name === fontName)
     if (selectedFont) {
-      // Remove all font classes first
-      availableFonts.forEach(f => {
-        document.documentElement.classList.remove(f.className)
-      })
-      // Add selected font class
-      setFont(selectedFont)
-      document.documentElement.classList.add(selectedFont.className)
+      setFonts(prev => ({
+        ...prev,
+        [textType]: selectedFont
+      }))
     }
   }
 
   return (
     <FontContext.Provider value={{ 
-      font, 
-      setFont: handleSetFont, 
+      fonts,
+      setFont: handleSetFont,
       availableFonts,
       loadFont
     }}>

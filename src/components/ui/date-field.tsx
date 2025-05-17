@@ -5,15 +5,17 @@ import type { DateValue } from '@internationalized/date';
 
 interface DateFieldComponentProps {
   label: string;
+  className?: string;
+  labelClassName?: string;
   value: DateValue | null | undefined; // Allow null or undefined for empty state
   onChange: (date: DateValue | null) => void;
 }
 
-function DateFieldComponent({ label, value, onChange }: DateFieldComponentProps) {
+function DateFieldComponent({ label, value, onChange, className, labelClassName }: DateFieldComponentProps) {
   return (
     // Pass value and onChange to the underlying react-aria-components DateField
-    <DateField className="space-y-2 min-w-[150px]" value={value} onChange={onChange}>
-      <Label className="text-sm font-medium text-foreground">{label}</Label>
+    <DateField className={`space-y-2 min-w-[150px] ${className || ''}`} value={value} onChange={onChange}>
+      <Label className={`text-sm font-medium text-foreground ${labelClassName || ''}`}>{label}</Label>
       <DateInput className="relative inline-flex h-9 w-full items-center overflow-hidden whitespace-nowrap rounded-lg border border-input bg-background px-3 py-2 text-sm shadow-sm shadow-black/5 transition-shadow data-[focus-within]:border-ring data-[disabled]:opacity-50 data-[focus-within]:outline-none data-[focus-within]:ring-[3px] data-[focus-within]:ring-ring/20">
         {(segment) => (
           <DateSegment

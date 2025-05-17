@@ -1,4 +1,5 @@
 import React from 'react';
+import { useFont } from '@/context/FontContext';
 import { Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'; 
 import { Language, PlannedItem, Event, City, EventType } from '../../types';
@@ -49,6 +50,7 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
   onRemoveItem,
   onReorder, // Destructure the updated onReorder
 }) => {
+  const { fonts } = useFont();
 
   // onDragEnd now directly calls onReorder with the full result object
   const handleOnDragEnd = (result: DropResult) => {
@@ -64,7 +66,9 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
       <div className="border rounded-md p-0 bg-white overflow-hidden h-full">
-        <h3 className="text-lg font-semibold mb-0 p-4 sticky top-0 bg-white z-10">{t('guru_plan_title')}</h3>
+        <h3 className={`text-xl font-bold mb-0 p-4 sticky top-0 bg-white z-10 ${fonts.heading.className}`} style={{ fontFamily: fonts.heading.name }}>
+          {t('guru_planner_main_title')}
+        </h3>
         {planGroups.length === 0 ? (
           <div className="p-4 text-gray-500">{t('guru_plan_placeholder')}</div>
         ) : (
@@ -85,7 +89,7 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                       >
                         <div className="flex items-center mb-2 cursor-grab" {...providedDraggableGroup.dragHandleProps}>
                            <GripVertical size={20} className="text-gray-500 mr-2" />
-                           <h4 className="text-md font-semibold text-slate-700">{t(group.titleKey, { defaultValue: group.id })}</h4>
+                           <h4 className={`text-md font-semibold text-slate-700 ${fonts.subheading.className}`}>{t(group.titleKey, { defaultValue: group.id })}</h4>
                         </div>
                         {/* Changed type to "event-item" for all item droppables */}
                         <Droppable droppableId={group.id} type="event-item"> 
@@ -117,7 +121,7 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                                           <Link 
                                             to={`/events/${eventData.id}`}
                                             target="_blank"
-                                            className="text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                                            className={`text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline ${fonts.body.className}`}
                                           >
                                             {getLocalizedText(eventData.name, language)}
                                           </Link>

@@ -8,6 +8,8 @@ import { Calendar } from "@/components/ui/calendar";
 
 export interface PilgrimageCalendarProps {
   selectedRange?: DateRange;
+  className?: string;
+  headerClassName?: string;
   onDateRangeChange: SelectRangeEventHandler;
   locale?: Locale;
   highlightedDates?: Date[]; // New prop for dates to highlight
@@ -17,7 +19,9 @@ export function PilgrimageCalendar({
   selectedRange, 
   onDateRangeChange, 
   locale, 
-  highlightedDates 
+  highlightedDates,
+  className,
+  headerClassName
 }: PilgrimageCalendarProps) {
   console.log("--- PilgrimageCalendar RENDERED ---"); 
 
@@ -73,17 +77,24 @@ export function PilgrimageCalendar({
   };
 
   return (
-    <Calendar
-      mode="range"
-      selected={selectedRange}
-      onSelect={onDateRangeChange}
-      numberOfMonths={2}
-      className="rounded-md border"
-      locale={locale}
-      modifiers={modifiers}
-      modifiersStyles={modifiersStyles}
-      components={components}
-      showOutsideDays={false}
-    />
+    <div className={className}>
+      <Calendar
+        mode="range"
+        selected={selectedRange}
+        onSelect={onDateRangeChange}
+        numberOfMonths={2}
+        className="rounded-md border"
+        locale={locale}
+        modifiers={modifiers}
+        modifiersStyles={modifiersStyles}
+        components={components}
+        showOutsideDays={false}
+        classNames={{
+          caption_label: headerClassName,
+          nav_button: headerClassName,
+          head_cell: headerClassName
+        }}
+      />
+    </div>
   );
 }

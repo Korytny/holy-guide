@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useFont } from '@/context/FontContext';
 import { ImageCloud, ImageCloudItem } from './ui/image-cloud';
 import { Skeleton } from '@/components/ui/skeleton';
 import { fetchTitleData } from '@/services/api';
@@ -20,6 +21,7 @@ interface HeroSectionProps {
 
 const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoading }) => {
   const { language, t } = useLanguage();
+  const { fonts } = useFont();
   const navbarHeight = '4rem';
   const [titleData, setTitleData] = useState<HeroTextData | null>(null);
   const [isTextLoading, setIsTextLoading] = useState<boolean>(true);
@@ -88,10 +90,10 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
            <p className="text-red-500 pointer-events-auto">{textError}</p>
         ) : titleData ? (
            <div className="pointer-events-auto">
-             <h1 className="text-4xl font-bold text-[#09332A] sm:text-5xl lg:text-6xl mb-4 font-heading" style={{color: '#09332A'}}>
+             <h1 className={`text-4xl font-bold text-[#09332A] sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`} style={{color: '#09332A'}}>
                {getLocalizedString(titleData.name)}
              </h1>
-             <p className="mt-4 text-lg text-black dark:text-gray-300 max-w-xl mx-auto font-[Monaco]">
+             <p className={`mt-4 text-lg text-black dark:text-gray-300 max-w-xl mx-auto ${fonts.subheading.className}`}>
                {getLocalizedString(titleData.description)}
              </p>
            </div>

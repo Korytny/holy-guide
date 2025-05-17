@@ -10,7 +10,11 @@ import { useLanguage } from '../context/LanguageContext';
 import LanguageSwitcher from './LanguageSwitcher';
 import { FontSwitcher } from '@/components/ui/FontSwitcher';
 
-const Navbar = () => {
+interface NavbarProps {
+  className?: string;
+}
+
+const Navbar = ({ className = '' }: NavbarProps) => {
   // Removed refreshProfile and toast as handleSignOut is removed
   const { auth } = useAuth();
   const { t } = useLanguage();
@@ -19,7 +23,7 @@ const Navbar = () => {
   // Removed handleSignOut function
 
   return (
-    <div className="bg-white shadow-sm border-b">
+    <div className={`bg-white shadow-sm border-b ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center">
           <div className="flex-1 flex justify-start gap-4">

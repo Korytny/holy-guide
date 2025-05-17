@@ -5,6 +5,8 @@ import { PilgrimageCalendar } from './PilgrimageCalendar';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { useFont } from '@/context/FontContext';
+import { FontSwitcher } from '@/components/ui/FontSwitcher';
 import { format } from 'date-fns';
 import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
 import { DateFieldComponent } from '@/components/ui/date-field';
@@ -130,27 +132,38 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
     setter(newSelection);
   };
 
+  const { fonts } = useFont();
+
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <div className="absolute top-4 right-4">
+        <FontSwitcher />
+      </div>
       {/* Left Panel: Calendar and Date Inputs */}
       <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
-        <h3 className="text-lg font-semibold mb-4">{t('select_event_dates', {defaultValue: 'Select Event Dates'})}</h3>
+        <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>{t('select_event_dates', {defaultValue: 'Select Event Dates'})}</h3>
         <PilgrimageCalendar 
             selectedRange={selectedDateRange} 
             onDateRangeChange={onDateRangeChange}
             locale={currentLocale}
             highlightedDates={eventDatesForCalendar}
+            className={fonts.body.className}
+            headerClassName={fonts.subheading.className}
         />
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DateFieldComponent
             label={t('start_date_label')}
             value={convertToDateValue(selectedDateRange?.from)}
             onChange={(dateValue) => handleDateFieldChange(dateValue, 'from')}
+            className={fonts.body.className}
+            labelClassName={fonts.subheading.className}
           />
           <DateFieldComponent
             label={t('end_date_label')}
             value={convertToDateValue(selectedDateRange?.to)}
             onChange={(dateValue) => handleDateFieldChange(dateValue, 'to')}
+            className={fonts.body.className}
+            labelClassName={fonts.subheading.className}
           />
         </div>
       </div>
@@ -161,14 +174,14 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
         {/* Top section: Plan Name Input, Save Button, and Saved Plans */}
         <div className="flex flex-col space-y-3">
           <div className="flex flex-col sm:flex-row items-center gap-2">
-            <Input
+              <Input
               placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter Guru plan name...'})}
               value={guruPlanNameValue}
               onChange={(e) => onGuruPlanNameChange(e.target.value)}
-              className="text-lg font-semibold w-full sm:flex-grow"
+              className={`text-lg font-semibold w-full sm:flex-grow ${fonts.body.className}`}
             />
             <Button 
-                className="w-full sm:w-auto flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white"
+                className={`w-full sm:w-auto flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white ${fonts.subheading.className}`}
                 onClick={() => onSaveOrUpdateGuruPlan(guruPlanNameValue)}
                 disabled={!guruPlanNameValue.trim() && !currentLoadedGuruPlanId}
             >
@@ -181,7 +194,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
               <div className="flex flex-wrap gap-2">
                 {savedGuruPlans.map(plan => (
                   <div key={plan.id} className="flex items-center">
-                    <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className="text-xs rounded-r-none px-2 py-1 h-auto">{plan.title}</Button>
+                    <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>
                     <Button variant="destructive" size="sm" onClick={() => onDeleteGuruPlan(plan.id)} className="text-xs px-1 py-1 h-auto rounded-l-none" aria-label={t('delete_guru_plan_label', { planName: plan.title })}><X size={14} /></Button>
                   </div>
                 ))}
@@ -193,7 +206,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
         {/* Filters Section */}
         <div className="space-y-3">
             <div className="mb-2">
-              <label className="block text-sm font-medium text-gray-700 mb-1">{t('filter_by_city', {defaultValue: 'Filter by City'})}</label>
+              <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_city', {defaultValue: 'Filter by City'})}</label>
               <Select value={selectedCityId || 'all'} onValueChange={(value) => onCityChange(value === 'all' ? undefined : value)}>
                 <SelectTrigger><SelectValue placeholder={t('select_city_placeholder', {defaultValue: 'Select a city'})} /></SelectTrigger>
                 <SelectContent>
@@ -206,7 +219,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
             </div>
 
             <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('filter_by_event_type', {defaultValue: 'Event Type'})}</label>
+                <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_event_type', {defaultValue: 'Event Type'})}</label>
                 <div className="flex flex-wrap gap-2">
                     {eventTypeOptions.map(opt => (
                         <Button 
@@ -214,7 +227,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                             variant={selectedEventTypes.includes(opt.value) ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => toggleFilter(selectedEventTypes, opt.value, onSelectedEventTypesChange)}
-                            className="text-xs"
+                            className={`text-xs ${fonts.body.className}`}
                         >
                             {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
                             {t(opt.labelKey, {defaultValue: opt.value})}
@@ -224,7 +237,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
             </div>
 
             <div className="mb-2">
-                <label className="block text-sm font-medium text-gray-700 mb-1">{t('filter_by_culture', {defaultValue: 'Culture'})}</label>
+                <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_culture', {defaultValue: 'Culture'})}</label>
                 <div className="flex flex-wrap gap-2">
                     {eventCultureOptions.map(opt => (
                         <Button 
@@ -232,7 +245,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                             variant={selectedCultures.includes(opt.value) ? 'default' : 'outline'}
                             size="sm"
                             onClick={() => toggleFilter(selectedCultures, opt.value, onSelectedCulturesChange)}
-                            className="text-xs"
+                            className={`text-xs ${fonts.body.className}`}
                         >
                             {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
                             {t(opt.labelKey, {defaultValue: opt.value})}
@@ -253,14 +266,14 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                         }
                     }}
                 />
-                <label htmlFor="hasTranslationFilter" className="text-sm font-medium text-gray-700">{t('filter_has_translation', {defaultValue: 'Has Online Translation'})}</label>
+                <label htmlFor="hasTranslationFilter" className={`text-sm font-medium text-gray-700 ${fonts.body.className}`}>{t('filter_has_translation', {defaultValue: 'Has Online Translation'})}</label>
             </div>
         </div>
 
         {/* Action Buttons at the bottom */}
         <div className="flex flex-col sm:flex-row sm:gap-4 pt-4 mt-auto border-t">
-            <Button size="lg" className="w-full sm:w-1/2" onClick={onAddFilteredEventsToPlan}>{t('add_filtered_events_to_plan_button')}</Button>
-            <Button size="lg" variant="outline" className="w-full sm:w-1/2 mt-2 sm:mt-0" onClick={onAddFavoritesToPlan}>{t('add_favorite_events_to_plan_button')}</Button>
+            <Button size="lg" className={`w-full sm:w-1/2 ${fonts.subheading.className}`} onClick={onAddFilteredEventsToPlan}>{t('add_filtered_events_to_plan_button')}</Button>
+            <Button size="lg" variant="outline" className={`w-full sm:w-1/2 mt-2 sm:mt-0 ${fonts.subheading.className}`} onClick={onAddFavoritesToPlan}>{t('add_favorite_events_to_plan_button')}</Button>
         </div>
       </div>
     </div>

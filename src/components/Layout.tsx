@@ -15,9 +15,9 @@ const Layout = ({ children, hideNavbar = false, hideSecondaryNav = false }: Layo
   return (
     <FontProvider>
       <div className="min-h-screen flex flex-col">
-      {!hideNavbar && <Navbar />}
+      {!hideNavbar && <Navbar className="sticky top-0 z-50" />}
       {/* Removed background from main element */}
-      <main className={`flex-grow min-h-[calc(100vh-${navbarHeight})] w-full`}>
+      <main className={`flex-grow w-full`}>
         {children}
       </main>
       </div>

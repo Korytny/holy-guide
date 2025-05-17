@@ -174,7 +174,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
 
       <div className="border rounded-md p-4 bg-white space-y-6">
         <div>
-            <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('plan_your_pilgrimage')}</h3>
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">{t('select_life_period')}</h3>
     
             {savedGoals && savedGoals.length > 0 && (
               <div className="mb-6 mt-2">
@@ -207,7 +207,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         </div>
         
         <div className="mb-4">
-          <label className="block text-sm font-medium text-gray-700 mb-2">{t('select_cities_to_stage')}</label>
+          <label className="block text-sm font-medium text-gray-700 mb-2">{t('filter_by_city')}</label>
           <Select onValueChange={onCitySelect}>
             <SelectTrigger className="w-full">
               <SelectValue placeholder={t('select_a_city_to_stage')} />
@@ -264,7 +264,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">{t('add_from_favorites')}</label>
           <Button variant="outline" className="w-full" onClick={onAddFavoritesToPlan}>
-            {t('add_favorites_to_plan')}
+            {t('find_from_favorites')}
           </Button>
 
           <div className="mt-4">
@@ -283,7 +283,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               }}
               disabled={!goalNameValue.trim() && !currentLoadedGoalId} // Disable if input is empty AND no goal is loaded (to prevent saving empty new goal)
             >
-              {saveButtonText} {/* Dynamically set button text */}
+              {t(saveButtonText.includes('Update') ? 'update_button' : 'save_button')}
             </Button>
           </div>
         </div>
