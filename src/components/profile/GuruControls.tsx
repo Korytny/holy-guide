@@ -17,7 +17,37 @@ import {
 import type { DateValue } from '@internationalized/date';
 import { Checkbox } from "@/components/ui/checkbox";
 import { getLocalizedText } from '../../utils/languageUtils';
-import { X, PartyPopper, Zap, Leaf, Eye, Sparkles, BookOpenText, Users, Church, Star, MoonStar, Handshake } from 'lucide-react';
+import { X, PartyPopper, Zap, Leaf, Eye, Sparkles, BookOpenText, Users, Church, Star, MoonStar, Handshake, Cross, Cog } from 'lucide-react';
+
+const OmIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    stroke="currentColor" 
+    strokeWidth="0.5" 
+    className="h-4 w-4 mr-1.5"
+  >
+    {/* Center dot */}
+    <circle cx="12" cy="12" r="2" fill="currentColor"/>
+    {/* Empty middle circle */}
+    <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor"/>
+    {/* Thin outer circle */}
+    <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor"/>
+  </svg>
+);
+
+const StarOfDavidIcon = () => (
+  <svg 
+    xmlns="http://www.w3.org/2000/svg" 
+    viewBox="0 0 24 24" 
+    fill="currentColor" 
+    className="h-4 w-4 mr-1.5"
+  >
+    {/* Star of David - two overlapping triangles */}
+    <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
+  </svg>
+);
 
 const dateFnsLocales: Record<string, DateFnsLocale> = {
   en: enUS, ru: ru, hi: hi,
@@ -34,12 +64,17 @@ const eventTypeOptions: { value: EventType; labelKey: string; Icon?: React.Eleme
 
 const eventCultureOptions: { value: EventCulture; labelKey: string; Icon?: React.ElementType }[] = [
   { value: "atheism", labelKey: "event_culture_atheism", Icon: Users }, 
-  { value: "hinduism", labelKey: "event_culture_hinduism" /* Icon: Om (Placeholder) */ },
-  { value: "christianity", labelKey: "event_culture_christianity", Icon: Church },
-  { value: "judaism", labelKey: "event_culture_judaism", Icon: Star },
+  { value: "hinduism", labelKey: "event_culture_hinduism", Icon: OmIcon },
+  { value: "christianity", labelKey: "event_culture_christianity", Icon: Cross },
+  { value: "judaism", labelKey: "event_culture_judaism", Icon: StarOfDavidIcon },
   { value: "islam", labelKey: "event_culture_islam", Icon: MoonStar },
   { value: "advaita", labelKey: "event_culture_advaita", Icon: Handshake },
-  { value: "syncretism", labelKey: "event_culture_syncretism", Icon: Users },
+  { value: "syncretism", labelKey: "event_culture_syncretism", Icon: () => (
+    <div className="relative h-4 w-4 mr-1.5">
+      <Cog className="absolute top-0 left-0 h-3 w-3" />
+      <Cog className="absolute bottom-0 right-0 h-3 w-3" />
+    </div>
+  ) },
 ];
 
 interface GuruControlsProps {

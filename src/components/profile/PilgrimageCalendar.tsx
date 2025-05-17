@@ -12,16 +12,24 @@ export interface PilgrimageCalendarProps {
   headerClassName?: string;
   onDateRangeChange: SelectRangeEventHandler;
   locale?: Locale;
-  highlightedDates?: Date[]; // New prop for dates to highlight
+  highlightedDates?: Date[];
+  showTimePicker?: boolean;
+  timePickerProps?: {
+    startTime?: string;
+    endTime?: string;
+    onTimeChange?: (time: { start: string; end: string }) => void;
+  };
 }
 
-export function PilgrimageCalendar({ 
-  selectedRange, 
-  onDateRangeChange, 
-  locale, 
+export function PilgrimageCalendar({
+  selectedRange,
+  onDateRangeChange,
+  locale,
   highlightedDates,
   className,
-  headerClassName
+  headerClassName,
+  showTimePicker = false,
+  timePickerProps
 }: PilgrimageCalendarProps) {
   console.log("--- PilgrimageCalendar RENDERED ---"); 
 
@@ -89,6 +97,8 @@ export function PilgrimageCalendar({
         modifiersStyles={modifiersStyles}
         components={components}
         showOutsideDays={false}
+        showTimePicker={showTimePicker}
+        timePickerProps={timePickerProps}
         classNames={{
           caption_label: headerClassName,
           nav_button: headerClassName,
