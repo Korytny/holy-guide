@@ -438,7 +438,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
     if (events_like && events_like.length > 0) {
       const favEvents = await getEventsByIds(events_like);
-      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: getRandomTime(), date: cityDatesMap.get(event.cityId), orderIndex: currentFavOrderIndex++ }));
+      favEvents.forEach(event => itemsToAdd.push({ type: 'event', data: event, city_id_for_grouping: event.cityId, time: event.time || getRandomTime(), date: cityDatesMap.get(event.cityId), orderIndex: currentFavOrderIndex++ }));
     }
     
     if (itemsToAdd.length > 0) {

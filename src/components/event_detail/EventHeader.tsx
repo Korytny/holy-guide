@@ -26,7 +26,10 @@ const EventHeader: React.FC<EventHeaderProps> = ({ event, places, routes, id, on
 
     const isEventFavorite = event ? isFavorite('event', event.id) : false;
     const eventName = getLocalizedText(event.name, language);
-    const allImages = [ event.imageUrl, ...(Array.isArray(event.images) ? event.images.filter(img => typeof img === 'string') : []) ].filter(Boolean) as string[];
+    const allImages = Array.from(new Set([
+      event.imageUrl, 
+      ...(Array.isArray(event.images) ? event.images.filter(img => typeof img === 'string') : [])
+    ].filter(Boolean))) as string[];
 
     return (
         <div className="relative w-full h-64 md:h-96"> 

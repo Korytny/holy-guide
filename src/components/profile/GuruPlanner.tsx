@@ -56,7 +56,40 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);   
   
-  const [planGroups, setPlanGroups] = useState<EventGroup[]>([]);
+  const [planGroups, setPlanGroups] = useState<EventGroup[]>([{
+    id: 'practice',
+    titleKey: 'event_type_practice',
+    items: [{
+      type: 'event',
+      data: {
+        id: 'test-event-1',
+        name: { en: 'Test Event', ru: 'Тестовое событие' },
+        cityId: 'test-city',
+        placeIds: [],
+        routeIds: [],
+        eventTypeField: 'practice',
+        date: '2025-05-20T10:00:00',
+        time: '10:00',
+        cultureField: 'buddhism',
+        hasOnlineStream: false,
+        description: { en: 'Test description', ru: 'Тестовое описание' },
+        location: { en: 'Test location', ru: 'Тестовое место' },
+        duration: 60,
+        price: 0,
+        maxParticipants: 10,
+        isRecurring: false,
+        recurrencePattern: null,
+        imageUrl: null,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString()
+      } as unknown as Event,
+      city_id_for_grouping: 'test-city',
+      date: '2025-05-20',
+      time: '10:00',
+      orderIndex: 0
+    } as PlannedItem],
+    order: 0
+  }]);
   const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(undefined);
   const [isGuruPlanInitiated, setIsGuruPlanInitiated] = useState<boolean>(false);
   
@@ -370,21 +403,21 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
       return;
     }
 
-    let newPlanGroups = JSON.parse(JSON.stringify(planGroups)); // Deep copy for manipulation
+    let newPlanGroups: EventGroup[] = JSON.parse(JSON.stringify(planGroups)); // Deep copy for manipulation
 
     if (type === 'group') {
       console.log("DND: Reordering GROUP");
       const [reorderedGroup] = newPlanGroups.splice(source.index, 1);
       newPlanGroups.splice(destination.index, 0, reorderedGroup);
-      newPlanGroups = newPlanGroups.map((group: EventGroup, index: number) => ({ ...group, order: index }));
+      newPlanGroups = newPlanGroups.map((group, index) => ({ ...group, order: index }));
     } else if (type === 'event-item') {
       console.log("DND: Reordering EVENT_ITEM");
       const sourceGroupId = source.droppableId;
       const destinationGroupId = destination.droppableId;
       console.log(`Source Group ID: ${sourceGroupId}, Dest Group ID: ${destinationGroupId}`);
 
-      const sourceGroupIndex = newPlanGroups.findIndex((g: EventGroup) => g.id === sourceGroupId);
-      const destinationGroupIndex = newPlanGroups.findIndex((g: EventGroup) => g.id === destinationGroupId);
+      const sourceGroupIndex = newPlanGroups.findIndex(g => g.id === sourceGroupId);
+      const destinationGroupIndex = newPlanGroups.findIndex(g => g.id === destinationGroupId);
       console.log(`Source Group Index: ${sourceGroupIndex}, Dest Group Index: ${destinationGroupIndex}`);
 
 

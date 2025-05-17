@@ -1,4 +1,5 @@
 {
+  "no_date": "Нет даты",
     "explore": "Исследовать",
     "back_to_cities": "Назад к городам",
     "back_to_home": "На главную",
@@ -238,6 +239,7 @@
     "saved_guru_plans": "Сохраненные Планы Гуру",
     "delete_guru_plan_label": "Удалить план Гуру {{planName}}",
     "filter_by_city": "Фильтр по городу",
+  "select_event_format": "Выберите формат мероприятий",
     "select_city_placeholder": "Выберите город",
     "all_cities": "Все города",
     "filter_by_event_type": "Тип События",

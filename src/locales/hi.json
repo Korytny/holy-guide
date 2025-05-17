@@ -1,4 +1,5 @@
 {
+  "no_date": "कोई तारीख नहीं",
     "explore": "खोजें",
     "back_to_cities": "शहरों पर वापस जाएं",
     "back_to_home": "होम पर वापस जाएं",
@@ -235,6 +236,7 @@
     "saved_guru_plans": "सहेजी गई गुरु योजनाएं",
     "delete_guru_plan_label": "गुरु योजना {{planName}} हटाएं",
     "filter_by_city": "शहर द्वारा फ़िल्टर करें",
+    "select_event_format": "कार्यक्रम प्रारूप चुनें",
     "select_city_placeholder": "एक शहर चुनें",
     "all_cities": "सभी शहर",
     "filter_by_event_type": "घटना का प्रकार",

@@ -200,6 +200,15 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                           className="w-auto p-1 text-xs ml-2 h-7"
                                           placeholder={t('date_placeholder')} 
                                         />
+                                        {item.type === 'event' && (
+                                          <Input
+                                            type="time"
+                                            value={item.time || ''}
+                                            onChange={(e) => onUpdateDateTime(item, item.date, e.target.value)}
+                                            className="w-auto p-1 text-xs ml-2 h-7"
+                                            placeholder={t('time_placeholder')}
+                                          />
+                                        )}
                                         <Button 
                                           variant="ghost" 
                                           size="icon" 

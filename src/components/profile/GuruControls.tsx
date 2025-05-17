@@ -206,42 +206,25 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
       {/* Right Panel: Plan Name, Saved Plans, Filters, and Actions */}
       <div className="border rounded-md p-4 bg-white flex flex-col space-y-4"> 
         
-        {/* Top section: Plan Name Input, Save Button, and Saved Plans */}
-        <div className="flex flex-col space-y-3">
-          <div className="flex flex-col sm:flex-row items-center gap-2">
-              <Input
-              placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter Guru plan name...'})}
-              value={guruPlanNameValue}
-              onChange={(e) => onGuruPlanNameChange(e.target.value)}
-              className={`text-lg font-semibold w-full sm:flex-grow ${fonts.body.className}`}
-            />
-            <Button 
-                className={`w-full sm:w-auto flex-shrink-0 bg-orange-500 hover:bg-orange-600 text-white ${fonts.subheading.className}`}
-                onClick={() => onSaveOrUpdateGuruPlan(guruPlanNameValue)}
-                disabled={!guruPlanNameValue.trim() && !currentLoadedGuruPlanId}
-            >
-                {saveButtonText}
-            </Button>
-          </div>
-          
-          {savedGuruPlans && savedGuruPlans.length > 0 && (
-            <div className="mt-1">
-              <div className="flex flex-wrap gap-2">
-                {savedGuruPlans.map(plan => (
-                  <div key={plan.id} className="flex items-center">
-                    <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>
-                    <Button variant="destructive" size="sm" onClick={() => onDeleteGuruPlan(plan.id)} className="text-xs px-1 py-1 h-auto rounded-l-none" aria-label={t('delete_guru_plan_label', { planName: plan.title })}><X size={14} /></Button>
-                  </div>
-                ))}
-              </div>
+        {/* Saved Plans Section */}
+        {savedGuruPlans && savedGuruPlans.length > 0 && (
+          <div className="mt-1">
+            <div className="flex flex-wrap gap-2">
+              {savedGuruPlans.map(plan => (
+                <div key={plan.id} className="flex items-center">
+                  <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>
+                  <Button variant="destructive" size="sm" onClick={() => onDeleteGuruPlan(plan.id)} className="text-xs px-1 py-1 h-auto rounded-l-none" aria-label={t('delete_guru_plan_label', { planName: plan.title })}><X size={14} /></Button>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
+          </div>
+        )}
 
         {/* Filters Section */}
-        <div className="space-y-3">
+        <div className="space-y-6">
+            <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>{t('select_event_format', {defaultValue: 'Select Event Format'})}</h3>
+            
             <div className="mb-2">
-              <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_city', {defaultValue: 'Filter by City'})}</label>
               <Select value={selectedCityId || 'all'} onValueChange={(value) => onCityChange(value === 'all' ? undefined : value)}>
                 <SelectTrigger><SelectValue placeholder={t('select_city_placeholder', {defaultValue: 'Select a city'})} /></SelectTrigger>
                 <SelectContent>
@@ -305,10 +288,40 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
             </div>
         </div>
 
+        {/* Plan Name Input above buttons */}
+        <div className="w-full pt-4">
+          <Input
+            placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter Guru plan name...'})}
+            value={guruPlanNameValue}
+            onChange={(e) => onGuruPlanNameChange(e.target.value)}
+            className={`text-lg font-semibold w-full ${fonts.body.className}`}
+          />
+        </div>
+
         {/* Action Buttons at the bottom */}
         <div className="flex flex-col sm:flex-row sm:gap-4 pt-4 mt-auto border-t">
-            <Button size="lg" className={`w-full sm:w-1/2 ${fonts.subheading.className}`} onClick={onAddFilteredEventsToPlan}>{t('add_filtered_events_to_plan_button')}</Button>
-            <Button size="lg" variant="outline" className={`w-full sm:w-1/2 mt-2 sm:mt-0 ${fonts.subheading.className}`} onClick={onAddFavoritesToPlan}>{t('add_favorite_events_to_plan_button')}</Button>
+            <Button 
+                size="lg"
+                className={`w-full sm:w-1/3 mt-2 sm:mt-0 bg-orange-500 hover:bg-orange-600 text-white ${fonts.subheading.className}`}
+                onClick={onAddFilteredEventsToPlan}
+            >
+                {t('add_filtered_events_to_plan_button')}
+            </Button>
+            <Button 
+                size="lg" 
+                variant="outline" 
+                className={`w-full sm:w-1/3 mt-2 sm:mt-0 ${fonts.subheading.className}`} 
+                onClick={onAddFavoritesToPlan}
+            >
+                {t('add_favorite_events_to_plan_button')}
+            </Button>
+            <Button 
+                size="lg" 
+                className={`w-full sm:w-1/3 bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
+                onClick={() => window.location.href = '/auth'}
+            >
+                {saveButtonText}
+            </Button>
         </div>
       </div>
     </div>
