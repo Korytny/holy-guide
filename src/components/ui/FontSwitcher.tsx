@@ -1,4 +1,5 @@
 import { useFont } from '@/context/FontContext'
+import { useLanguage } from '@/context/LanguageContext'
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,19 +11,22 @@ import {
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
 
-const textTypes = [
-  { id: 'heading', label: 'Заголовки' },
-  { id: 'subheading', label: 'Подзаголовки' },
-  { id: 'body', label: 'Основной текст' }
-]
-
 export function FontSwitcher() {
   const { fonts, setFont, availableFonts } = useFont()
+  const { language } = useLanguage()
+
+  const textTypes = [
+    { id: 'heading', label: language === 'ru' ? 'Заголовки' : language === 'hi' ? 'शीर्षक' : 'Headings' },
+    { id: 'subheading', label: language === 'ru' ? 'Подзаголовки' : language === 'hi' ? 'उपशीर्षक' : 'Subheadings' },
+    { id: 'body', label: language === 'ru' ? 'Основной текст' : language === 'hi' ? 'मुख्य पाठ' : 'Body text' }
+  ]
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">Шрифты</Button>
+        <Button variant="outline">
+          {language === 'ru' ? 'Шрифты' : language === 'hi' ? 'फॉन्ट' : 'Fonts'}
+        </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         {textTypes.map((type) => (

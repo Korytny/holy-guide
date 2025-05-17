@@ -19,6 +19,9 @@ export type CalendarProps = React.ComponentProps<typeof DayPicker> & {
     IconRight?: React.ComponentType<any>;
     [key: string]: React.ComponentType<any> | undefined;
   };
+  onPrevClick?: () => void;
+  onNextClick?: () => void;
+  captionLabel?: string;
 };
 
 function Calendar({
@@ -42,22 +45,22 @@ function Calendar({
   };
 
   const defaultClassNames = {
-    months: "relative flex flex-col sm:flex-row gap-4",
+    months: "relative flex flex-col sm:flex-row gap-0",
     month: "w-full",
-    month_caption: "relative flex flex-col items-center gap-1 mb-2",
-    caption_label: "text-base font-semibold",
-    nav: "flex w-full justify-between mb-2 px-4",
+    month_caption: "relative flex items-center justify-center gap-4 mb-1 w-full",
+    caption_label: "text-xs font-semibold",
+    nav: "flex items-center justify-between w-full mb-2 px-2",
     button_previous: cn(
       buttonVariants({ variant: "ghost" }),
-      "size-9 text-foreground hover:bg-accent p-0",
+      "size-6 text-foreground hover:bg-accent p-0",
     ),
     button_next: cn(
       buttonVariants({ variant: "ghost" }),
-      "size-9 text-foreground hover:bg-accent p-0",
+      "size-6 text-foreground hover:bg-accent p-0",
     ),
-    weekday: "size-9 p-0 text-xs font-medium text-muted-foreground/80",
+    weekday: "size-6 p-0 text-[0.65rem] font-medium text-muted-foreground/80",
     day_button:
-      "relative flex size-9 items-center justify-center whitespace-nowrap rounded-lg p-0 text-foreground outline-offset-2 group-[[data-selected]:not(.range-middle)]:[transition-property:color,background-color,border-radius,box-shadow] group-[[data-selected]:not(.range-middle)]:duration-150 focus:outline-none group-data-[disabled]:pointer-events-none focus-visible:z-10 hover:bg-accent group-data-[selected]:bg-primary hover:text-foreground group-data-[selected]:text-primary-foreground group-data-[disabled]:text-foreground/30 group-data-[disabled]:line-through group-data-[outside]:text-foreground/30 group-data-[outside]:group-data-[selected]:text-primary-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-ring/70 group-[.range-start:not(.range-end)]:rounded-e-none group-[.range-end:not(.range-start)]:rounded-s-none group-[.range-middle]:rounded-none group-data-[selected]:group-[.range-middle]:bg-accent group-data-[selected]:group-[.range-middle]:text-foreground",
+      "relative flex size-6 items-center justify-center whitespace-nowrap rounded-sm p-0 text-xs text-foreground outline-offset-1 group-[[data-selected]:not(.range-middle)]:[transition-property:color,background-color,border-radius,box-shadow] group-[[data-selected]:not(.range-middle)]:duration-150 focus:outline-none group-data-[disabled]:pointer-events-none focus-visible:z-10 hover:bg-accent group-data-[selected]:bg-primary hover:text-foreground group-data-[selected]:text-primary-foreground group-data-[disabled]:text-foreground/30 group-data-[disabled]:line-through group-data-[outside]:text-foreground/30 group-data-[outside]:group-data-[selected]:text-primary-foreground focus-visible:outline focus-visible:outline-1 focus-visible:outline-ring/70 group-[.range-start:not(.range-end)]:rounded-e-none group-[.range-end:not(.range-start)]:rounded-s-none group-[.range-middle]:rounded-none group-data-[selected]:group-[.range-middle]:bg-accent group-data-[selected]:group-[.range-middle]:text-foreground",
     day: "group size-9 px-0 text-sm",
     range_start: "range-start",
     range_end: "range-end",
@@ -86,10 +89,39 @@ function Calendar({
   };
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-2", className)}>
+      <div className="flex justify-between items-center mb-2 px-2">
+        <button
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "size-6 text-foreground hover:bg-accent p-0"
+          )}
+          onClick={() => props.onPrevClick?.()}
+        >
+          <ChevronLeft className="h-4 w-4" />
+        </button>
+        <span className="text-sm font-medium">
+          {props.captionLabel}
+        </span>
+        <button
+          className={cn(
+            buttonVariants({ variant: "ghost" }),
+            "size-6 text-foreground hover:bg-accent p-0"
+          )}
+          onClick={() => props.onNextClick?.()}
+        >
+          <ChevronRight className="h-4 w-4" />
+        </button>
+      </div>
       <DayPicker
         showOutsideDays={showOutsideDays}
-        classNames={mergedClassNames}
+        classNames={{
+          ...mergedClassNames,
+          nav: "hidden",
+          months: "relative flex flex-col sm:flex-row gap-4",
+          caption: "flex justify-center text-sm font-medium mb-2",
+          caption_label: "text-center"
+        }}
         components={defaultComponents}
         {...props}
       />
