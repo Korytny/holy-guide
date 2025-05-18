@@ -40,6 +40,7 @@ export function FontSwitcher() {
                   key={`${type.id}-${font.name}`}
                   className={`${font.className} ${fonts[type.id].name === font.name ? 'bg-accent' : ''}`}
                   onSelect={() => setFont(font.name, type.id as 'heading' | 'subheading' | 'body')}
+                  style={{ fontFamily: font.name }}
                 >
                   {font.name} {fonts[type.id].name === font.name && '✓'}
                 </DropdownMenuItem>

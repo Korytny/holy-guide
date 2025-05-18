@@ -21,10 +21,17 @@ export default {
         extend: {
             fontFamily: {
                 sans: ['"Share Tech Mono Cyr"', ...fontFamily.mono],
-                heading: ['Rubik', ...fontFamily.sans],
+                heading: ['Montserrat', ...fontFamily.sans],
+                subheading: ['Ubuntu', ...fontFamily.sans],
+                body: ['Open Sans', ...fontFamily.sans],
                 roboto: ['Roboto', ...fontFamily.sans],
                 'open-sans': ['Open Sans', ...fontFamily.sans],
                 montserrat: ['Montserrat', ...fontFamily.sans],
+                lato: ['Lato', ...fontFamily.sans],
+                'pt-serif': ['PT Serif', ...fontFamily.serif],
+                ubuntu: ['Ubuntu', ...fontFamily.sans],
+                'playfair-display': ['Playfair Display', ...fontFamily.serif],
+                'pt-sans': ['PT Sans', ...fontFamily.sans],
                 'card-title': ['LaudatioC', ...fontFamily.sans],
                 'card-subtitle': ['Monaco', ...fontFamily.mono],
             },

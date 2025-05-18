@@ -89,11 +89,24 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         ) : textError ? (
            <p className="text-red-500 pointer-events-auto">{textError}</p>
         ) : titleData ? (
-           <div className="pointer-events-auto">
-             <h1 className={`text-4xl font-bold text-[#09332A] sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`} style={{color: '#09332A'}}>
+           <div className="pointer-events-auto backdrop-blur-sm bg-white/30 dark:bg-black/30 p-6 rounded-lg">
+             <h1 className={`text-4xl font-bold sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`} 
+                 style={{
+                   color: 'white',
+                   textShadow: `
+                     -1px -1px 0 #000,
+                     1px -1px 0 #000,
+                     -1px 1px 0 #000,
+                     1px 1px 0 #000,
+                     0 0 8px rgba(0, 0, 0, 0.5)
+                   `,
+                   animation: 'fadeIn 1s ease-out',
+                   letterSpacing: '0.05em'
+                 }}>
                {getLocalizedString(titleData.name)}
              </h1>
-             <p className={`mt-4 text-lg text-black dark:text-gray-300 max-w-xl mx-auto ${fonts.subheading.className}`}>
+             <p className={`mt-4 text-lg text-black dark:text-gray-300 max-w-xl mx-auto ${fonts.subheading.className}`}
+                style={{ letterSpacing: '0.025em' }}>
                {getLocalizedString(titleData.description)}
              </p>
            </div>
