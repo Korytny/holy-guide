@@ -24,9 +24,12 @@ export function FontSwitcher() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline">
-          {language === 'ru' ? 'Шрифты' : language === 'hi' ? 'फॉन्ट' : 'Fonts'}
-        </Button>
+        <button
+          className={`flex items-center gap-2 text-sm ${fonts.subheading.className} hover:text-primary transition-colors`}
+          onClick={() => document.getElementById('font-menu')?.click()}
+        >
+          {language === 'ru' ? 'Шрифт' : language === 'hi' ? 'फॉन्ट' : 'Font'}
+        </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
         {textTypes.map((type) => (

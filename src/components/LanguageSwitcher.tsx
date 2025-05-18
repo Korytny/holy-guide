@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { useLanguage } from '../context/LanguageContext';
+import { useFont } from '../context/FontContext';
 import { Language } from '../types';
 import { Globe } from 'lucide-react';
 import {
@@ -13,6 +14,7 @@ import { Button } from '@/components/ui/button';
 
 const LanguageSwitcher: React.FC = () => {
   const { language, setLanguage } = useLanguage();
+  const { fonts } = useFont();
 
   const languages = [
     { code: 'en', name: 'English', flag: '🇬🇧' },
@@ -26,7 +28,7 @@ const LanguageSwitcher: React.FC = () => {
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
         {/* Use a Button as the trigger */}
-        <Button variant="ghost" className="flex items-center gap-2 text-sm">
+        <Button variant="ghost" className={`flex items-center gap-2 text-sm ${fonts.subheading.className}`}>
           <Globe size={16} className="text-gray-600" />
           <span className="hidden sm:inline">{currentLanguage?.name}</span>
           <span className="sm:hidden">{currentLanguage?.flag}</span>
