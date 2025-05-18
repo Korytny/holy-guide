@@ -1,4 +1,11 @@
 import { useEffect, useState, useCallback } from "react";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { type AuthContextType } from "../../context/AuthContext";
 import { type LanguageContextType } from "../../context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem, Location } from "../../types";
@@ -468,8 +475,64 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setPlannedItems(finalItems);
   };
 
+  const [pilgrimageType, setPilgrimageType] = useState<string>("");
+
   return (
     <>
+      <div className="mb-6 flex flex-wrap gap-4 items-center">
+        <div className="flex-1 min-w-[200px]">
+          <Select onValueChange={setPilgrimageType} value={pilgrimageType}>
+            <SelectTrigger className="w-full">
+              <SelectValue placeholder={t('pilgrimage_filter_title')} />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="temple" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-amber-500"></span>
+                {t('place_type_temple')}
+              </SelectItem>
+              <SelectItem value="samadhi" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-purple-500"></span>
+                {t('place_type_samadhi')}
+              </SelectItem>
+              <SelectItem value="kunda" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-blue-500"></span>
+                {t('place_type_kunda')}
+              </SelectItem>
+              <SelectItem value="ashram" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-green-500"></span>
+                {t('place_type_ashram')}
+              </SelectItem>
+              <SelectItem value="festival" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-red-500"></span>
+                {t('event_type_festival')}
+              </SelectItem>
+              <SelectItem value="practice" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-indigo-500"></span>
+                {t('event_type_practice')}
+              </SelectItem>
+              <SelectItem value="vipassana" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-teal-500"></span>
+                {t('event_type_vipassana')}
+              </SelectItem>
+              <SelectItem value="ayurveda" className="flex items-center gap-2">
+                <span className="w-3 h-3 rounded-full bg-orange-500"></span>
+                {t('event_type_ayurveda')}
+              </SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <span>{t('selected')}:</span>
+          {pilgrimageType && (
+            <span className="font-medium">
+              {t(pilgrimageType.startsWith('place_') ? 
+                `place_type_${pilgrimageType.replace('place_', '')}` : 
+                `event_type_${pilgrimageType}`)}
+            </span>
+          )}
+        </div>
+      </div>
       <PilgrimagePlannerControls
         // ... (other props)
         availableCities={availableCities}
