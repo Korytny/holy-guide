@@ -1,23 +1,25 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react'; // Import useRef
 import { getCities } from '../services/api';
 import { City, Language } from '../types';
 import CityCard from '../components/CityCard';
 import CityCardMob from '../components/CityCardMob';
 import SearchBar from '../components/SearchBar';
 import HeroSection from '../components/HeroSection';
-import { ImageCloudItem } from '../components/ui/image-cloud'; 
+import { ImageCloudItem } from '../components/ui/image-cloud';
 import { useLanguage } from '../context/LanguageContext';
-import { useAuth } from '../context/AuthContext'; 
+import { useAuth } from '../context/AuthContext';
 import { useIsSmallScreen } from '../hooks/use-small-screen';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLocalizedText } from '../utils/languageUtils';
 import { motion } from 'framer-motion';
 import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner';
 import { GuruPlanner } from '../components/profile/GuruPlanner'; // Import GuruPlanner
+import { AnimatedText } from '@/components/ui/animated-underline-text-one'; // Import AnimatedText
+import { WordPullUp } from '@/components/ui/word-pull-up';
 
 const CitiesPage = () => {
   const { language, t } = useLanguage();
-  const authContext = useAuth(); 
+  const authContext = useAuth();
   const isSmallScreen = useIsSmallScreen();
   const [cities, setCities] = useState<City[]>([]);
   const [areCitiesLoading, setAreCitiesLoading] = useState(true);
@@ -25,6 +27,9 @@ const CitiesPage = () => {
   const [allCities, setAllCities] = useState<City[]>([]);
   const [imageCloudItems, setImageCloudItems] = useState<ImageCloudItem[]>([]);
   const isCloudLoading = areCitiesLoading;
+
+  const guruSectionRef = useRef<HTMLDivElement>(null); // Ref for Guru section
+  const [isGuruSectionInView, setIsGuruSectionInView] = useState(false); // State to track if Guru section is in view
 
   // heroText can be removed if not used elsewhere or defined locally in HeroSection
 
@@ -47,11 +52,11 @@ const CitiesPage = () => {
           setImageCloudItems(items);
         } catch (error) {
             console.error('[CitiesPage] Error fetching cities:', error);
-            setCities([]); 
-            setAllCities([]); 
-            setImageCloudItems([]); 
+            setCities([]);
+            setAllCities([]);
+            setImageCloudItems([]);
         } finally {
-            setAreCitiesLoading(false); 
+            setAreCitiesLoading(false);
         }
       };
       fetchAllCitiesData();
@@ -79,25 +84,32 @@ const CitiesPage = () => {
     setCities(results);
   }, [searchTerm, allCities]);
 
+  // Scroll trigger - removed since we're not using animations anymore
+
   const showLoadingSkeleton = authContext.auth.isLoading || areCitiesLoading;
   const CardComponent = isSmallScreen ? CityCardMob : CityCard;
 
   return (
     <>
-      <HeroSection
-        imageCloudItems={imageCloudItems}
-        isCloudLoading={isCloudLoading}
-      />
+      <div> {/* Hero section container */}
+        <HeroSection
+          imageCloudItems={imageCloudItems}
+          isCloudLoading={isCloudLoading}
+        />
+      </div>
       {/* Guru Planner Section - Added below Hero */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
+      <div ref={guruSectionRef} className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"> {/* Attach ref to Guru section container */}
         <section aria-labelledby="guru-planner-heading" className="mb-12">
-          <h2 id="guru-planner-heading" className="text-3xl font-bold tracking-tight text-gray-900 dark:text-white mb-6 text-center">
-            {t('guru_planner_main_title', { defaultValue: 'Spiritual Event Guide' })}
-          </h2>
-          <GuruPlanner 
-            auth={authContext} 
-            language={language} 
-            t={t} 
+          <div className="text-center mt-20 mb-20">
+            <WordPullUp
+              className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
+              words={t('guru_planner_main_title', { defaultValue: 'Spiritual Event Guide' })}
+            />
+          </div>
+          <GuruPlanner
+            auth={authContext}
+            language={language}
+            t={t}
           />
         </section>
       </div>
@@ -105,9 +117,10 @@ const CitiesPage = () => {
       {/* Existing Cities List Section */}
       <div className="bg-gradient-to-b from-orange-50 to-orange-100 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
-          <h2 className="text-3xl font-bold text-center mb-6">
-            {t('cities_section_title', { defaultValue: 'Cities' })}
-          </h2>
+          <WordPullUp
+            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mt-20 mb-20"
+            words={t('cities_section_title', { defaultValue: 'Cities' })}
+          />
           <div className="flex justify-center mb-8">
             <div className="w-full max-w-2xl">
               <SearchBar placeholder={t('search_placeholder')} onSearch={term => setSearchTerm(term)} />
@@ -123,11 +136,11 @@ const CitiesPage = () => {
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {cities.length > 0 ? (
                   cities.map((city, index) => (
-                    <motion.div 
+                    <motion.div
                       key={city.id}
                       initial={{ opacity: 0, y: 20 }}
                       whileInView={{ opacity: 1, y: 0 }}
-                      viewport={{ once: true }} 
+                      viewport={{ once: true }}
                       transition={{ duration: 0.5, delay: index * 0.1 }}
                     >
                       <CardComponent city={city} />
@@ -147,14 +160,16 @@ const CitiesPage = () => {
       {/* Existing Pilgrimage Planner Section - kept at the bottom */}
       <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
         <section aria-labelledby="pilgrimage-planner-heading" className="mb-8">
-          <h2 id="pilgrimage-planner-heading" className="text-2xl font-bold tracking-tight text-gray-900 dark:text-white mb-4">
-            {t('pilgrimage_plan', { defaultValue: 'Pilgrimage Plan' })}
-          </h2>
-          <PilgrimagePlanner 
-            auth={authContext} 
-            language={language} 
-            t={t} 
-          /> 
+          <WordPullUp
+            id="pilgrimage-planner-heading"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mt-20 mb-20"
+            words={t('pilgrimage_plan', { defaultValue: 'Pilgrimage Plan' })}
+          />
+          <PilgrimagePlanner
+            auth={authContext}
+            language={language}
+            t={t}
+          />
         </section>
       </div>
     </>
