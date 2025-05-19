@@ -56,16 +56,19 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [savedGoals, setSavedGoals] = useState<any[]>([]);
   const [goalNameForInput, setGoalNameForInput] = useState('');
   const [currentLoadedGoalId, setCurrentLoadedGoalId] = useState<string | null>(null);
-  const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); // Added state for filter controls
+  const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); 
  
-  const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>([]);
-  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>([]);
+  const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple']);
+  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['practice', 'retreat', 'vipassana']);
 
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
   
   const [filteredPlaces, setFilteredPlaces] = useState<Place[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);
+
+  const [isLoadingCities, setIsLoadingCities] = useState(true);
+  const [isLoadingPlacesAndEvents, setIsLoadingPlacesAndEvents] = useState(true);
 
   useEffect(() => {
     if (onItemsChange) {
@@ -75,11 +78,22 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
   useEffect(() => {
     const fetchInitialCities = async () => {
+      setIsLoadingCities(true);
       const cities = await getCities();
-      if (cities) setAvailableCities(cities);
+      if (cities) {
+        setAvailableCities(cities);
+        const rishikeshCity = cities.find(city => 
+          city.name?.en?.toLowerCase() === "rishikesh" || 
+          city.name?.ru === "Решикешь"
+        );
+        if (rishikeshCity) {
+          setFilterControlSelectedCityIds([rishikeshCity.id]);
+        }
+      }
+      setIsLoadingCities(false);
     };
     fetchInitialCities();
-  }, []);
+  }, []); 
 
   useEffect(() => {
     const finalSortedList = [...plannedItems].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -89,22 +103,34 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
   useEffect(() => {
     const fetchAllAvailableData = async () => {
-      const allEvents = await getEvents();
-      setAvailableEvents(allEvents || []);
-
-      if (availableCities.length > 0) {
-        let allPlacesAccumulated: Place[] = [];
-        for (const city of availableCities) {
-          const placesInCity = await getPlacesByCityId(city.id);
-          allPlacesAccumulated = allPlacesAccumulated.concat(placesInCity);
-        }
-        const uniquePlaces = Array.from(new Map(allPlacesAccumulated.map(p => [p.id, p])).values());
-        setAvailablePlaces(uniquePlaces);
+      if (isLoadingCities) { // Wait for cities to be loaded first
+        setIsLoadingPlacesAndEvents(true); // Ensure this is true if cities are still loading
+        return;
       }
+      if (availableCities.length === 0) { // No cities found, nothing to fetch for
+        setAvailablePlaces([]);
+        setAvailableEvents([]);
+        setIsLoadingPlacesAndEvents(false);
+        return;
+      }
+
+      setIsLoadingPlacesAndEvents(true);
+      const allEventsPromise = getEvents();
+      
+      const placesPromises = availableCities.map(city => getPlacesByCityId(city.id));
+      const allPlacesNested = await Promise.all(placesPromises);
+      const allPlacesAccumulated = allPlacesNested.flat().filter(p => p); // Filter out any null/undefined results from getPlacesByCityId
+
+      const allEvents = await allEventsPromise;
+
+      setAvailableEvents(allEvents || []);
+      const uniquePlaces = Array.from(new Map(allPlacesAccumulated.map(p => [p.id, p])).values());
+      setAvailablePlaces(uniquePlaces);
+      setIsLoadingPlacesAndEvents(false);
     };
     
     fetchAllAvailableData();
-  }, [availableCities]);
+  }, [availableCities, isLoadingCities]);
 
   useEffect(() => {
     let cityIdsToConsider: Set<string>;
@@ -728,9 +754,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes} 
         onSelectedEventSubtypesChange={setSelectedEventSubtypes} 
         onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
-        onClearPlan={handleClearPlan} 
+        onClearPlan={handleClearPlan}
+        isLoadingData={isLoadingCities || isLoadingPlacesAndEvents} // Pass combined loading state
       />
-      {isPlanInitiated && (
+      {(isLoadingCities || isLoadingPlacesAndEvents) && <div className="text-center p-4">{t('loading_data', { defaultValue: 'Loading data...'})}</div>}
+      {!isLoadingCities && !isLoadingPlacesAndEvents && isPlanInitiated && (
         <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 
           <div className="md:col-span-1"> 
             <PilgrimagePlanDisplay

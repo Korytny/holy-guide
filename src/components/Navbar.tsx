@@ -26,10 +26,8 @@ const Navbar = ({ className = '' }: NavbarProps) => {
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center"> {/* Удален justify-center */}
           <div className="flex items-center gap-4"> {/* Удалены flex-1 и justify-center */}
-            <div className={fonts.subheading.className}>
+            <div className="flex items-center gap-4">
               <LanguageSwitcher />
-            </div>
-            <div className={fonts.subheading.className}>
               <FontSwitcher />
             </div>
           </div>

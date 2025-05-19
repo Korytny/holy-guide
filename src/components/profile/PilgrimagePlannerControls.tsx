@@ -71,10 +71,11 @@ interface PilgrimagePlannerControlsProps {
   onSelectedPlaceSubtypesChange: (subtypes: PlaceSubtype[]) => void;
   onSelectedEventSubtypesChange: (subtypes: EventSubtype[]) => void;
   onAddFilteredItemsToPlan: () => void;
-  onClearPlan: () => void; 
+  onClearPlan: () => void;
+  isLoadingData?: boolean; 
 }
 
-const ORANGE_BUTTON_CLASS = "bg-orange-500 hover:bg-orange-600 text-white"; 
+const ORANGE_BUTTON_CLASS = "bg-saffron hover:bg-saffron/90 text-white"; 
 const BEIGE_BACKGROUND_CLASS = "bg-orange-50";
 const CARD_BACKGROUND_CLASS = 'bg-card'; 
 
@@ -102,6 +103,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   onSelectedEventSubtypesChange,
   onAddFilteredItemsToPlan,
   onClearPlan,
+  isLoadingData,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
   const isMobile = useMobile();
@@ -200,8 +202,12 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
                       <ToggleGroupItem
                         key={city.id}
                         value={city.id}
-                        variant={isSelected ? 'default' : 'outline'}
-                        className={`px-2 py-1 text-sm ${fonts.body.className} ${isSelected ? 'toggle-item-selected' : ''}`}
+                        variant="outline" // Keep variant as outline, manage selection with classes
+                        className={`px-2 py-1 text-sm ${fonts.body.className} ${
+                          isSelected 
+                          ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground' 
+                          : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'
+                        }`}
                       >
                         {getLocalizedText(city.name, language)}
                       </ToggleGroupItem>
@@ -248,7 +254,16 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:gap-2 pt-4 mt-auto border-t"> 
+          <div className="flex flex-col sm:flex-row sm:gap-2 pt-4 mt-auto border-t">
+            <Button 
+              size="lg" 
+              onClick={onAddFilteredItemsToPlan} 
+              className={`w-full sm:w-1/4 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className} mt-2 sm:mt-0`}
+              disabled={isLoadingData}
+            >
+              {isLoadingData ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_to_plan_button')}
+            </Button>
+
             { (currentLoadedGoalId || showPlanNameInput) ? (
               <div className="w-full sm:w-1/4 flex flex-col gap-2 mt-2 sm:mt-0">
                 <Label htmlFor="goalNameInputPilgrimage" className="sr-only">{t('goal_name_placeholder')}</Label>
@@ -261,7 +276,8 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
                 />
                 <Button 
                   size="lg"
-                  className={`w-full ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className}`}
+                  variant="outline"
+                  className={`w-full ${fonts.subheading.className}`}
                   onClick={() => {
                       onSaveOrUpdateGoal(goalNameValue);
                       if (showPlanNameInput && !currentLoadedGoalId) { 
@@ -276,20 +292,13 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
             ) : (
               <Button 
                 size="lg" 
-                className={`w-full sm:w-1/4 mt-2 sm:mt-0 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className}`}
+                variant="outline"
+                className={`w-full sm:w-1/4 mt-2 sm:mt-0 ${fonts.subheading.className}`}
                 onClick={() => setShowPlanNameInput(true)} 
               >
                 {t(saveButtonTextKey)}
               </Button>
             )}
-
-            <Button 
-              size="lg" 
-              onClick={onAddFilteredItemsToPlan} 
-              className={`w-full sm:w-1/4 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className} mt-2 sm:mt-0`}
-            >
-              {t('add_filtered_to_plan_button')}
-            </Button>
             
             <Button 
               size="lg" 

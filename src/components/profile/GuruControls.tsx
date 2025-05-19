@@ -61,6 +61,7 @@ const eventTypeOptions: { value: EventType; labelKey: string; Icon?: React.Eleme
   { value: "vipassana", labelKey: "event_type_vipassana", Icon: Eye },
   { value: "puja", labelKey: "event_type_puja", Icon: Sparkles },
   { value: "lecture", labelKey: "event_type_lecture", Icon: BookOpenText },
+  { value: "guru_festival", labelKey: "event_type_guru_festival", Icon: Star },
 ];
 
 export const eventCultureOptions: { value: EventCulture; labelKey: string; Icon?: React.ElementType }[] = [
@@ -102,6 +103,7 @@ interface GuruControlsProps {
   onDeleteGuruPlan: (planId: string) => void;
   savedGuruPlans: Array<{ id: string; title: string; created_at: string; }>;
   eventDatesForCalendar: Date[];
+  isLoadingCities?: boolean;
 }
 
 export const GuruControls: React.FC<GuruControlsProps> = ({
@@ -128,6 +130,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
   onDeleteGuruPlan,
   savedGuruPlans,
   eventDatesForCalendar,
+  isLoadingCities,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
 
@@ -242,8 +245,12 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                   <ToggleGroupItem 
                     key={city.id} 
                     value={city.id}
-                    variant={selectedCityIds.includes(city.id) ? 'default' : 'outline'}
-                    className={`px-1 py-1 text-sm ${fonts.body.className} ${selectedCityIds.includes(city.id) ? 'toggle-item-selected' : ''}`}
+                    variant="outline"
+                    className={`px-1 py-1 text-sm ${fonts.body.className} ${
+                      selectedCityIds.includes(city.id)
+                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground'
+                      : ''
+                    }`}
                   >
                     {getLocalizedText(city.name, language)}
                   </ToggleGroupItem>
@@ -291,8 +298,17 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
 
             {/* Action Buttons at the bottom */}
         <div className="flex flex-col sm:flex-row sm:gap-4 pt-4 mt-auto border-t">
+            <Button 
+                size="lg"
+                className={`w-full sm:w-1/3 bg-saffron hover:bg-saffron/90 text-white ${fonts.subheading.className}`}
+                onClick={onAddFilteredEventsToPlan}
+                disabled={isLoadingCities}
+            >
+                {isLoadingCities ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_events_to_plan_button')}
+            </Button>
+
             { (currentLoadedGuruPlanId || showPlanNameInput) ? (
-              <div className="w-full sm:w-1/3 flex flex-col gap-2 mt-2 sm:mt-0">
+              <div className="w-full sm:w-1/3 flex flex-col gap-2">
                 <Input
                   placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter plan name...'})}
                   value={guruPlanNameValue}
@@ -301,39 +317,33 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                 />
                 <Button 
                   size="lg"
-                  className={`bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
+                  variant="outline"
+                  className={`w-full ${fonts.subheading.className}`}
                   onClick={() => {
                       onSaveOrUpdateGuruPlan(guruPlanNameValue);
-                      if (showPlanNameInput && !currentLoadedGuruPlanId) { // If it was a new plan being named and saved
-                          setShowPlanNameInput(false); // Parent will set currentLoadedGuruPlanId, this hides redundant input trigger
+                      if (showPlanNameInput && !currentLoadedGuruPlanId) {
+                          setShowPlanNameInput(false);
                       }
                   }}
                 >
-                  {saveButtonText} {/* "Update" if currentLoadedGuruPlanId, "Save" if new plan via showPlanNameInput */}
+                  {saveButtonText}
                 </Button>
               </div>
             ) : (
-              // Initial "Save" button for a new, unnamed plan
               <Button 
                 size="lg" 
-                className={`w-full sm:w-1/3 mt-2 sm:mt-0 bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
-                onClick={() => setShowPlanNameInput(true)} // Click to show input for new plan name
+                variant="outline"
+                className={`w-full sm:w-1/3 ${fonts.subheading.className}`}
+                onClick={() => setShowPlanNameInput(true)}
               >
-                {saveButtonText} {/* This will be "Save" as currentLoadedGuruPlanId is null and showPlanNameInput is false */}
+                {saveButtonText}
               </Button>
             )}
 
             <Button 
-                size="lg"
-                className={`w-full sm:w-1/3 mt-2 sm:mt-0 bg-orange-500 hover:bg-orange-600 text-white ${fonts.subheading.className}`}
-                onClick={onAddFilteredEventsToPlan}
-            >
-                {t('add_filtered_events_to_plan_button')}
-            </Button>
-            <Button 
                 size="lg" 
                 variant="outline" 
-                className={`w-full sm:w-1/3 mt-2 sm:mt-0 ${fonts.subheading.className}`} 
+                className={`w-full sm:w-1/3 ${fonts.subheading.className}`} 
                 onClick={onAddFavoritesToPlan}
             >
                 {t('add_favorite_events_to_plan_button')}

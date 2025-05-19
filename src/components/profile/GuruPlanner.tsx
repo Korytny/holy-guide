@@ -20,6 +20,7 @@ const eventTypeToTitleKey: Record<EventType, string> = {
   vipassana: "event_type_vipassana",
   puja: "event_type_puja",
   lecture: "event_type_lecture",
+  guru_festival: "event_type_guru_festival",
 };
 
 const eventTypeToDefaultDuration: Record<EventType, number> = {
@@ -29,6 +30,7 @@ const eventTypeToDefaultDuration: Record<EventType, number> = {
   vipassana: 600, // 10 hours for vipassana
   puja: 90,      // 1.5 hours for pujas
   lecture: 45,   // 45 minutes for lectures
+  guru_festival: 180, // 3 hours for guru festivals
 };
 
 interface GuruPlannerProps {
@@ -57,11 +59,12 @@ const getNextOrderIndex = (items: { orderIndex: number }[] | { order: number }[]
 export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, language, t }) => {
   const defaultPlanName = t('event_type_practice', { defaultValue: 'Practice' });
 
-  const [selectedEventTypes, setSelectedEventTypes] = useState<EventType[]>([]);
+  const [selectedEventTypes, setSelectedEventTypes] = useState<EventType[]>(['festival', 'retreat', 'practice', 'puja']);
   const [hasTranslation, setHasTranslation] = useState<boolean | undefined>(undefined);
-  const [selectedCultures, setSelectedCultures] = useState<EventCulture[]>([]);
+  const [selectedCultures, setSelectedCultures] = useState<EventCulture[]>(['hinduism', 'advaita']);
   const [selectedCityIds, setSelectedCityIds] = useState<string[]>([]);
 
+  const [isLoadingCities, setIsLoadingCities] = useState(true);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);   
   
@@ -124,11 +127,26 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
   }, [planGroups]);
 
   useEffect(() => {
-    const fetchAllCities = async () => {
+    const fetchAllCitiesAndSetDefaults = async () => {
+      setIsLoadingCities(true);
       const cities = await getCities();
-      if (cities) setAvailableCities(cities);
+      if (cities) {
+        setAvailableCities(cities);
+        const defaultCityNames = ["rishikesh", "govardhan"];
+        const defaultCityNamesRu = ["решикешь", "говордхан"];
+        const cityIdsToSelect: string[] = [];
+        cities.forEach(city => {
+          const nameEn = city.name?.en?.toLowerCase();
+          const nameRu = city.name?.ru?.toLowerCase();
+          if ((nameEn && defaultCityNames.includes(nameEn)) || (nameRu && defaultCityNamesRu.includes(nameRu))) {
+            cityIdsToSelect.push(city.id);
+          }
+        });
+        setSelectedCityIds(cityIdsToSelect);
+      }
+      setIsLoadingCities(false);
     };
-    fetchAllCities();
+    fetchAllCitiesAndSetDefaults();
   }, []);
 
   useEffect(() => {
@@ -539,8 +557,10 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
         onLoadGuruPlan={handleLoadGuruPlan}
         savedGuruPlans={savedGuruPlans}
         eventDatesForCalendar={eventDatesForCalendar}
+        isLoadingCities={isLoadingCities} 
       />
-      {isGuruPlanInitiated && (
+      {isLoadingCities && <div className="text-center p-4">{t('loading_cities', { defaultValue: 'Loading cities...'})}</div>}
+      {!isLoadingCities && isGuruPlanInitiated && (
         <div className="mt-8">
           <GuruPlanDisplay
               planGroups={planGroups}

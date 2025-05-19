@@ -86,7 +86,7 @@ export interface Route {
 }
 
 // Types for GuruPlanner filters
-export type EventType = "festival" | "practice" | "retreat" | "vipassana" | "puja" | "lecture";
+export type EventType = "festival" | "practice" | "retreat" | "vipassana" | "puja" | "lecture" | "guru_festival";
 export type EventCulture = "atheism" | "hinduism" | "christianity" | "judaism" | "islam" | "advaita" | "syncretism";
 
 export interface Event {
