@@ -26,7 +26,7 @@ import useMobile from '../../hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
 // Removed FontSwitcher import
 export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site'; 
-export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture';
+export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture' | 'guru_festival';
 
 export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: 'temple', labelKey: 'place_type_temple', Icon: Church },
@@ -42,6 +42,7 @@ export const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Ic
   { value: "vipassana", labelKey: "event_type_vipassana", Icon: Eye },
   { value: "lecture", labelKey: "event_type_lecture", Icon: BookOpenText },
   { value: "puja", labelKey: "event_type_puja", Icon: Flame },
+  { value: "guru_festival", labelKey: "event_type_guru_festival", Icon: Flame },
 ];
 
 const dateFnsLocales: Record<string, DateFnsLocale> = {

@@ -384,30 +384,34 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       alert(t('please_select_date_range_first'));
       return;
     }
-    const cityItemsInPlan = plannedItems.filter(item => item.type === 'city');
-    if (cityItemsInPlan.length === 0) {
+    if (plannedItems.length === 0) {
       alert(t('please_add_cities_to_plan_first'));
       return;
     }
+    
     const startDate = selectedDateRange.from;
     const endDate = selectedDateRange.to || selectedDateRange.from;
     const intervalDays = eachDayOfInterval({ start: startDate, end: endDate });
     if (intervalDays.length === 0) return;
+    
     const updatedPlannedItems = plannedItems.map(pItem => ({ ...pItem }));
-    let dayIndex = 0;
-    cityItemsInPlan.forEach(cityItem => {
-      const targetDate = intervalDays[dayIndex % intervalDays.length];
-      const cityItemInUpdateArray = updatedPlannedItems.find(pi => pi.data.id === cityItem.data.id && pi.type === 'city');
-      if (cityItemInUpdateArray) {
-          cityItemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
+    const itemsCount = plannedItems.length;
+    const daysCount = intervalDays.length;
+    const step = Math.max(1, Math.floor(daysCount / itemsCount));
+    
+    plannedItems.forEach((item, itemIndex) => {
+      const dayIndex = Math.min(itemIndex * step, daysCount - 1);
+      const targetDate = intervalDays[dayIndex];
+      
+      const itemInUpdateArray = updatedPlannedItems.find(pi => 
+        pi.type === item.type && pi.data.id === item.data.id
+      );
+      
+      if (itemInUpdateArray) {
+        itemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
       }
-      updatedPlannedItems.forEach(item => {
-          if (item.city_id_for_grouping === cityItem.data.id && !item.date) { 
-              item.date = format(targetDate, 'yyyy-MM-dd');
-          }
-      });
-      dayIndex++;
     });
+    
     setPlannedItems(updatedPlannedItems);
   };
 
