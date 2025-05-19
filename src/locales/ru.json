@@ -160,7 +160,7 @@
     "pilgrimage_plan_settings_title": "Настройка плана паломничества", 
     "selected_dates": "Выбранные даты",
     "distribute_dates_to_cities_button": "Распределить даты по городам",
-    "select_cities_to_plan": "Выберите города для плана",
+    "select_cities_to_plan": "Место и формат",
     "select_a_city_to_add_to_plan": "Выберите город для добавления...",
     "add_from_favorites": "Добавить из избранного",
     "add_favorites_to_plan": "Добавить избранное в план",
@@ -208,7 +208,7 @@
     "save_as_goal": "Сохранить как цель",
     "select_life_period": "Выберите жизненный период",
     "from_favorites": "Из Избранного", 
-    "find_from_favorites": "Найти в Избранном",
+    "find_from_favorites": "Из избранного",
     "update_button": "Обновить",
     "save_button": "Сохранить",
     "clear_plan_button": "Очистить план",
@@ -267,10 +267,11 @@
     "filter_event_subtypes_label": "Типы событий",
     "event_type_lecture": "Лекция",
     "event_type_puja": "Пуджа",
-    "add_filtered_to_plan_button": "Добавить отфильтрованное в план",
+    "add_filtered_to_plan_button": "Найти",
     "no_items_to_add_based_on_filters": "Нет элементов, соответствующих фильтрам, или они уже в плане.",
     "pilgrimage_filter_title": "Тип паломничества",
     "event_type_retreat": "Ретрит",
     "online": "Онлайн",
-    "online_short": "есть онлайн"
+    "online_short": "есть онлайн",
+    "clear_short_button_text": "Очистить"
 }

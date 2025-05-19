@@ -159,7 +159,7 @@
     "plan_your_pilgrimage": "Plan Your Pilgrimage",
     "selected_dates": "Selected Dates",
     "distribute_dates_to_cities_button": "Distribute Dates to Cities",
-    "select_cities_to_plan": "Select Cities to Plan",
+    "select_cities_to_plan": "Place and formate",
     "select_a_city_to_add_to_plan": "Select a city to add to plan...",
     "add_from_favorites": "Add from Favorites",
     "add_favorites_to_plan": "Add Favorites to Plan",
@@ -205,7 +205,7 @@
     "error_loading_goal": "Error loading goal. Please check console.",
     "delete_goal_label": "Delete goal {{goalName}}",
     "save_as_goal": "Save as Goal",
-    "find_from_favorites": "Find from Favorites",
+    "find_from_favorites": "From favorites",
     "update_button": "Update",
     "save_button": "Save",
     "clear_plan_button": "Clear Plan",
@@ -221,7 +221,7 @@
     "filter_event_subtypes_label": "Event Types",
     "event_type_lecture": "Lecture",
     "event_type_puja": "Puja",
-    "add_filtered_to_plan_button": "Add Selected to Plan",
+    "add_filtered_to_plan_button": "Search",
     "no_items_to_add_based_on_filters": "No items match filters or they are already in the plan.",
     "event_culture_atheism": "Atheism",
     "event_culture_hinduism": "Hinduism",
@@ -260,5 +260,6 @@
     "guru_plan_not_found": "Guru Plan not found or data is corrupt.",
     "error_loading_guru_plan": "Error loading Guru Plan.",
     "online": "Online",
-    "online_short": "has online"
+    "online_short": "has online",
+    "clear_short_button_text": "Clear"
 }
