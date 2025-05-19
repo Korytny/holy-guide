@@ -31,14 +31,16 @@ export function PilgrimageCalendar({
   showTimePicker = false,
   timePickerProps
 }: PilgrimageCalendarProps) {
-  console.log("--- PilgrimageCalendar RENDERED ---"); 
-
-  // Log received highlightedDates
-  React.useEffect(() => {
-    if (highlightedDates) {
-      console.log("PilgrimageCalendar received highlightedDates:", highlightedDates.map(d => d.toISOString()));
-    }
-  }, [highlightedDates]);
+  // Debug logging only in development
+  if (process.env.NODE_ENV === 'development') {
+    console.debug("--- PilgrimageCalendar RENDERED ---");
+    
+    React.useEffect(() => {
+      if (highlightedDates) {
+        console.debug("PilgrimageCalendar received highlightedDates:", highlightedDates.map(d => d.toISOString()));
+      }
+    }, [highlightedDates]);
+  }
 
   const modifiers = {
     highlighted: highlightedDates || [], 

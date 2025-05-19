@@ -71,7 +71,12 @@ export const PlannedItemsTable: React.FC<PlannedItemsTableProps> = ({
                                             <Link 
                                               to={`/${item.type === 'city' ? 'cities' : item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
                                               target="_blank"
-                                              className="text-blue-600 hover:text-blue-800 hover:underline"
+                                              className={cn(
+                                                "hover:underline",
+                                                item.type === 'city' ? "text-blue-600 hover:text-blue-800" : 
+                                                item.type === 'event' ? "text-gray-600 hover:text-gray-800" :
+                                                "text-blue-600 hover:text-blue-800"
+                                              )}
                                             >
                                               {getLocalizedText(item.data.name as any, language)}
                                             </Link>

@@ -13,21 +13,34 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
   const previousPlannedItemsRef = useRef<string>();
   const [mapKey, setMapKey] = useState(0); // State for the map key
 
-  const placesForRoute: PlaceType[] = plannedItems
-    .filter(item => 
-      item.type === 'place' && 
-      item.data && 
-      (item.data as PlaceType).location && 
-      (item.data as PlaceType).location.latitude != null && 
-      (item.data as PlaceType).location.longitude != null
-    )
+  const placesForRoute: PlaceType[] = (plannedItems || [])
+    .filter(item => {
+      try {
+        return (
+          item?.type === 'place' && 
+          item?.data?.id && 
+          (item.data as PlaceType)?.location && 
+          (item.data as PlaceType).location.latitude != null && 
+          (item.data as PlaceType).location.longitude != null
+        );
+      } catch (e) {
+        console.error('Error processing place item:', item, e);
+        return false;
+      }
+    })
     .map((item, index) => {
-      const placeData = item.data as PlaceType;
-      return {
-        ...placeData,
-        order: placeData.order ?? item.order ?? index, 
-      };
-    });
+      try {
+        const placeData = item.data as PlaceType;
+        return {
+          ...placeData,
+          order: placeData.order ?? item.order ?? index,
+        };
+      } catch (e) {
+        console.error('Error mapping place item:', item, e);
+        return null;
+      }
+    })
+    .filter(Boolean) as PlaceType[];
 
   useEffect(() => {
     // Create a string representation of essential parts of plannedItems for comparison.

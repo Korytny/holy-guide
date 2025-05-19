@@ -27,7 +27,9 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
     }));
 
     const validPlaces = places.filter(place => place.location?.latitude && place.location?.longitude);
-    console.log('Valid places for map:', validPlaces);
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('Valid places for map:', validPlaces);
+    }
     const polylinePoints = validPlaces
         .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
         .map(place => [place.location.latitude, place.location.longitude] as [number, number]);

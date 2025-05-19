@@ -152,7 +152,27 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('end_date_label')} value={convertToDateValue(selectedDateRange?.to)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'to')} />
       </div>
       {selectedDateRange && selectedDateRange.from && (
-        <Button variant="outline" className={`w-full ${fonts.subheading.className}`} onClick={onDistributeDates}>{t('distribute_dates_to_cities_button')}</Button>
+              <Button 
+                variant="outline" 
+                className={`w-full ${fonts.subheading.className}`}
+                onClick={() => {
+                  try {
+                    if (!selectedDateRange?.from || !selectedDateRange?.to) {
+                      console.error('Invalid date range');
+                      return;
+                    }
+                    if (!plannedItems.length) {
+                      console.error('No items to distribute dates');
+                      return;
+                    }
+                    onDistributeDates();
+                  } catch (error) {
+                    console.error('Error distributing dates:', error);
+                  }
+                }}
+              >
+                {t('distribute_dates_to_cities_button')}
+              </Button>
       )}
     </div>
   );

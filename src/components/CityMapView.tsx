@@ -61,7 +61,9 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
   useEffect(() => {
     if (!mapContainer.current || mapInstance.current) return; // Initialize only once
     
-    const defaultCenter = center || [55.751244, 37.618423];
+    const defaultCenter = center || (locations.length > 0 ? 
+      [locations[0].latitude, locations[0].longitude] : 
+      [0, 0]); // Fallback to 0,0 if no locations
     mapInstance.current = L.map(mapContainer.current, { 
       center: defaultCenter, 
       zoom,
