@@ -10,7 +10,7 @@ import { supabase } from '../../integrations/supabase/client';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { DropResult } from 'react-beautiful-dnd'; // Import DropResult
 
-import { GuruControls } from "./GuruControls";
+import { GuruControls, eventCultureOptions } from "./GuruControls"; // Import eventCultureOptions
 import { GuruPlanDisplay, EventGroup } from "./GuruPlanDisplay"; 
 
 const eventTypeToTitleKey: Record<EventType, string> = {
@@ -51,7 +51,7 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
   const [selectedEventTypes, setSelectedEventTypes] = useState<EventType[]>([]);
   const [hasTranslation, setHasTranslation] = useState<boolean | undefined>(undefined);
   const [selectedCultures, setSelectedCultures] = useState<EventCulture[]>([]);
-  const [selectedCityId, setSelectedCityId] = useState<string | undefined>(undefined);
+  const [selectedCityIds, setSelectedCityIds] = useState<string[]>([]);
 
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
   const [filteredEvents, setFilteredEvents] = useState<Event[]>([]);   
@@ -127,10 +127,10 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
   }, []);
 
   useEffect(() => {
-    console.log("Recalculating filteredEvents. Available:", availableEvents.length, "Filters:", {selectedCityId, selectedEventTypes, hasTranslation, selectedCultures});
+    console.log("Recalculating filteredEvents. Available:", availableEvents.length, "Filters:", {selectedCityIds, selectedEventTypes, hasTranslation, selectedCultures});
     let tempFilteredEvents = [...availableEvents];
-    if (selectedCityId) {
-      tempFilteredEvents = tempFilteredEvents.filter(event => event.cityId === selectedCityId);
+    if (selectedCityIds.length > 0) {
+      tempFilteredEvents = tempFilteredEvents.filter(event => event.cityId && selectedCityIds.includes(event.cityId));
     }
     if (selectedEventTypes.length > 0) {
       tempFilteredEvents = tempFilteredEvents.filter(event => event.eventTypeField && selectedEventTypes.includes(event.eventTypeField));
@@ -143,7 +143,7 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
     }
     console.log("Resulting filteredEvents:", tempFilteredEvents);
     setFilteredEvents(tempFilteredEvents);
-  }, [availableEvents, selectedCityId, selectedEventTypes, hasTranslation, selectedCultures]);
+  }, [availableEvents, selectedCityIds, selectedEventTypes, hasTranslation, selectedCultures]);
 
   useEffect(() => {
     setIsGuruPlanInitiated(planGroups.some(group => group.items.length > 0));
@@ -174,7 +174,7 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
         );
         if (alreadyExists) {
           console.log(`Event ${getLocalizedText(event.name, language)} already in plan.`);
-          alert(t('event_already_in_plan', { eventName: getLocalizedText(event.name, language) }));
+          // alert(t('event_already_in_plan', { eventName: getLocalizedText(event.name, language) })); // Suppress alert for duplicates
           return;
         }
         groupsChanged = true;
@@ -486,8 +486,8 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
         language={language}
         t={t}
         availableCities={availableCities}
-        selectedCityId={selectedCityId}
-        onCityChange={setSelectedCityId}
+        selectedCityIds={selectedCityIds}
+        onSelectedCityIdsChange={setSelectedCityIds}
         selectedEventTypes={selectedEventTypes}
         onSelectedEventTypesChange={setSelectedEventTypes}
         hasTranslation={hasTranslation}
@@ -508,12 +508,13 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
         eventDatesForCalendar={eventDatesForCalendar}
       />
       {isGuruPlanInitiated && (
-        <div className="mt-8"> 
+        <div className="mt-8">
           <GuruPlanDisplay
               planGroups={planGroups}
               availableCities={availableCities} 
               language={language}
               t={t}
+              eventCultureOptions={eventCultureOptions} // Pass eventCultureOptions as prop
               onUpdateDateTime={handleUpdatePlannedEventDateTime}
               onRemoveItem={handleRemovePlannedEvent}
               onReorder={handleReorder} 

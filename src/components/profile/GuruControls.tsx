@@ -2,6 +2,7 @@ import React from 'react';
 import { Language, City, EventType, EventCulture } from '../../types';
 import { type DateRange } from 'react-day-picker';
 import { PilgrimageCalendar } from './PilgrimageCalendar';
+import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -62,7 +63,7 @@ const eventTypeOptions: { value: EventType; labelKey: string; Icon?: React.Eleme
   { value: "lecture", labelKey: "event_type_lecture", Icon: BookOpenText },
 ];
 
-const eventCultureOptions: { value: EventCulture; labelKey: string; Icon?: React.ElementType }[] = [
+export const eventCultureOptions: { value: EventCulture; labelKey: string; Icon?: React.ElementType }[] = [
   { value: "atheism", labelKey: "event_culture_atheism", Icon: Users }, 
   { value: "hinduism", labelKey: "event_culture_hinduism", Icon: OmIcon },
   { value: "christianity", labelKey: "event_culture_christianity", Icon: Cross },
@@ -81,8 +82,8 @@ interface GuruControlsProps {
   language: Language;
   t: (key: string, params?: object) => string;
   availableCities: City[];
-  selectedCityId?: string;
-  onCityChange: (cityId: string | undefined) => void;
+  selectedCityIds: string[];
+  onSelectedCityIdsChange: (cityIds: string[]) => void;
   selectedEventTypes: EventType[];
   onSelectedEventTypesChange: (types: EventType[]) => void;
   hasTranslation?: boolean;
@@ -93,12 +94,12 @@ interface GuruControlsProps {
   onAddFavoritesToPlan: () => void;
   selectedDateRange?: DateRange;
   onDateRangeChange: (range: DateRange | undefined) => void;
-  guruPlanNameValue: string; 
-  onGuruPlanNameChange: (name: string) => void; 
-  currentLoadedGuruPlanId: string | null; 
-  onSaveOrUpdateGuruPlan: (name: string) => void; 
-  onLoadGuruPlan: (planId: string) => void; 
-  onDeleteGuruPlan: (planId: string) => void; 
+  guruPlanNameValue: string;
+  onGuruPlanNameChange: (name: string) => void;
+  currentLoadedGuruPlanId: string | null;
+  onSaveOrUpdateGuruPlan: (name: string) => void;
+  onLoadGuruPlan: (planId: string) => void;
+  onDeleteGuruPlan: (planId: string) => void;
   savedGuruPlans: Array<{ id: string; title: string; created_at: string; }>;
   eventDatesForCalendar: Date[];
 }
@@ -107,8 +108,8 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
   language,
   t,
   availableCities,
-  selectedCityId,
-  onCityChange,
+  selectedCityIds,
+  onSelectedCityIdsChange,
   selectedEventTypes,
   onSelectedEventTypesChange,
   hasTranslation,
@@ -223,17 +224,25 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
         {/* Filters Section */}
         <div className="space-y-6">
             <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>{t('select_event_format', {defaultValue: 'Select Event Format'})}</h3>
-            
+
             <div className="mb-2">
-              <Select value={selectedCityId || 'all'} onValueChange={(value) => onCityChange(value === 'all' ? undefined : value)}>
-                <SelectTrigger><SelectValue placeholder={t('select_city_placeholder', {defaultValue: 'Select a city'})} /></SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">{t('all_cities', {defaultValue: 'All Cities'})}</SelectItem>
-                  {availableCities.map(city => (
-                    <SelectItem key={city.id} value={city.id}>{getLocalizedText(city.name, language)}</SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              <ToggleGroup 
+                type="multiple" 
+                className="flex-wrap gap-2"
+                value={selectedCityIds}
+                onValueChange={(value) => onSelectedCityIdsChange(value)}
+              >
+                {availableCities.map(city => (
+                  <ToggleGroupItem 
+                    key={city.id} 
+                    value={city.id}
+                    variant={selectedCityIds.includes(city.id) ? 'default' : 'outline'}
+                    className={`px-3 py-1 text-sm ${fonts.body.className} ${selectedCityIds.includes(city.id) ? 'toggle-item-selected' : ''}`}
+                  >
+                    {getLocalizedText(city.name, language)}
+                  </ToggleGroupItem>
+                ))}
+              </ToggleGroup>
             </div>
 
             <div className="mb-2">

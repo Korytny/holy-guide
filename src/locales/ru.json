@@ -161,7 +161,7 @@
     "selected_dates": "Выбранные даты",
     "distribute_dates_to_cities_button": "Распределить даты по городам",
     "select_cities_to_plan": "Выберите города для плана",
-    "select_a_city_to_add_to_plan": "Выберите город для добавления в план...",
+    "select_a_city_to_add_to_plan": "Выберите город для добавления...",
     "add_from_favorites": "Добавить из избранного",
     "add_favorites_to_plan": "Добавить избранное в план",
     "suggest_route": "Предложить маршрут",
@@ -268,5 +268,6 @@
     "event_type_puja": "Пуджа",
     "add_filtered_to_plan_button": "Добавить отфильтрованное в план",
     "no_items_to_add_based_on_filters": "Нет элементов, соответствующих фильтрам, или они уже в плане.",
-    "pilgrimage_filter_title": "Тип паломничества"
+    "pilgrimage_filter_title": "Тип паломничества",
+    "event_type_retreat": "Ретрит"
 }

@@ -94,7 +94,7 @@ export interface Event {
   name: string | { [key in Language]?: string };
   description: string | { [key in Language]?: string };
   imageUrl: string;
-  cityId: string;
+  cityId?: string | null;
   placeIds: string[];
   routeIds: string[];
   date?: string;

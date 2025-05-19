@@ -3,7 +3,7 @@ import { getEventById } from '@/services/eventsApi';
 import { useFont } from '@/context/FontContext';
 import { Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult } from 'react-beautiful-dnd'; 
-import { Language, PlannedItem, Event, City, EventType } from '../../types';
+import { Language, PlannedItem, Event, City, EventType, EventCulture } from '../../types'; // Import EventCulture
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Trash2, GripVertical } from 'lucide-react';
@@ -25,6 +25,7 @@ interface GuruPlanDisplayProps {
   onUpdateDateTime: (itemToUpdate: PlannedItem, date?: string, time?: string) => void;
   onRemoveItem: (itemToRemove: PlannedItem, group: EventGroup) => void; 
   onReorder: (result: DropResult) => void;
+  eventCultureOptions: { value: EventCulture; labelKey: string; Icon?: React.ElementType }[]; // Add eventCultureOptions prop
 }
 
 const formatDateDisplay = (dateString?: string): string => {
@@ -51,8 +52,9 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
   onUpdateDateTime,
   onRemoveItem,
   onReorder,
+  eventCultureOptions, // Destructure eventCultureOptions
 }) => {
-  console.log('GuruPlanDisplay props:', { planGroups });
+  console.log('GuruPlanDisplay props:', { planGroups, availableCities, eventCultureOptions }); // Log availableCities and eventCultureOptions
   const { fonts } = useFont();
   const [eventsData, setEventsData] = useState<Record<string, Event>>({});
   const [loading, setLoading] = useState<boolean>(false);
@@ -151,19 +153,30 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                               {...providedItems.droppableProps}
                               className="pl-4 pr-1 py-1 space-y-2 rounded bg-white border border-slate-200 min-h-[50px]"
                             >
+                              {/* {console.log(`Group ${group.id} items BEFORE filter:`, group.items)} */} {/* Commenting out for now to reduce console noise */}
                               {group.items
                                 .filter(item => {
                                   const event = item.data as Event;
                                   const eventName = getLocalizedText(event.name, language);
-                                  return event.id && 
-                                         !event.id.startsWith('temp_') && 
-                                         !eventName.toLowerCase().includes('тестовое') &&
-                                         !eventName.toLowerCase().includes('test');
+                                  const isTestEvent = !event.id || 
+                                                      event.id.startsWith('temp_') || 
+                                                      eventName.toLowerCase().includes('тестовое') ||
+                                                      eventName.toLowerCase().includes('test');
+                                  console.log(`Filtering item ${event.id}: isTestEvent = ${isTestEvent}, Name = "${eventName}"`);
+                                  return !isTestEvent;
                                 })
                                 .map((item, itemIndex) => {
                                   const event = item.data as Event;
                                   const eventData = eventsData[event.id] || event;
+                                  {console.log(`Item ${itemIndex}: Event ID: ${eventData.id}, Event City ID: ${eventData.cityId}, Item City ID: ${item.city_id_for_grouping}, Culture Field: ${eventData.cultureField}, Available Cities: ${availableCities ? availableCities.length : 'undefined'}`)} {/* Wrapped in curly braces */}
                                   const itemDraggableId = `item-${group.id}-${eventData.id}-${item.orderIndex}`;
+
+                                  if ((eventData.cityId || item.city_id_for_grouping) && availableCities) {
+                                    const cityIdToFind = eventData.cityId || item.city_id_for_grouping;
+                                    const city = availableCities.find(c => c.id === cityIdToFind);
+                                    {console.log(`Item ${itemIndex}: Searching for City ID "${cityIdToFind}", Found City: ${city ? getLocalizedText(city.name, language) : 'Not found'}`)} {/* Wrapped in curly braces */}
+                                  }
+
 
                                 return (
                                   <Draggable key={itemDraggableId} draggableId={itemDraggableId} index={itemIndex}>
@@ -176,8 +189,8 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                                         <div {...providedDraggableItem.dragHandleProps} className="cursor-grab pr-1">
                                           <GripVertical size={16} className="text-gray-400" />
                                         </div>
-                                        <div className="flex-grow flex items-center gap-3 min-w-0">
-                                          <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1 shrink-0">
+                                        <div className="flex-grow flex items-center gap-3 min-w-0"> {/* Reverted to flex-row */}
+                                          <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1 shrink-0"> {/* Date/Time block */}
                                             <span className="text-sm text-blue-700 font-medium">
                                               {item.date ? formatDateDisplay(item.date) : 
                                                eventData.time ? formatDateDisplay(eventData.time) : 
@@ -189,7 +202,17 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                                               </span>
                                             )}
                                           </div>
-                                          <div className="min-w-0">
+                                          {(eventData.cityId || item.city_id_for_grouping) && availableCities && (
+                                            <span className={`px-2 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium shrink-0 ${fonts.body.className}`}> {/* City name badge */}
+                                              {getLocalizedText(availableCities.find(city => city.id === (eventData.cityId || item.city_id_for_grouping))?.name, language)}
+                                            </span>
+                                          )}
+                                          {eventData.cultureField && eventCultureOptions && ( // Check if eventCultureOptions is available
+                                            <span className={`px-2 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium shrink-0 ${fonts.body.className}`}> {/* Culture badge */}
+                                              {t(eventCultureOptions.find(opt => opt.value === eventData.cultureField)?.labelKey || eventData.cultureField, {defaultValue: eventData.cultureField})} {/* Use translated label */}
+                                            </span>
+                                          )}
+                                          <div className="min-w-0"> {/* Event Name Link */}
                                             <Link 
                                               to={`/events/${eventData.id}`}
                                               target="_blank"

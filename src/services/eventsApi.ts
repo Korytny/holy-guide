@@ -9,7 +9,13 @@ export interface EventFilters {
 }
 
 const mapDbEventToEvent = (dbEvent: any): Event => {
-  const event: Partial<Event> = { ...dbEvent };
+  const event: Partial<Event> = {
+    ...dbEvent,
+    // Explicitly map city_id to cityId
+    cityId: dbEvent.city_id,
+    // Explicitly map culture to cultureField
+    cultureField: dbEvent.culture,
+  };
   if (dbEvent.event_category) {
     event.eventTypeField = dbEvent.event_category as EventType;
   }
