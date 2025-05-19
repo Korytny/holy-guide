@@ -155,74 +155,149 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
 
   const handleAddFilteredItemsToPlan = () => {
-    // Generate place items directly from filters, no check against existing plan needed for replacement
-    const newPlaceItems: PlannedItem[] = filteredPlaces.map((place, index) => ({
-      type: 'place',
-      data: place,
-      city_id_for_grouping: place.cityId,
-      time: getRandomTime(),
-      orderIndex: index, // Placeholder, will be properly set later
-    }));
+    const onlyCitiesSelected =
+      filterControlSelectedCityIds.length > 0 &&
+      selectedPlaceSubtypes.length === 0 &&
+      selectedEventSubtypes.length === 0;
 
-    // Generate event items directly from filters
-    const newEventItems: PlannedItem[] = filteredEvents.map((event, index) => ({
-      type: 'event',
-      data: event,
-      city_id_for_grouping: event.cityId,
-      time: event.time || getRandomTime(),
-      orderIndex: newPlaceItems.length + index, // Placeholder, continue sequence
-      date: event.date ? event.date.split('T')[0] : undefined,
-    }));
+    let itemsForPlan: PlannedItem[] = [];
 
-    const allNewSubItems = [...newPlaceItems, ...newEventItems];
-
-    if (allNewSubItems.length === 0) {
-      alert(t('no_items_match_current_filters', { defaultValue: 'No items match the current filters.' }));
-      setPlannedItems([]); // Clear the plan if no items match
-      return;
-    }
-
-    // Determine parent cities for these new sub-items
-    const cityIdsOfNewSubItems = new Set<string>();
-    allNewSubItems.forEach(item => {
-      if (item.city_id_for_grouping) {
-        cityIdsOfNewSubItems.add(item.city_id_for_grouping);
-      }
-    });
-
-    const cityItemsForNewPlan: PlannedItem[] = [];
-    // Determine which cities to consider based on filter controls or all available if none selected
-    let sourceCityPoolForParentLookup: City[];
-    if (filterControlSelectedCityIds.length > 0) {
-        sourceCityPoolForParentLookup = availableCities.filter(c => filterControlSelectedCityIds.includes(c.id));
-    } else {
-        sourceCityPoolForParentLookup = availableCities;
-    }
-
-    sourceCityPoolForParentLookup.forEach(cityData => {
-      // Only add city if it's a parent of at least one found sub-item
-      if (cityIdsOfNewSubItems.has(cityData.id)) {
-        cityItemsForNewPlan.push({
-          type: 'city',
+    if (onlyCitiesSelected) {
+      // Случай 1: Выбраны только города в фильтре, категории (подтипы мест/событий) не выбраны.
+      // Добавляем только сами объекты городов в план.
+      const cityItemsToAdd = availableCities
+        .filter(city => filterControlSelectedCityIds.includes(city.id))
+        .map((cityData) => ({ // index убран, orderIndex будет назначен в конце
+          type: 'city' as 'city',
           data: cityData,
           city_id_for_grouping: cityData.id,
           time: getRandomTime(),
           orderIndex: 0, // Placeholder
-        });
-      }
-    });
+        }));
+      itemsForPlan = cityItemsToAdd;
 
-    // Assign final orderIndex and set the plan
-    let nextIdx = 0;
-    const finalCityItems = cityItemsForNewPlan.map(item => ({ ...item, orderIndex: nextIdx++ }));
-    // Ensure sub-items are grouped under their cities visually by sorting later,
-    // but for now, just append them with continuing orderIndexes.
-    // The display component groups them, so raw order here is less critical than correct data.
-    const finalSubItems = allNewSubItems.map(item => ({ ...item, orderIndex: nextIdx++ }));
+      if (itemsForPlan.length === 0) {
+        // Это может произойти, если filterControlSelectedCityIds содержал ID, которых нет в availableCities
+        alert(t('no_cities_selected_or_found', { defaultValue: 'Selected cities were not found.' }));
+        setPlannedItems([]); // Очищаем план
+        return;
+      }
+    } else {
+      // Случай 2: Выбраны города И категории, ИЛИ только категории (фильтр по всем городам),
+      // ИЛИ вообще ничего не выбрано в контролах (тогда filteredPlaces/Events будут содержать все из всех городов).
+
+      // filteredPlaces и filteredEvents уже обновлены через useEffects на основе
+      // filterControlSelectedCityIds, selectedPlaceSubtypes, selectedEventSubtypes.
+
+      const newPlaceItems: PlannedItem[] = filteredPlaces.map((place) => ({
+        type: 'place',
+        data: place,
+        city_id_for_grouping: place.cityId,
+        time: getRandomTime(),
+        orderIndex: 0, // Placeholder
+      }));
+
+      const newEventItems: PlannedItem[] = filteredEvents.map((event) => ({
+        type: 'event',
+        data: event,
+        city_id_for_grouping: event.cityId,
+        time: event.time || getRandomTime(),
+        orderIndex: 0, // Placeholder
+        date: event.date ? event.date.split('T')[0] : undefined,
+      }));
+
+      const allNewSubItems = [...newPlaceItems, ...newEventItems];
+
+      // Если выбраны города в контролах, но по категориям для них ничего не нашлось
+      if (allNewSubItems.length === 0 && filterControlSelectedCityIds.length > 0) {
+        alert(t('no_items_match_filters_for_selected_cities', { defaultValue: 'No places or events match the category filters for the selected cities.' }));
+        // Решаем, что делать: можно очистить план, или добавить только города.
+        // По ТЗ, если категории выбраны, то должны быть объекты категорий.
+        // Если ничего не нашлось, то план будет пуст.
+        setPlannedItems([]);
+        return;
+      }
+      
+      // Если sub-элементы (места/события) найдены, или если фильтр по городам был пуст (поиск по всем городам)
+      // и нашлись какие-то места/события по категориям.
+      if (allNewSubItems.length > 0) {
+        const cityIdsOfNewSubItems = new Set<string>();
+        allNewSubItems.forEach(item => {
+          if (item.city_id_for_grouping) {
+            cityIdsOfNewSubItems.add(item.city_id_for_grouping);
+          }
+        });
+
+        const cityItemsForNewPlan: PlannedItem[] = [];
+        // Определяем пул городов для поиска родительских:
+        // если в контролах выбраны города - то только они, иначе - все доступные.
+        const sourceCityPool = filterControlSelectedCityIds.length > 0
+          ? availableCities.filter(c => filterControlSelectedCityIds.includes(c.id))
+          : availableCities;
+        
+        sourceCityPool.forEach(cityData => {
+          if (cityIdsOfNewSubItems.has(cityData.id)) {
+            cityItemsForNewPlan.push({
+              type: 'city',
+              data: cityData,
+              city_id_for_grouping: cityData.id,
+              time: getRandomTime(),
+              orderIndex: 0, // Placeholder
+            });
+          }
+        });
+        itemsForPlan = [...cityItemsForNewPlan, ...allNewSubItems];
+      } else {
+        // Сюда мы можем попасть, если:
+        // 1. filterControlSelectedCityIds пуст (все города) И selectedPlaceSubtypes/selectedEventSubtypes пусты (все категории)
+        //    ИЛИ availablePlaces/availableEvents пусты.
+        // 2. filterControlSelectedCityIds пуст, категории выбраны, но ничего не нашлось по категориям во всех городах.
+        // В этом случае, если пользователь нажал "Найти" без указания конкретных городов и категорий,
+        // возможно, он ожидает увидеть все города.
+        // Однако, если категории были выбраны, но ничего не нашлось, то сообщение об этом.
+        if (selectedPlaceSubtypes.length > 0 || selectedEventSubtypes.length > 0) {
+             alert(t('no_items_match_current_filters', { defaultValue: 'No items match the current filters.' }));
+        } else {
+            // Если вообще ничего не выбрано (ни городов, ни категорий), и мы хотим добавить все города
+            // Это поведение отличается от "только город выбран в фильтре".
+            // Если здесь нужно добавить ВСЕ города, то:
+            // itemsForPlan = availableCities.map((cityData) => ({ ... }));
+            // Пока оставим так: если ничего не найдено по фильтрам (даже пустым), то ничего не добавляем.
+            // Пользователь сказал: "если ничего не выбрано, то попадает все" - это поведение мы меняем.
+            // Новое поведение: если ничего не выбрано в контролах (города, категории), то кнопка "Найти"
+            // не должна добавлять "все подряд". Она должна добавлять согласно фильтрам.
+            // Если фильтры пусты, и мы здесь, значит filteredPlaces и filteredEvents пусты.
+             alert(t('no_items_match_current_filters_or_no_filters_applied', { defaultValue: 'No items match the current filters, or no filters were applied to yield results.' }));
+        }
+        setPlannedItems([]);
+        return;
+      }
+    }
+
+    // Общая логика для установки отсортированного плана
+    // Сортируем так, чтобы города шли первыми, затем их дочерние элементы.
+    // Внутри дочерних элементов можно добавить доп. сортировку, если необходимо.
+    let currentOrderIndex = 0;
+    const finalSortedItems = itemsForPlan
+      .sort((a, b) => {
+        if (a.type === 'city' && b.type !== 'city') return -1;
+        if (a.type !== 'city' && b.type === 'city') return 1;
+        
+        // Если оба не города или оба города, группируем по city_id_for_grouping
+        if (a.city_id_for_grouping && b.city_id_for_grouping) {
+          const cityGroupCompare = a.city_id_for_grouping.localeCompare(b.city_id_for_grouping);
+          if (cityGroupCompare !== 0) return cityGroupCompare;
+        }
+        // Если типы одинаковые и городская группа одинаковая, можно добавить сортировку по имени или типу элемента
+        // Например, сначала места, потом события внутри одной городской группы
+        if (a.type === 'place' && b.type === 'event') return -1;
+        if (a.type === 'event' && b.type === 'place') return 1;
+        
+        return 0; // Сохраняем исходный порядок, если другие критерии равны
+      })
+      .map(item => ({ ...item, orderIndex: currentOrderIndex++ }));
     
-    setPlannedItems([...finalCityItems, ...finalSubItems]);
-    // The useEffect for sortedItemsForDisplay will sort this new list by orderIndex,
-    // which should respect the city-first ordering if city orderIndexes are lower.
+    setPlannedItems(finalSortedItems);
   };
 
   const handleAddPlacesForCity = async (cityId: string) => {

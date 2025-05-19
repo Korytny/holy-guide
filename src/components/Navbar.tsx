@@ -24,8 +24,8 @@ const Navbar = ({ className = '' }: NavbarProps) => {
   return (
     <div className={`bg-white shadow-sm border-b ${className}`}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="flex h-16 items-center justify-center">
-          <div className="flex-1 flex justify-center items-center gap-4">
+        <div className="flex h-16 items-center"> {/* Удален justify-center */}
+          <div className="flex items-center gap-4"> {/* Удалены flex-1 и justify-center */}
             <div className={fonts.subheading.className}>
               <LanguageSwitcher />
             </div>
@@ -34,13 +34,13 @@ const Navbar = ({ className = '' }: NavbarProps) => {
             </div>
           </div>
 
-          <div className="flex-1 flex justify-center">
+          <div className="flex-1 flex justify-center"> {/* Этот блок остается с flex-1 для центрирования заголовка */}
             <h1 className={`text-xl ${fonts.heading.className} cursor-pointer text-[#09332A]`} onClick={() => navigate('/')}>
               {t('app_title')}
             </h1>
           </div>
 
-          <div className="flex-1 flex justify-center items-center">
+          <div className="flex items-center"> {/* Удалены flex-1 и justify-center */}
             {auth.isAuthenticated ? (
               <Button
                 variant="ghost"
