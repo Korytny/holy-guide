@@ -56,6 +56,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [savedGoals, setSavedGoals] = useState<any[]>([]);
   const [goalNameForInput, setGoalNameForInput] = useState('');
   const [currentLoadedGoalId, setCurrentLoadedGoalId] = useState<string | null>(null);
+  const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); // Added state for filter controls
  
   const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>([]);
   const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>([]);
@@ -106,69 +107,122 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   }, [availableCities]);
 
   useEffect(() => {
-    const plannedCityIds = new Set(plannedItems.filter(item => item.type === 'city').map(item => item.data.id));
+    let cityIdsToConsider: Set<string>;
+    if (filterControlSelectedCityIds.length === 0) {
+      cityIdsToConsider = new Set(availableCities.map(c => c.id)); // All available cities
+    } else {
+      cityIdsToConsider = new Set(filterControlSelectedCityIds); // Specific cities from filter
+    }
+
     let tempFilteredPlaces: Place[] = []; 
 
-    if (plannedCityIds.size > 0 && selectedPlaceSubtypes.length > 0) { 
+    if (availablePlaces.length > 0 && cityIdsToConsider.size > 0) {
       tempFilteredPlaces = availablePlaces.filter(p => {
-        if (!plannedCityIds.has(p.cityId)) return false; 
-        if (p.type === undefined) return false; 
-        const subtypeString = placeTypeNumberToSubtypeString[p.type]; 
+        if (!cityIdsToConsider.has(p.cityId)) return false; 
+        
+        if (selectedPlaceSubtypes.length === 0) return true; // No subtype filter: include all from considered cities
+
+        // Subtype filter active:
+        if (p.type === undefined) return false; // Place must have a type to match subtype filter
+        const subtypeString = placeTypeNumberToSubtypeString[p.type];
         return subtypeString && selectedPlaceSubtypes.includes(subtypeString); 
       });
     }
     setFilteredPlaces(tempFilteredPlaces);
-  }, [availablePlaces, selectedPlaceSubtypes, plannedItems]); 
+  }, [availablePlaces, selectedPlaceSubtypes, filterControlSelectedCityIds, availableCities]);
 
   useEffect(() => {
-    const plannedCityIds = new Set(plannedItems.filter(item => item.type === 'city').map(item => item.data.id));
+    let cityIdsToConsider: Set<string>;
+    if (filterControlSelectedCityIds.length === 0) {
+      cityIdsToConsider = new Set(availableCities.map(c => c.id)); // All available cities
+    } else {
+      cityIdsToConsider = new Set(filterControlSelectedCityIds); // Specific cities from filter
+    }
+
     let tempFilteredEvents: Event[] = []; 
 
-    if (plannedCityIds.size > 0 && selectedEventSubtypes.length > 0) { 
-      tempFilteredEvents = availableEvents.filter(e => 
-        plannedCityIds.has(e.cityId) && 
-        e.eventTypeField && selectedEventSubtypes.includes(e.eventTypeField)
-      );
+    if (availableEvents.length > 0 && cityIdsToConsider.size > 0) {
+      tempFilteredEvents = availableEvents.filter(e => {
+        if (!cityIdsToConsider.has(e.cityId)) return false;
+
+        if (selectedEventSubtypes.length === 0) return true; // No subtype filter: include all from considered cities
+        
+        return e.eventTypeField && selectedEventSubtypes.includes(e.eventTypeField);
+      });
     }
     setFilteredEvents(tempFilteredEvents);
-  }, [availableEvents, selectedEventSubtypes, plannedItems]);
+  }, [availableEvents, selectedEventSubtypes, filterControlSelectedCityIds, availableCities]);
 
 
   const handleAddFilteredItemsToPlan = () => {
-    const itemsToAdd: PlannedItem[] = [];
-    let currentOrderIndex = getNextOrderIndex(plannedItems);
-    const existingItemSignatures = new Set(plannedItems.map(pi => `${pi.type}-${pi.data.id}`));
+    // Generate place items directly from filters, no check against existing plan needed for replacement
+    const newPlaceItems: PlannedItem[] = filteredPlaces.map((place, index) => ({
+      type: 'place',
+      data: place,
+      city_id_for_grouping: place.cityId,
+      time: getRandomTime(),
+      orderIndex: index, // Placeholder, will be properly set later
+    }));
 
-    filteredPlaces.forEach(place => {
-      if (!existingItemSignatures.has(`place-${place.id}`)) {
-        itemsToAdd.push({
-          type: 'place',
-          data: place,
-          city_id_for_grouping: place.cityId,
-          time: getRandomTime(),
-          orderIndex: currentOrderIndex++,
-        });
-      }
-    });
+    // Generate event items directly from filters
+    const newEventItems: PlannedItem[] = filteredEvents.map((event, index) => ({
+      type: 'event',
+      data: event,
+      city_id_for_grouping: event.cityId,
+      time: event.time || getRandomTime(),
+      orderIndex: newPlaceItems.length + index, // Placeholder, continue sequence
+      date: event.date ? event.date.split('T')[0] : undefined,
+    }));
 
-    filteredEvents.forEach(event => {
-      if (!existingItemSignatures.has(`event-${event.id}`)) {
-        itemsToAdd.push({
-          type: 'event',
-          data: event,
-          city_id_for_grouping: event.cityId,
-          time: event.time || getRandomTime(),
-          orderIndex: currentOrderIndex++,
-          date: event.date ? event.date.split('T')[0] : undefined, 
-        });
-      }
-    });
-    
-    if (itemsToAdd.length > 0) {
-      setPlannedItems(prevItems => [...prevItems, ...itemsToAdd].sort((a, b) => a.orderIndex - b.orderIndex));
-    } else {
-      alert(t('no_items_to_add_based_on_filters', { defaultValue: 'No new items match filters or they are already in the plan.' }));
+    const allNewSubItems = [...newPlaceItems, ...newEventItems];
+
+    if (allNewSubItems.length === 0) {
+      alert(t('no_items_match_current_filters', { defaultValue: 'No items match the current filters.' }));
+      setPlannedItems([]); // Clear the plan if no items match
+      return;
     }
+
+    // Determine parent cities for these new sub-items
+    const cityIdsOfNewSubItems = new Set<string>();
+    allNewSubItems.forEach(item => {
+      if (item.city_id_for_grouping) {
+        cityIdsOfNewSubItems.add(item.city_id_for_grouping);
+      }
+    });
+
+    const cityItemsForNewPlan: PlannedItem[] = [];
+    // Determine which cities to consider based on filter controls or all available if none selected
+    let sourceCityPoolForParentLookup: City[];
+    if (filterControlSelectedCityIds.length > 0) {
+        sourceCityPoolForParentLookup = availableCities.filter(c => filterControlSelectedCityIds.includes(c.id));
+    } else {
+        sourceCityPoolForParentLookup = availableCities;
+    }
+
+    sourceCityPoolForParentLookup.forEach(cityData => {
+      // Only add city if it's a parent of at least one found sub-item
+      if (cityIdsOfNewSubItems.has(cityData.id)) {
+        cityItemsForNewPlan.push({
+          type: 'city',
+          data: cityData,
+          city_id_for_grouping: cityData.id,
+          time: getRandomTime(),
+          orderIndex: 0, // Placeholder
+        });
+      }
+    });
+
+    // Assign final orderIndex and set the plan
+    let nextIdx = 0;
+    const finalCityItems = cityItemsForNewPlan.map(item => ({ ...item, orderIndex: nextIdx++ }));
+    // Ensure sub-items are grouped under their cities visually by sorting later,
+    // but for now, just append them with continuing orderIndexes.
+    // The display component groups them, so raw order here is less critical than correct data.
+    const finalSubItems = allNewSubItems.map(item => ({ ...item, orderIndex: nextIdx++ }));
+    
+    setPlannedItems([...finalCityItems, ...finalSubItems]);
+    // The useEffect for sortedItemsForDisplay will sort this new list by orderIndex,
+    // which should respect the city-first ordering if city orderIndexes are lower.
   };
 
   const handleAddPlacesForCity = async (cityId: string) => {
@@ -577,15 +631,14 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     <>
       <PilgrimagePlannerControls
         availableCities={availableCities}
-        stagedCities={stagedForPlanningCities}
+        filterSelectedCityIds={filterControlSelectedCityIds} // Pass state to controls
+        onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds} // Pass setter to controls
         plannedItems={plannedItems} 
         selectedDateRange={selectedDateRange} 
         language={language}
         t={t}
         onDateRangeChange={handleDateRangeChange}
-        onCitySelect={handleStageCityForPlanning} 
-        onRemoveStagedCity={handleRemoveStagedCity}
-        onAddStagedCities={handleAddStagedCitiesToMainPlan}
+        // onCitySelect, onRemoveStagedCity, onAddStagedCities removed as they are not in PilgrimagePlannerControlsProps
         onAddFavoritesToPlan={handleAddFavoritesToPlan}
         onDistributeDates={handleDistributeDates}
         goalNameValue={goalNameForInput}

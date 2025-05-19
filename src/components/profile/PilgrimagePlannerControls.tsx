@@ -24,7 +24,7 @@ import type { DateValue } from '@internationalized/date';
 import { Label } from "@/components/ui/label";
 import useMobile from '../../hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
-
+// Removed FontSwitcher import
 export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site'; 
 export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture';
 
@@ -155,9 +155,9 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   );
 
   return (
-    <div className={`flex flex-col md:grid md:grid-cols-24 ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Removed md:gap-4 */}
+    <div className={`flex flex-col md:flex md:flex-row ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Changed to md:flex md:flex-row */}
       {!isMobile && (
-        <div className={`md:col-span-10 space-y-6 flex flex-col`}> 
+        <div className={`md:w-1/2 space-y-6 flex flex-col p-3`}> {/* Changed to md:w-1/2 and added p-3 */}
           <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm flex flex-col flex-grow`}> 
             <h3 className={`text-lg font-semibold mb-4 text-center ${fonts.subheading.className}`}>{t('select_dates')}</h3>
             <PilgrimageCalendar selectedRange={selectedDateRange} onDateRangeChange={onDateRangeChange} locale={currentLocale} className={fonts.body.className} headerClassName={fonts.subheading.className}/>
@@ -172,13 +172,12 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         </div>
       )}
 
-      <div className={`space-y-6 ${isMobile ? 'w-full' : 'md:col-span-14'}`}> {/* Changed to md:col-span-14 */}
-        <h2 className={`text-xl font-semibold text-center mb-2 ${isMobile ? '' : 'md:sr-only'} ${fonts.heading.className}`}>{t('pilgrimage_plan_settings_title')}</h2>
-        
+      <div className={`space-y-6 ${isMobile ? 'w-full p-3' : 'md:w-1/2 p-3'}`}> {/* Changed to md:w-1/2 and added p-3 */}
+        {/* H2 title moved inside the card below */}
         {isMobile && <DateFieldsSection />}
         
         {/* Merged Filters and Actions Card - Maximizing horizontal content space */}
-        <div className={`py-4 px-0 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm space-y-4 flex flex-col flex-grow`}> {/* Changed px-1.5 to px-0 */}
+        <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm space-y-4 flex flex-col flex-grow`}> {/* Changed py-4 px-0 to p-4 */}
           <div> 
             <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_cities_to_plan')}</h3>
             <div className="mb-2 mt-2"> 
