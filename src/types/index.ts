@@ -99,6 +99,7 @@ export interface Event {
   routeIds: string[];
   date?: string;
   time?: string;
+  duration?: number;
   info?: any;
   images?: any;
   eventTypeField?: EventType; 
@@ -107,6 +108,12 @@ export interface Event {
   location?: Location; 
   places?: Place[];
   routes?: Route[];
+  price?: number;
+  maxParticipants?: number;
+  isRecurring?: boolean;
+  recurrencePattern?: string | null;
+  createdAt?: string;
+  updatedAt?: string;
 }
 
 export interface LanguageText {

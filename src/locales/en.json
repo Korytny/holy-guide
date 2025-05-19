@@ -143,7 +143,7 @@
     "loading_stories": "Loading stories...",
     "error_loading_stories": "Error loading stories.",
     "no_stories_available": "No audio stories available for this entity.",
-    "your_browser_does_not_support_audio": "Your browser does not support the audio element.",
+    "your_browser_does_does_not_support_audio": "Your browser does not support the audio element.",
     "no_story_for_current_language": "No story available for the current language.",
     "failed_to_generate_audio": "Failed to generate audio.",
     "no_text_content_for_language": "No text content found for the current language.",
@@ -212,6 +212,8 @@
     "place_type_ashram": "Ashram",
     "event_type_festival": "Festival",
     "event_type_practice": "Practice",
+  "event_type_retreat": "Retreat",
+  "place_and_format": "Place and Format",
     "event_type_vipassana": "Vipassana",
     "event_type_ayurveda": "Ayurveda",
     "pilgrimage_filters_title": "Pilgrimage Filters",
@@ -246,7 +248,7 @@
     "select_city_placeholder": "Select a city",
     "all_cities": "All Cities",
     "save_current_guru_plan": "Save Current Guru Plan",
-    "guru_plan_title": "Guru Event Plan",
+    "guru_plan_title": "Events Plan",
     "guru_plan_placeholder": "Your Guru plan will appear here once you add events.",
     "event_already_in_plan": "Event '{{eventName}}' is already in the plan.",
     "no_favorite_events_to_add": "No favorite events to add.",
@@ -256,5 +258,7 @@
     "guru_plan_deleted_successfully": "Guru Plan deleted successfully.",
     "error_deleting_guru_plan": "Error deleting Guru Plan.",
     "guru_plan_not_found": "Guru Plan not found or data is corrupt.",
-    "error_loading_guru_plan": "Error loading Guru Plan."
+    "error_loading_guru_plan": "Error loading Guru Plan.",
+    "online": "Online",
+    "online_short": "has online"
 }

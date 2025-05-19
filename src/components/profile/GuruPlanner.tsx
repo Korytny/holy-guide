@@ -5,7 +5,7 @@ import { type LanguageContextType } from "../../context/LanguageContext";
 import { City, Event, Language, PlannedItem, EventType, EventCulture } from "../../types"; 
 import { getCities } from "../../services/citiesApi";
 import { getEvents, getEventsByIds } from "../../services/eventsApi"; 
-import { format } from "date-fns"; 
+import { format, addDays, addMonths } from "date-fns"; 
 import { supabase } from '../../integrations/supabase/client';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { DropResult } from 'react-beautiful-dnd'; // Import DropResult
@@ -20,6 +20,15 @@ const eventTypeToTitleKey: Record<EventType, string> = {
   vipassana: "event_type_vipassana",
   puja: "event_type_puja",
   lecture: "event_type_lecture",
+};
+
+const eventTypeToDefaultDuration: Record<EventType, number> = {
+  festival: 120, // 2 hours for festivals
+  practice: 60,  // 1 hour for practices
+  retreat: 480,  // 8 hours for retreats
+  vipassana: 600, // 10 hours for vipassana
+  puja: 90,      // 1.5 hours for pujas
+  lecture: 45,   // 45 minutes for lectures
 };
 
 interface GuruPlannerProps {
@@ -90,7 +99,13 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
     } as PlannedItem],
     order: 0
   }]);
-  const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(undefined);
+  const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(() => {
+    const today = new Date();
+    return {
+      from: today,
+      to: addDays(addMonths(today, 1), 7),
+    };
+  });
   const [isGuruPlanInitiated, setIsGuruPlanInitiated] = useState<boolean>(false);
   
   const [guruPlanNameForInput, setGuruPlanNameForInput] = useState(defaultPlanName);
@@ -127,6 +142,7 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
   }, []);
 
   useEffect(() => {
+    console.log("GuruPlanner: selectedCityIds changed to:", selectedCityIds); // Log selectedCityIds
     console.log("Recalculating filteredEvents. Available:", availableEvents.length, "Filters:", {selectedCityIds, selectedEventTypes, hasTranslation, selectedCultures});
     let tempFilteredEvents = [...availableEvents];
     if (selectedCityIds.length > 0) {
@@ -195,7 +211,10 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
 
         const newPlannedItem: PlannedItem = {
           type: 'event',
-          data: event,
+          data: {
+            ...event,
+            duration: event.duration || eventTypeToDefaultDuration[eventType] || 60
+          },
           city_id_for_grouping: event.cityId,
           time: event.time || getRandomTime(),
           date: event.date ? event.date.split(' ')[0] : undefined,
@@ -218,7 +237,21 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
 
   const handleAddFilteredEventsToPlan = () => {
     console.log("handleAddFilteredEventsToPlan clicked. Filtered events:", filteredEvents);
-    addEventsToPlan(filteredEvents);
+    // Clear existing event items from the plan before adding new filtered events
+    setPlanGroups(prevGroups => {
+      const groupsWithoutEvents = prevGroups.map(group => ({
+        ...group,
+        items: group.items.filter(item => item.type !== 'event') // Keep non-event items if any
+      })).filter(group => group.items.length > 0); // Remove empty groups
+      // If you want to completely reset the plan (including removing the initial test group if it's empty of events):
+      // return []; 
+      return groupsWithoutEvents; 
+    });
+    // Add a slight delay or use a useEffect to ensure setPlanGroups has completed
+    // before calling addEventsToPlan, or pass the cleared groups to addEventsToPlan.
+    // For simplicity now, let's assume setPlanGroups updates reasonably fast.
+    // A more robust solution might involve a callback or a different state update pattern.
+    addEventsToPlan(filteredEvents); 
   }
 
   const handleAddFavoriteEventsToPlan = async () => {

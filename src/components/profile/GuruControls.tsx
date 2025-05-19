@@ -169,6 +169,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
   };
 
   const { fonts } = useFont();
+  const [showPlanNameInput, setShowPlanNameInput] = React.useState(false);
 
   return (
     <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
@@ -207,37 +208,42 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
       {/* Right Panel: Plan Name, Saved Plans, Filters, and Actions */}
       <div className="border rounded-md p-4 bg-white flex flex-col space-y-4"> 
         
-        {/* Saved Plans Section */}
-        {savedGuruPlans && savedGuruPlans.length > 0 && (
-          <div className="mt-1">
-            <div className="flex flex-wrap gap-2">
-              {savedGuruPlans.map(plan => (
-                <div key={plan.id} className="flex items-center">
-                  <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>
-                  <Button variant="destructive" size="sm" onClick={() => onDeleteGuruPlan(plan.id)} className="text-xs px-1 py-1 h-auto rounded-l-none" aria-label={t('delete_guru_plan_label', { planName: plan.title })}><X size={14} /></Button>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
         {/* Filters Section */}
-        <div className="space-y-6">
-            <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>{t('select_event_format', {defaultValue: 'Select Event Format'})}</h3>
+            <div className="space-y-6">
+                <div className="flex justify-between items-center mb-4">
+                    <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('place_and_format', {defaultValue: 'Place and Format'})}</h3>
+                    <div className="flex items-center space-x-2">
+                            <Checkbox 
+                                id="hasTranslationFilter"
+                                checked={hasTranslation === true}
+                                onCheckedChange={(checked) => {
+                                    onHasTranslationChange(checked === true ? true : undefined);
+                                }}
+                            />
+                        <label htmlFor="hasTranslationFilter" className={`text-sm font-medium text-gray-700 ${fonts.body.className}`}>{t('filter_has_translation', {defaultValue: 'Has Online Translation'})}</label>
+                    </div>
+                </div>
 
-            <div className="mb-2">
+                <div className="mb-2">
               <ToggleGroup 
                 type="multiple" 
-                className="flex-wrap gap-2"
+                className="flex-wrap justify-start gap-2"
                 value={selectedCityIds}
                 onValueChange={(value) => onSelectedCityIdsChange(value)}
               >
-                {availableCities.map(city => (
+                {availableCities
+                  .slice() // Create a shallow copy to avoid mutating the original prop
+                  .sort((a, b) => {
+                    const nameA = getLocalizedText(a.name, language);
+                    const nameB = getLocalizedText(b.name, language);
+                    return nameA.localeCompare(nameB, language); // Use localeCompare for proper sorting
+                  })
+                  .map(city => (
                   <ToggleGroupItem 
                     key={city.id} 
                     value={city.id}
                     variant={selectedCityIds.includes(city.id) ? 'default' : 'outline'}
-                    className={`px-3 py-1 text-sm ${fonts.body.className} ${selectedCityIds.includes(city.id) ? 'toggle-item-selected' : ''}`}
+                    className={`px-1 py-1 text-sm ${fonts.body.className} ${selectedCityIds.includes(city.id) ? 'toggle-item-selected' : ''}`}
                   >
                     {getLocalizedText(city.name, language)}
                   </ToggleGroupItem>
@@ -281,34 +287,42 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
                 </div>
             </div>
             
-            <div className="flex items-center space-x-2">
-                <Checkbox 
-                    id="hasTranslationFilter"
-                    checked={hasTranslation === true}
-                    onCheckedChange={(checked) => {
-                        if (checked === 'indeterminate') {
-                            onHasTranslationChange(undefined);
-                        } else {
-                            onHasTranslationChange(Boolean(checked));
-                        }
-                    }}
-                />
-                <label htmlFor="hasTranslationFilter" className={`text-sm font-medium text-gray-700 ${fonts.body.className}`}>{t('filter_has_translation', {defaultValue: 'Has Online Translation'})}</label>
-            </div>
         </div>
 
-        {/* Plan Name Input above buttons */}
-        <div className="w-full pt-4">
-          <Input
-            placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter Guru plan name...'})}
-            value={guruPlanNameValue}
-            onChange={(e) => onGuruPlanNameChange(e.target.value)}
-            className={`text-lg font-semibold w-full ${fonts.body.className}`}
-          />
-        </div>
-
-        {/* Action Buttons at the bottom */}
+            {/* Action Buttons at the bottom */}
         <div className="flex flex-col sm:flex-row sm:gap-4 pt-4 mt-auto border-t">
+            { (currentLoadedGuruPlanId || showPlanNameInput) ? (
+              <div className="w-full sm:w-1/3 flex flex-col gap-2 mt-2 sm:mt-0">
+                <Input
+                  placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter plan name...'})}
+                  value={guruPlanNameValue}
+                  onChange={(e) => onGuruPlanNameChange(e.target.value)}
+                  className={`text-sm ${fonts.body.className}`}
+                />
+                <Button 
+                  size="lg"
+                  className={`bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
+                  onClick={() => {
+                      onSaveOrUpdateGuruPlan(guruPlanNameValue);
+                      if (showPlanNameInput && !currentLoadedGuruPlanId) { // If it was a new plan being named and saved
+                          setShowPlanNameInput(false); // Parent will set currentLoadedGuruPlanId, this hides redundant input trigger
+                      }
+                  }}
+                >
+                  {saveButtonText} {/* "Update" if currentLoadedGuruPlanId, "Save" if new plan via showPlanNameInput */}
+                </Button>
+              </div>
+            ) : (
+              // Initial "Save" button for a new, unnamed plan
+              <Button 
+                size="lg" 
+                className={`w-full sm:w-1/3 mt-2 sm:mt-0 bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
+                onClick={() => setShowPlanNameInput(true)} // Click to show input for new plan name
+              >
+                {saveButtonText} {/* This will be "Save" as currentLoadedGuruPlanId is null and showPlanNameInput is false */}
+              </Button>
+            )}
+
             <Button 
                 size="lg"
                 className={`w-full sm:w-1/3 mt-2 sm:mt-0 bg-orange-500 hover:bg-orange-600 text-white ${fonts.subheading.className}`}
@@ -324,14 +338,21 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
             >
                 {t('add_favorite_events_to_plan_button')}
             </Button>
-            <Button 
-                size="lg" 
-                className={`w-full sm:w-1/3 bg-amber-600 hover:bg-amber-700 text-white ${fonts.subheading.className}`}
-                onClick={() => window.location.href = '/auth'}
-            >
-                {saveButtonText}
-            </Button>
         </div>
+        
+        {/* Saved Plans Section - MOVED HERE */}
+        {savedGuruPlans && savedGuruPlans.length > 0 && (
+          <div className="mt-4 pt-4 border-t"> {/* Added mt-4, pt-4 and border-t for separation */}
+            <div className="flex flex-wrap justify-start gap-2"> {/* Ensure left alignment */}
+              {savedGuruPlans.map(plan => (
+                <div key={plan.id} className="flex items-center">
+                  <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>
+                  <Button variant="destructive" size="sm" onClick={() => onDeleteGuruPlan(plan.id)} className="text-xs px-1 py-1 h-auto rounded-l-none" aria-label={t('delete_guru_plan_label', { planName: plan.title })}><X size={14} /></Button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );

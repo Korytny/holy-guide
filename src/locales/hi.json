@@ -208,6 +208,7 @@
     "save_button": "सहेजें",
     "event_type_festival": "त्यौहार",
     "event_type_practice": "अभ्यास",
+  "place_and_format": "स्थान और प्रारूप",
     "event_type_retreat": "रिट्रीट",
     "event_type_vipassana": "विपश्यना",
     "event_type_puja": "पूजा",
@@ -221,7 +222,6 @@
     "event_culture_syncretism": "समन्वयवाद",
     "guru_planner_main_title": "आध्यात्मिक घटना गाइड",
     "select_event_dates": "घटना तिथियां चुनें",
-    "select_life_period": "जीवन अवधि चुनें",
     "save_button": "सहेजें",
     "find_button": "खोजें",
     "from_favorites_button": "पसंदीदा से",
@@ -258,5 +258,6 @@
     "error_deleting_guru_plan": "गुरु योजना हटाने में त्रुटि।",
     "guru_plan_not_found": "गुरु योजना नहीं मिली या डेटा दूषित है।",
     "error_loading_guru_plan": "गुरु योजना लोड करने में त्रुटि।",
-    "select_event_dates": "घटना तिथियां चुनें"
+    "select_event_dates": "घटना तिथियां चुनें",
+    "online": "ऑनलाइन"
 }

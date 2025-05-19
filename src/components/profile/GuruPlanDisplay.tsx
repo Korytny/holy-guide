@@ -168,7 +168,7 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                                 .map((item, itemIndex) => {
                                   const event = item.data as Event;
                                   const eventData = eventsData[event.id] || event;
-                                  {console.log(`Item ${itemIndex}: Event ID: ${eventData.id}, Event City ID: ${eventData.cityId}, Item City ID: ${item.city_id_for_grouping}, Culture Field: ${eventData.cultureField}, Available Cities: ${availableCities ? availableCities.length : 'undefined'}`)} {/* Wrapped in curly braces */}
+                                  {console.log(`Item ${itemIndex}: Event ID: ${eventData.id}, Event City ID: ${eventData.cityId}, Item City ID: ${item.city_id_for_grouping}, Culture Field: ${eventData.cultureField}, Has Online Stream: ${eventData.hasOnlineStream}, Available Cities: ${availableCities ? availableCities.length : 'undefined'}`)} {/* Wrapped in curly braces, added hasOnlineStream */}
                                   const itemDraggableId = `item-${group.id}-${eventData.id}-${item.orderIndex}`;
 
                                   if ((eventData.cityId || item.city_id_for_grouping) && availableCities) {
@@ -181,57 +181,83 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
                                 return (
                                   <Draggable key={itemDraggableId} draggableId={itemDraggableId} index={itemIndex}>
                                     {(providedDraggableItem) => (
-                                      <div 
+                                      <div
                                         ref={providedDraggableItem.innerRef}
-                                        {...providedDraggableItem.draggableProps} 
-                                        className="flex items-center p-2 bg-gray-50 hover:bg-gray-100 rounded shadow-xs border gap-1"
+                                        {...providedDraggableItem.draggableProps}
+                                        className="grid grid-cols-12 items-center p-2 bg-gray-50 hover:bg-gray-100 rounded shadow-xs border gap-1"
                                       >
-                                        <div {...providedDraggableItem.dragHandleProps} className="cursor-grab pr-1">
+                                        {/* 1. Drag Picker */}
+                                        <div {...providedDraggableItem.dragHandleProps} className="col-span-1 flex items-center justify-center cursor-grab">
                                           <GripVertical size={16} className="text-gray-400" />
                                         </div>
-                                        <div className="flex-grow flex items-center gap-3 min-w-0"> {/* Reverted to flex-row */}
-                                          <div className="flex items-center gap-1 bg-blue-50 rounded px-2 py-1 shrink-0"> {/* Date/Time block */}
-                                            <span className="text-sm text-blue-700 font-medium">
-                                              {item.date ? formatDateDisplay(item.date) : 
-                                               eventData.time ? formatDateDisplay(eventData.time) : 
-                                               t('no_date', {defaultValue: 'No date'})}
+
+                                        {/* 2. Date & Time */}
+                                        <div className="col-span-2 flex items-center">
+                                          <div className="flex items-center gap-0 bg-blue-50 rounded py-1 px-2 w-full">
+                                            <span className="text-xs text-blue-700 font-medium whitespace-nowrap">
+                                              {item.date ? formatDateDisplay(item.date) :
+                                               eventData.time ? formatDateDisplay(eventData.time) :
+                                               t('no_date_short', {defaultValue: '-'})}
                                             </span>
                                             {item.time && (
-                                              <span className="text-sm text-gray-600">
+                                              <span className="text-xs text-gray-600 whitespace-nowrap ml-2">
                                                 {formatTimeDisplay(item.time)}
                                               </span>
                                             )}
                                           </div>
+                                        </div>
+
+                                        {/* 3. City */}
+                                        <div className="col-span-1 flex items-center">
                                           {(eventData.cityId || item.city_id_for_grouping) && availableCities && (
-                                            <span className={`px-2 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium shrink-0 ${fonts.body.className}`}> {/* City name badge */}
+                                            <span className={`px-2 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium ${fonts.body.className} whitespace-nowrap truncate block w-full text-center`}>
                                               {getLocalizedText(availableCities.find(city => city.id === (eventData.cityId || item.city_id_for_grouping))?.name, language)}
                                             </span>
                                           )}
-                                          {eventData.cultureField && eventCultureOptions && ( // Check if eventCultureOptions is available
-                                            <span className={`px-2 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium shrink-0 ${fonts.body.className}`}> {/* Culture badge */}
-                                              {t(eventCultureOptions.find(opt => opt.value === eventData.cultureField)?.labelKey || eventData.cultureField, {defaultValue: eventData.cultureField})} {/* Use translated label */}
+                                        </div>
+
+                                        {/* 4. Culture */}
+                                        <div className="col-span-1 flex items-center">
+                                          {eventData.cultureField && eventCultureOptions && (
+                                            <span className={`px-1 py-0.5 text-xs border rounded-full bg-gray-100 text-gray-700 font-medium ${fonts.body.className} whitespace-nowrap truncate block w-full text-center`}>
+                                              {t(eventCultureOptions.find(opt => opt.value === eventData.cultureField)?.labelKey || eventData.cultureField, {defaultValue: eventData.cultureField})}
                                             </span>
                                           )}
-                                          <div className="min-w-0"> {/* Event Name Link */}
-                                            <Link 
-                                              to={`/events/${eventData.id}`}
-                                              target="_blank"
-                                              className={`text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline ${fonts.body.className} truncate`}
-                                              title={getLocalizedText(eventData.name, language)}
-                                            >
-                                              {getLocalizedText(eventData.name, language)}
-                                            </Link>
-                                          </div>
                                         </div>
-                                        <Button 
-                                          variant="ghost" 
-                                          size="icon" 
-                                          onClick={() => onRemoveItem(item, group)}
-                                          className="text-red-500 hover:text-red-700 h-8 w-8"
-                                          title={t('remove_item_tooltip', {defaultValue: 'Remove event'})}
-                                        >
-                                          <Trash2 size={16} />
-                                        </Button>
+
+                                        {/* Online Indicator */}
+                                        <div className="col-span-1 flex items-center justify-center">
+                                          {eventData.hasOnlineStream && (
+                                            <span className={`px-1 py-0.5 text-xs border rounded-full bg-green-100 text-green-700 font-medium ${fonts.body.className} whitespace-nowrap`}>
+                                              {t('online_short', {defaultValue: 'онлайн'})}
+                                            </span>
+                                          )}
+                                        </div>
+
+                                        {/* 5. Name */}
+                                        <div className="col-span-5 flex items-center min-w-0">
+                                          <Link
+                                            to={`/events/${eventData.id}`}
+                                            target="_blank"
+                                            className={`text-sm font-medium text-blue-600 hover:text-blue-800 hover:underline ${fonts.body.className} truncate block w-full text-left`}
+                                            title={getLocalizedText(eventData.name, language)}
+                                          >
+                                            {getLocalizedText(eventData.name, language)}
+                                          </Link>
+                                        </div>
+
+                                        {/* 6. Remove Button */}
+                                        <div className="col-span-1 flex items-center justify-center">
+                                          <Button
+                                            variant="ghost"
+                                            size="icon"
+                                            onClick={() => onRemoveItem(item, group)}
+                                            className="text-red-500 hover:text-red-700 h-8 w-8"
+                                            title={t('remove_item_tooltip', {defaultValue: 'Remove event'})}
+                                          >
+                                            <Trash2 size={16} />
+                                          </Button>
+                                        </div>
                                       </div>
                                     )}
                                   </Draggable>

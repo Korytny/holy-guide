@@ -215,6 +215,7 @@
     "place_type_ashram": "Ашрам",
     "event_type_festival": "Фестиваль",
     "event_type_practice": "Практика",
+  "place_and_format": "Место и формат",
     "event_type_vipassana": "Випассана",
     "event_type_ayurveda": "Аюрведа",
     "event_culture_atheism": "Атеизм",
@@ -231,7 +232,7 @@
     "guru_plan_name_placeholder": "Введите имя плана Гуру...",
     "filter_by_event_type": "Тип События",
     "filter_by_culture": "Культура",
-    "filter_has_translation": "Есть онлайн перевод",
+    "filter_has_translation": "Есть онлайн трансляция",
     "add_filtered_events_to_plan_button": "Найти события",
     "add_favorite_events_to_plan_button": "Из избранного",
     "update_guru_plan_button": "Обновить",
@@ -269,5 +270,7 @@
     "add_filtered_to_plan_button": "Добавить отфильтрованное в план",
     "no_items_to_add_based_on_filters": "Нет элементов, соответствующих фильтрам, или они уже в плане.",
     "pilgrimage_filter_title": "Тип паломничества",
-    "event_type_retreat": "Ретрит"
+    "event_type_retreat": "Ретрит",
+    "online": "Онлайн",
+    "online_short": "есть онлайн"
 }

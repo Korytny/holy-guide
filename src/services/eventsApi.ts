@@ -15,6 +15,8 @@ const mapDbEventToEvent = (dbEvent: any): Event => {
     cityId: dbEvent.city_id,
     // Explicitly map culture to cultureField
     cultureField: dbEvent.culture,
+    // Explicitly map has_online_stream to hasOnlineStream
+    hasOnlineStream: dbEvent.has_online_stream,
   };
   if (dbEvent.event_category) {
     event.eventTypeField = dbEvent.event_category as EventType;

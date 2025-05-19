@@ -8,7 +8,7 @@ import { Badge } from "@/components/ui/badge";
 import { 
     X, RotateCcw, 
     Church, Archive, Waves, Sparkles, // Icons for PlaceSubtypes
-    PartyPopper, Zap, Eye, Leaf, BookOpenText, Flame // Icons for EventSubtypes
+    PartyPopper, Zap, Eye, Leaf, BookOpenText, Flame, MountainSnow // Added MountainSnow for retreat
 } from 'lucide-react'; 
 import { getLocalizedText } from '../../utils/languageUtils';
 import { Input } from "@/components/ui/input";
@@ -25,7 +25,7 @@ import useMobile from '../../hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
 
 export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site'; 
-export type EventSubtype = 'festival' | 'practice' | 'vipassana' | 'ayurveda' | 'lecture' | 'puja';
+export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture'; // Changed ayurveda to retreat
 
 export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: 'temple', labelKey: 'place_type_temple', Icon: Church },
@@ -37,8 +37,8 @@ export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Ic
 export const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: "festival", labelKey: "event_type_festival", Icon: PartyPopper },
   { value: "practice", labelKey: "event_type_practice", Icon: Zap },
+  { value: "retreat", labelKey: "event_type_retreat", Icon: MountainSnow }, // Changed ayurveda to retreat, updated Icon
   { value: "vipassana", labelKey: "event_type_vipassana", Icon: Eye },
-  { value: "ayurveda", labelKey: "event_type_ayurveda", Icon: Leaf }, 
   { value: "lecture", labelKey: "event_type_lecture", Icon: BookOpenText },
   { value: "puja", labelKey: "event_type_puja", Icon: Flame },
 ];
@@ -83,7 +83,8 @@ interface PilgrimagePlannerControlsProps {
 
 const ORANGE_BUTTON_CLASS = "bg-orange-500 hover:bg-orange-600 text-white"; 
 const BEIGE_BACKGROUND_CLASS = "bg-orange-50";
-const CARD_BACKGROUND_CLASS = BEIGE_BACKGROUND_CLASS === 'bg-card' ? 'bg-background' : 'bg-card';
+// Simplified CARD_BACKGROUND_CLASS logic, assuming 'bg-card' is the default if not beige
+const CARD_BACKGROUND_CLASS = 'bg-card'; 
 
 export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
   availableCities,
@@ -175,7 +176,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         <div className={`md:w-1/2 space-y-6 p-1`}>
           <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm`}>
             <h3 className={`text-lg font-semibold mb-4 text-center ${fonts.subheading.className}`}>{t('select_dates')}</h3>
-            <PilgrimageCalendar selectedRange={selectedDateRange} onDateRangeChange={onDateRangeChange} locale={currentLocale} numberOfMonths={2} className={fonts.body.className} headerClassName={fonts.subheading.className}/>
+            <PilgrimageCalendar selectedRange={selectedDateRange} onDateRangeChange={onDateRangeChange} locale={currentLocale} className={fonts.body.className} headerClassName={fonts.subheading.className}/>
           </div>
           <DateFieldsSection />
         </div>
