@@ -19,6 +19,7 @@ import type { DateValue } from '@internationalized/date';
 import { Checkbox } from "@/components/ui/checkbox";
 import { getLocalizedText } from '../../utils/languageUtils';
 import { X, PartyPopper, Zap, Leaf, Eye, Sparkles, BookOpenText, Users, Church, Star, MoonStar, Handshake, Cross, Cog } from 'lucide-react';
+import useMediaQuery from '@/hooks/use-mobile';
 
 const OmIcon = () => (
   <svg 
@@ -29,11 +30,8 @@ const OmIcon = () => (
     strokeWidth="0.5" 
     className="h-4 w-4 mr-1.5"
   >
-    {/* Center dot */}
     <circle cx="12" cy="12" r="2" fill="currentColor"/>
-    {/* Empty middle circle */}
     <circle cx="12" cy="12" r="6" fill="none" stroke="currentColor"/>
-    {/* Thin outer circle */}
     <circle cx="12" cy="12" r="10" fill="none" stroke="currentColor"/>
   </svg>
 );
@@ -45,7 +43,6 @@ const StarOfDavidIcon = () => (
     fill="currentColor" 
     className="h-4 w-4 mr-1.5"
   >
-    {/* Star of David - two overlapping triangles */}
     <path d="M12 2L15.09 8.26L22 9.27L17 14.14L18.18 21.02L12 17.77L5.82 21.02L7 14.14L2 9.27L8.91 8.26L12 2Z" />
   </svg>
 );
@@ -133,6 +130,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
   isLoadingCities,
 }) => {
   const currentLocale = dateFnsLocales[language] || enUS;
+  const isMobile = useMediaQuery('(max-width: 768px)');
 
   const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
     if (!date) return null;
@@ -175,21 +173,9 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
   const [showPlanNameInput, setShowPlanNameInput] = React.useState(false);
 
   return (
-    <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
-      <div className="absolute top-4 right-4">
-        <FontSwitcher />
-      </div>
-      {/* Left Panel: Calendar and Date Inputs */}
-      <div className="bg-white p-6 rounded-lg shadow-sm space-y-6">
-        <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>{t('select_event_dates', {defaultValue: 'Select Event Dates'})}</h3>
-        <PilgrimageCalendar 
-            selectedRange={selectedDateRange} 
-            onDateRangeChange={onDateRangeChange}
-            locale={currentLocale}
-            highlightedDates={eventDatesForCalendar}
-            className={fonts.body.className}
-            headerClassName={fonts.subheading.className}
-        />
+    <div className="grid grid-cols-1 gap-4">
+      {/* Date Inputs - Always visible */}
+      <div className="bg-white p-4 rounded-lg shadow-sm">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <DateFieldComponent
             label={t('start_date_label')}
@@ -208,152 +194,175 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
         </div>
       </div>
 
-      {/* Right Panel: Plan Name, Saved Plans, Filters, and Actions */}
-      <div className="border rounded-md p-4 bg-white flex flex-col space-y-4"> 
-        
+      {/* Calendar - Hidden on mobile */}
+      {!isMobile && (
+        <div className="bg-white p-4 rounded-lg shadow-sm">
+          <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>
+            {t('select_event_dates', {defaultValue: 'Select Event Dates'})}
+          </h3>
+          <PilgrimageCalendar 
+            selectedRange={selectedDateRange} 
+            onDateRangeChange={onDateRangeChange}
+            locale={currentLocale}
+            highlightedDates={eventDatesForCalendar}
+            className={fonts.body.className}
+            headerClassName={fonts.subheading.className}
+          />
+        </div>
+      )}
+
+      {/* Filters and Actions */}
+      <div className="border rounded-md p-4 bg-white space-y-4">
         {/* Filters Section */}
-            <div className="space-y-6">
-                <div className="flex justify-between items-center mb-4">
-                    <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('place_and_format', {defaultValue: 'Place and Format'})}</h3>
-                    <div className="flex items-center space-x-2">
-                            <Checkbox 
-                                id="hasTranslationFilter"
-                                checked={hasTranslation === true}
-                                onCheckedChange={(checked) => {
-                                    onHasTranslationChange(checked === true ? true : undefined);
-                                }}
-                            />
-                        <label htmlFor="hasTranslationFilter" className={`text-sm font-medium text-gray-700 ${fonts.body.className}`}>{t('filter_has_translation', {defaultValue: 'Has Online Translation'})}</label>
-                    </div>
-                </div>
-
-                <div className="mb-2">
-              <ToggleGroup 
-                type="multiple" 
-                className="flex-wrap justify-start gap-2"
-                value={selectedCityIds}
-                onValueChange={(value) => onSelectedCityIdsChange(value)}
-              >
-                {availableCities
-                  .slice() // Create a shallow copy to avoid mutating the original prop
-                  .sort((a, b) => {
-                    const nameA = getLocalizedText(a.name, language);
-                    const nameB = getLocalizedText(b.name, language);
-                    return nameA.localeCompare(nameB, language); // Use localeCompare for proper sorting
-                  })
-                  .map(city => (
-                  <ToggleGroupItem 
-                    key={city.id} 
-                    value={city.id}
-                    variant="outline"
-                    className={`px-1 py-1 text-sm ${fonts.body.className} ${
-                      selectedCityIds.includes(city.id)
-                      ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground'
-                      : ''
-                    }`}
-                  >
-                    {getLocalizedText(city.name, language)}
-                  </ToggleGroupItem>
-                ))}
-              </ToggleGroup>
+        <div className="space-y-4">
+          <div className="flex justify-between items-center">
+            <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>
+              {t('place_and_format', {defaultValue: 'Place and Format'})}
+            </h3>
+            <div className="flex items-center space-x-2">
+              <Checkbox 
+                id="hasTranslationFilter"
+                checked={hasTranslation === true}
+                onCheckedChange={(checked) => {
+                  onHasTranslationChange(checked === true ? true : undefined);
+                }}
+              />
+              <label htmlFor="hasTranslationFilter" className={`text-sm font-medium text-gray-700 ${fonts.body.className}`}>
+                {t('filter_has_translation', {defaultValue: 'Has Online Translation'})}
+              </label>
             </div>
+          </div>
 
-            <div className="mb-2">
-                <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_event_type', {defaultValue: 'Event Type'})}</label>
-                <div className="flex flex-wrap gap-2">
-                    {eventTypeOptions.map(opt => (
-                        <Button 
-                            key={opt.value} 
-                            variant={selectedEventTypes.includes(opt.value) ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => toggleFilter(selectedEventTypes, opt.value, onSelectedEventTypesChange)}
-                            className={`text-xs ${fonts.body.className}`}
-                        >
-                            {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
-                            {t(opt.labelKey, {defaultValue: opt.value})}
-                        </Button>
-                    ))}
-                </div>
-            </div>
+          <div>
+            <ToggleGroup 
+              type="multiple" 
+              className="flex-wrap justify-start gap-2"
+              value={selectedCityIds}
+              onValueChange={(value) => onSelectedCityIdsChange(value)}
+            >
+              {availableCities
+                .slice()
+                .sort((a, b) => {
+                  const nameA = getLocalizedText(a.name, language);
+                  const nameB = getLocalizedText(b.name, language);
+                  return nameA.localeCompare(nameB, language);
+                })
+                .map(city => (
+                <ToggleGroupItem 
+                  key={city.id} 
+                  value={city.id}
+                  variant="outline"
+                  className={`px-1 py-1 text-sm ${fonts.body.className} ${
+                    selectedCityIds.includes(city.id)
+                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground'
+                    : ''
+                  }`}
+                >
+                  {getLocalizedText(city.name, language)}
+                </ToggleGroupItem>
+              ))}
+            </ToggleGroup>
+          </div>
 
-            <div className="mb-2">
-                <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>{t('filter_by_culture', {defaultValue: 'Culture'})}</label>
-                <div className="flex flex-wrap gap-2">
-                    {eventCultureOptions.map(opt => (
-                        <Button 
-                            key={opt.value} 
-                            variant={selectedCultures.includes(opt.value) ? 'default' : 'outline'}
-                            size="sm"
-                            onClick={() => toggleFilter(selectedCultures, opt.value, onSelectedCulturesChange)}
-                            className={`text-xs ${fonts.body.className}`}
-                        >
-                            {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
-                            {t(opt.labelKey, {defaultValue: opt.value})}
-                        </Button>
-                    ))}
-                </div>
+          <div>
+            <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>
+              {t('filter_by_event_type', {defaultValue: 'Event Type'})}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {eventTypeOptions.map(opt => (
+                <Button 
+                  key={opt.value} 
+                  variant={selectedEventTypes.includes(opt.value) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => toggleFilter(selectedEventTypes, opt.value, onSelectedEventTypesChange)}
+                  className={`text-xs ${fonts.body.className}`}
+                >
+                  {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
+                  {t(opt.labelKey, {defaultValue: opt.value})}
+                </Button>
+              ))}
             </div>
-            
+          </div>
+
+          <div>
+            <label className={`block text-sm font-medium text-gray-700 mb-1 ${fonts.subheading.className}`}>
+              {t('filter_by_culture', {defaultValue: 'Culture'})}
+            </label>
+            <div className="flex flex-wrap gap-2">
+              {eventCultureOptions.map(opt => (
+                <Button 
+                  key={opt.value} 
+                  variant={selectedCultures.includes(opt.value) ? 'default' : 'outline'}
+                  size="sm"
+                  onClick={() => toggleFilter(selectedCultures, opt.value, onSelectedCulturesChange)}
+                  className={`text-xs ${fonts.body.className}`}
+                >
+                  {opt.Icon && <opt.Icon className="mr-1.5 h-4 w-4" />}
+                  {t(opt.labelKey, {defaultValue: opt.value})}
+                </Button>
+              ))}
+            </div>
+          </div>
         </div>
 
-            {/* Action Buttons at the bottom */}
-        <div className="flex flex-col sm:flex-row sm:gap-4 pt-4 mt-auto border-t">
-            <Button 
-                size="lg"
-                className={`w-full sm:w-1/3 bg-saffron hover:bg-saffron/90 text-white ${fonts.subheading.className}`}
-                onClick={onAddFilteredEventsToPlan}
-                disabled={isLoadingCities}
-            >
-                {isLoadingCities ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_events_to_plan_button')}
-            </Button>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row gap-2 pt-4 border-t">
+          <Button 
+            size="lg"
+            className={`w-full bg-saffron hover:bg-saffron/90 text-white ${fonts.subheading.className}`}
+            onClick={onAddFilteredEventsToPlan}
+            disabled={isLoadingCities}
+          >
+            {isLoadingCities ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_events_to_plan_button')}
+          </Button>
 
-            { (currentLoadedGuruPlanId || showPlanNameInput) ? (
-              <div className="w-full sm:w-1/3 flex flex-col gap-2">
-                <Input
-                  placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter plan name...'})}
-                  value={guruPlanNameValue}
-                  onChange={(e) => onGuruPlanNameChange(e.target.value)}
-                  className={`text-sm ${fonts.body.className}`}
-                />
-                <Button 
-                  size="lg"
-                  variant="outline"
-                  className={`w-full ${fonts.subheading.className}`}
-                  onClick={() => {
-                      onSaveOrUpdateGuruPlan(guruPlanNameValue);
-                      if (showPlanNameInput && !currentLoadedGuruPlanId) {
-                          setShowPlanNameInput(false);
-                      }
-                  }}
-                >
-                  {saveButtonText}
-                </Button>
-              </div>
-            ) : (
+          { (currentLoadedGuruPlanId || showPlanNameInput) ? (
+            <div className="w-full flex flex-col gap-2">
+              <Input
+                placeholder={t('guru_plan_name_placeholder', {defaultValue: 'Enter plan name...'})}
+                value={guruPlanNameValue}
+                onChange={(e) => onGuruPlanNameChange(e.target.value)}
+                className={`text-sm ${fonts.body.className}`}
+              />
               <Button 
-                size="lg" 
+                size="lg"
                 variant="outline"
-                className={`w-full sm:w-1/3 ${fonts.subheading.className}`}
-                onClick={() => setShowPlanNameInput(true)}
+                className={`w-full ${fonts.subheading.className}`}
+                onClick={() => {
+                  onSaveOrUpdateGuruPlan(guruPlanNameValue);
+                  if (showPlanNameInput && !currentLoadedGuruPlanId) {
+                    setShowPlanNameInput(false);
+                  }
+                }}
               >
                 {saveButtonText}
               </Button>
-            )}
-
+            </div>
+          ) : (
             <Button 
-                size="lg" 
-                variant="outline" 
-                className={`w-full sm:w-1/3 ${fonts.subheading.className}`} 
-                onClick={onAddFavoritesToPlan}
+              size="lg" 
+              variant="outline"
+              className={`w-full ${fonts.subheading.className}`}
+              onClick={() => setShowPlanNameInput(true)}
             >
-                {t('add_favorite_events_to_plan_button')}
+              {saveButtonText}
             </Button>
+          )}
+
+          <Button 
+            size="lg" 
+            variant="outline" 
+            className={`w-full ${fonts.subheading.className}`} 
+            onClick={onAddFavoritesToPlan}
+          >
+            {t('add_favorite_events_to_plan_button')}
+          </Button>
         </div>
-        
-        {/* Saved Plans Section - MOVED HERE */}
+
+        {/* Saved Plans Section */}
         {savedGuruPlans && savedGuruPlans.length > 0 && (
-          <div className="mt-4 pt-4 border-t"> {/* Added mt-4, pt-4 and border-t for separation */}
-            <div className="flex flex-wrap justify-start gap-2"> {/* Ensure left alignment */}
+          <div className="mt-4 pt-4 border-t">
+            <div className="flex flex-wrap justify-start gap-2">
               {savedGuruPlans.map(plan => (
                 <div key={plan.id} className="flex items-center">
                   <Button variant="outline" size="sm" onClick={() => onLoadGuruPlan(plan.id)} className={`text-xs rounded-r-none px-2 py-1 h-auto ${fonts.body.className}`}>{plan.title}</Button>

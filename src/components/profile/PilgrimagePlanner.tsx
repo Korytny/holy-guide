@@ -397,11 +397,14 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     const updatedPlannedItems = plannedItems.map(pItem => ({ ...pItem }));
     const itemsCount = plannedItems.length;
     const daysCount = intervalDays.length;
-    const step = Math.max(1, Math.floor(daysCount / itemsCount));
+    
+    // Use Bresenham's algorithm for even distribution
+    let error = daysCount / 2;
+    const step = daysCount / itemsCount;
+    let currentDayIndex = 0;
     
     plannedItems.forEach((item, itemIndex) => {
-      const dayIndex = Math.min(itemIndex * step, daysCount - 1);
-      const targetDate = intervalDays[dayIndex];
+      const targetDate = intervalDays[currentDayIndex];
       
       const itemInUpdateArray = updatedPlannedItems.find(pi => 
         pi.type === item.type && pi.data.id === item.data.id
@@ -409,6 +412,13 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       
       if (itemInUpdateArray) {
         itemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
+      }
+      
+      // Update Bresenham's algorithm variables
+      error -= step;
+      if (error < 0) {
+        currentDayIndex++;
+        error += daysCount;
       }
     });
     
