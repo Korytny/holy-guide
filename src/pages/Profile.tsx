@@ -87,7 +87,9 @@ const Profile = () => {
           />
           {/* PilgrimageRouteMap is no longer rendered here directly */}
         </div>
-        <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
+        <div className="mt-10"> {/* Added wrapper with margin-top */}
+          <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
+        </div>
         <UserCommentsSection onCommentsAndPhotosCountLoaded={handleCommentsAndPhotosCountLoaded} />
         <div className="mt-8 text-center">
           <Button 

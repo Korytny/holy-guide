@@ -122,7 +122,7 @@ const FavoritesSection: React.FC<FavoritesSectionProps> = ({ onFavoriteCountsLoa
      }, [favoriteCities, favoritePlaces, favoriteRoutes, favoriteEvents, isLoadingAny, onFavoriteCountsLoaded]);
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8 mb-10">
+        <div className="bg-orange-50 rounded-2xl shadow-xl p-6 md:p-8"> {/* Changed bg-white to bg-orange-50, removed mb-10 for now, will add in Profile.tsx */}
             <h2 className="text-2xl font-semibold mb-6 pb-4 border-b text-center text-gray-900">{t('my_favorites')}</h2>
             
             {/* Favorite Cities Carousel */}

@@ -95,8 +95,8 @@ export const GuruPlanDisplay: React.FC<GuruPlanDisplayProps> = ({
 
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
-      <div className="border rounded-md p-0 bg-white overflow-hidden h-full">
-        <h3 className={`text-xl font-bold mb-0 p-4 sticky top-0 bg-white z-10 ${fonts.heading.className}`}>
+      <div className="rounded-lg shadow-lg p-0 bg-white overflow-hidden h-full"> {/* Applied shadow-lg, rounded-lg, removed border */}
+        <h3 className={`text-xl font-bold mb-0 p-2 md:p-4 sticky top-0 bg-transparent md:bg-white z-10 ${fonts.heading.className}`}>
           {t('guru_plan_title')}
         </h3>
 

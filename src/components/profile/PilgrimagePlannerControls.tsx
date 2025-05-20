@@ -152,7 +152,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   };
 
   const DateFieldsSection = () => (
-    <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm space-y-4 ${fonts.body.className}`}>
+    <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4 ${fonts.body.className}`}> {/* Applied shadow-lg, rounded-lg, removed border */}
       <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_dates')}</h3>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('start_date_label')} value={convertToDateValue(selectedDateRange?.from)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'from')} />
@@ -185,10 +185,10 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   );
 
   return (
-    <div className={`flex flex-col md:flex md:flex-row ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Changed to md:flex md:flex-row */}
+    <div className={`flex flex-col md:flex md:flex-row ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Main container already has shadow-xl, this is fine */}
       {!isMobile && (
         <div className={`md:w-1/2 space-y-6 flex flex-col p-3`}> {/* Changed to md:w-1/2 and added p-3 */}
-          <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm flex flex-col flex-grow`}> 
+          <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg flex flex-col flex-grow`}>  {/* Applied shadow-lg, rounded-lg, removed border */}
             <h3 className={`text-lg font-semibold mb-4 text-center ${fonts.subheading.className}`}>{t('select_dates')}</h3>
             <PilgrimageCalendar selectedRange={selectedDateRange} onDateRangeChange={onDateRangeChange} locale={currentLocale} className={fonts.body.className} headerClassName={fonts.subheading.className}/>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
@@ -207,7 +207,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         {isMobile && <DateFieldsSection />}
         
         {/* Merged Filters and Actions Card - Maximizing horizontal content space */}
-        <div className={`p-4 border rounded-md ${CARD_BACKGROUND_CLASS} shadow-sm space-y-4 flex flex-col flex-grow`}> {/* Changed py-4 px-0 to p-4 */}
+        <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4 flex flex-col flex-grow`}> {/* Applied shadow-lg, rounded-lg, removed border */}
           <div> 
             <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_cities_to_plan')}</h3>
             <div className="mb-2 mt-2"> 

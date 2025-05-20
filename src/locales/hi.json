@@ -77,6 +77,7 @@
     "cities_title": "भारत के पवित्र स्थान",
     "cities_subtitle": "भारत की आध्यात्मिक हृदयस्थली को उसके सबसे पवित्र शहरों के माध्यम से खोजें",
     "search_placeholder": "शहर खोजें...",
+    "cities_section_title": "पवित्र यात्रा शुरू करें - एक शहर चुनें",
     "search_places_placeholder": "इस शहर में स्थान खोजें...",
     "try_adjusting_search": "अपनी खोज को समायोजित करने का प्रयास करें या सभी उपलब्ध विकल्पों का अन्वेषण करें।",
     "no_cities_available": "वर्तमान में कोई शहर उपलब्ध नहीं हैं।",
@@ -244,7 +245,6 @@
     "filter_by_event_type": "घटना का प्रकार",
     "filter_by_culture": "संस्कृति",
     "filter_has_translation": "ऑनलाइन अनुवाद है",
-    "add_filtered_events_to_plan_button": "फ़िल्टर की गई घटनाओं को योजना में जोड़ें",
     "add_favorite_events_to_plan_button": "पसंदीदा घटनाओं को योजना में जोड़ें",
     "save_current_guru_plan": "वर्तमान गुरु योजना सहेजें",
     "guru_plan_name_placeholder": "गुरु योजना का नाम दर्ज करें...",
@@ -263,5 +263,7 @@
     "online": "ऑनलाइन",
   "distribute_dates_evenly_button": "तारीखों को समान रूप से वितरित करें",
   "clear_date_range_button": "अवधि सीमित न करें",
-  "feature_in_development": "सुविधा विकासधीन है।"
+  "feature_in_development": "सुविधा विकासधीन है。",
+  "add_filtered_to_plan_button": "खोजें",
+  "clear_short_button_text": "साफ़ करें"
 }

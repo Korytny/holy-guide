@@ -36,7 +36,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
   return (
     <div
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col",
+            "block group bg-white rounded-lg shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col", // Changed to rounded-lg, shadow-lg, removed hover:shadow-lg
             className
         )}
     >
