@@ -117,6 +117,16 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
 
   const [availableCities, setAvailableCities] = useState<City[]>([]);
 
+  // Placeholder function for distributing dates
+  const handleDistributeDates = () => {
+    // TODO: Implement the logic for distributing dates evenly
+    console.log("Distribute dates button clicked - logic to be implemented.");
+    // Example: You might iterate through planGroups and items,
+    // adjust their dates based on selectedDateRange and some distribution algorithm.
+    // This will likely involve updating the planGroups state.
+    alert(t('feature_in_development', {defaultValue: 'Функция "Распределить даты" в разработке.'}));
+  };
+
   const eventDatesForCalendar = useMemo(() => {
     const allItems = planGroups.flatMap(group => group.items);
     const dates = allItems
@@ -558,6 +568,7 @@ export const GuruPlanner: React.FC<GuruPlannerProps> = ({ auth: authContext, lan
         savedGuruPlans={savedGuruPlans}
         eventDatesForCalendar={eventDatesForCalendar}
         isLoadingCities={isLoadingCities} 
+        onDistributeDates={handleDistributeDates} // Pass the new handler
       />
       {isLoadingCities && <div className="text-center p-4">{t('loading_cities', { defaultValue: 'Loading cities...'})}</div>}
       {!isLoadingCities && isGuruPlanInitiated && (

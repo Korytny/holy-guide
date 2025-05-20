@@ -260,5 +260,8 @@
     "guru_plan_not_found": "गुरु योजना नहीं मिली या डेटा दूषित है।",
     "error_loading_guru_plan": "गुरु योजना लोड करने में त्रुटि।",
     "select_event_dates": "घटना तिथियां चुनें",
-    "online": "ऑनलाइन"
+    "online": "ऑनलाइन",
+  "distribute_dates_evenly_button": "तारीखों को समान रूप से वितरित करें",
+  "clear_date_range_button": "अवधि सीमित न करें",
+  "feature_in_development": "सुविधा विकासधीन है।"
 }

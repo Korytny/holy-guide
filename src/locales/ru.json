@@ -273,6 +273,9 @@
     "pilgrimage_filter_title": "Тип паломничества",
     "event_type_retreat": "Ретрит",
     "online": "Онлайн",
-    "online_short": "есть онлайн",
-    "clear_short_button_text": "Очистить"
+  "online_short": "есть онлайн",
+  "clear_short_button_text": "Очистить",
+  "distribute_dates_evenly_button": "Распределить даты равномерно",
+  "clear_date_range_button": "Не ограничивать период",
+  "feature_in_development": "Функция в разработке."
 }

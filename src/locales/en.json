@@ -262,5 +262,7 @@
     "error_loading_guru_plan": "Error loading Guru Plan.",
     "online": "Online",
     "online_short": "has online",
-    "clear_short_button_text": "Clear"
+    "clear_short_button_text": "Clear",
+  "distribute_dates_evenly_button": "Distribute Dates Evenly",
+  "clear_date_range_button": "Clear Date Range"
 }
