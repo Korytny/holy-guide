@@ -1,0 +1,308 @@
+{
+  "metadata": {
+    "table_name": "events",
+    "backup_time": "2025-09-27 15:35:29",
+    "row_count": 9,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "5f4a6a98-7071-4a0e-8d53-d6fb5c112046"
+      },
+      {
+        "column": "name",
+        "type": "JSON",
+        "sample": "{'en': 'Maha Shivaratri: Cosmic Dance of Conscious..."
+      },
+      {
+        "column": "info",
+        "type": "JSON",
+        "sample": "{'en': \"An immersive 12-hour journey through Shiva..."
+      },
+      {
+        "column": "type",
+        "type": "str",
+        "sample": "festival"
+      },
+      {
+        "column": "time",
+        "type": "str",
+        "sample": "2025-03-03T18:00:00+00:00"
+      },
+      {
+        "column": "images",
+        "type": "Array",
+        "sample": "['https://rxvckkqqunyqtxjyabub.supabase.co/storage..."
+      },
+      {
+        "column": "city_id",
+        "type": "str",
+        "sample": "88c07571-cf1c-49f5-ac64-48acbe212464"
+      },
+      {
+        "column": "event_category",
+        "type": "str",
+        "sample": "festival"
+      },
+      {
+        "column": "culture",
+        "type": "str",
+        "sample": "hinduism"
+      },
+      {
+        "column": "has_online_stream",
+        "type": "bool",
+        "sample": "False"
+      },
+      {
+        "column": "end_time",
+        "type": "str",
+        "sample": "2025-03-04T06:00:00+00:00"
+      },
+      {
+        "column": "views_count",
+        "type": "int",
+        "sample": "0"
+      },
+      {
+        "column": "favorites_count",
+        "type": "int",
+        "sample": "0"
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "5f4a6a98-7071-4a0e-8d53-d6fb5c112046",
+      "name": {
+        "en": "Maha Shivaratri: Cosmic Dance of Consciousness",
+        "hi": "महा शिवरात्रि: चेतना का ब्रह्मांडीय नृत्य",
+        "ru": "Маха Шиваратри: Космический Танец Сознания"
+      },
+      "info": {
+        "en": "An immersive 12-hour journey through Shiva's universe. Participants will: 1) Witness a life-sized holographic Nataraja performing the Tandava (destruction/creation dance) synchronized with seismic data from active volcanoes, 2) Drink 'Soma Elixir' infused with adaptogenic herbs mimicking ancient Vedic recipes, 3) Meditate inside a resonance chamber vibrating at 432 Hz (Shiva's preferred frequency), 4) Experience 'Third Eye Activation' via binaural beats and controlled light therapy. The climax features 108 priests simultaneously chanting the Rudram while Tesla coils generate plasma arcs shaped like tridents. Warning: may induce temporary altered states of consciousness.",
+        "hi": "शिव की ब्रह्मांड में 12 घंटे की गहन यात्रा। कार्यक्रम: 1) ज्वालामुखियों के सीस्मिक डेटा के साथ सिंक्रोनाइज़ होलोग्राफिक नटराज का तांडव नृत्य, 2) वैदिक सोमरस के आधुनिक संस्करण का पान, 3) 432 हर्ट्ज की अनुनाद कक्ष में ध्यान, 4) बाइनॉरल बीट्स द्वारा 'तीसरी आँख सक्रियण'। समापन: 108 पुजारियों का रुद्रपाठ और टेस्ला कॉइल द्वारा त्रिशूल आकार के प्लाज़्मा निर्माण। चेतावनी: चेतना की अस्थायी परिवर्तित अवस्था हो सकती है।",
+        "ru": "12-часовое погружение во вселенную Шивы. Участники: 1) Увидят голографического Натараджу в человеческий рост, танцующего Тандаву под данные сейсмодатчиков вулканов, 2) Выпьют 'Эликсир Сомы' из адаптогенных трав по ведическим рецептам, 3) Промедитируют в камере резонанса (432 Гц — частота Шивы), 4) Пройдут 'Активацию третьего глаза' через бинауральные ритмы. Кульминация: 108 жрецов поют Рудрам, пока катушки Теслы создают плазменные трезубцы. Предупреждение: может вызвать изменённое состояние сознания."
+      },
+      "type": "festival",
+      "time": "2025-03-03T18:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//111.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//112.jpg"
+      ],
+      "city_id": "88c07571-cf1c-49f5-ac64-48acbe212464",
+      "event_category": "festival",
+      "culture": "hinduism",
+      "has_online_stream": false,
+      "end_time": "2025-03-04T06:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "420e9628-03a1-49da-adbd-34845e5f2168",
+      "name": {
+        "en": "Diwali: Festival of Lights",
+        "hi": "दीवाली: प्रकाश का त्योहार",
+        "ru": "Дивали: Фестиваль огней"
+      },
+      "info": {
+        "en": "Diwali, the most vibrant Hindu festival, symbolizes the victory of light over darkness and good over evil. Celebrated over five days, it includes lighting oil lamps (diyas), decorating homes with rangoli, exchanging sweets, and fireworks. Families gather for Lakshmi Puja to invite prosperity. This year, join the grand celebrations in Vrindavan with cultural performances, spiritual discourses, and a spectacular light display at the Banke Bihari Temple. Don't miss the Ganges Aarti and the distribution of 10,000 free diyas to pilgrims!",
+        "hi": "दीवाली, सबसे जीवंत हिंदू त्योहार, अंधकार पर प्रकाश और बुराई पर अच्छाई की जीत का प्रतीक है। पांच दिनों तक चलने वाले इस उत्सव में दीये जलाना, रंगोली से घरों को सजाना, मिठाइयाँ बाँटना और आतिशबाजी शामिल है। परिवार लक्ष्मी पूजा कर समृद्धि आमंत्रित करते हैं। इस वर्ष, वृंदावन में भव्य उत्सव में शामिल हों: सांस्कृतिक कार्यक्रम, आध्यात्मिक प्रवचन और बांके बिहारी मंदिर में अद्भुत रोशनी। 10,000 तीर्थयात्रियों के लिए मुफ्त दीये वितरण और गंगा आरती न छोड़ें!",
+        "ru": "Дивали, самый яркий индуистский фестиваль, символизирует победу света над тьмой и добра над злом. Празднуется пять дней: зажигают масляные лампы (дия), украшают дома ранголи, дарят сладости и запускают фейерверки. Семьи собираются на пуджу Лакшми для привлечения процветания. В этом году присоединяйтесь к торжествам во Вриндаване: культурные выступления, духовные беседы и грандиозная иллюминация в храме Банке Бихари. Обязательно посетите Ганга-Аарти и получите бесплатные дии для 10 000 паломников!"
+      },
+      "type": "true",
+      "time": "2024-11-12T18:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//108.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//201.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//42.jpg"
+      ],
+      "city_id": "bd5e679a-7efc-4c11-92f9-e687c4d86343",
+      "event_category": "festival",
+      "culture": "hinduism",
+      "has_online_stream": true,
+      "end_time": "2024-11-15T23:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "3565bb59-39e0-438d-826c-4cc71037c972",
+      "name": {
+        "en": "Advaita Vedanta Retreat",
+        "hi": "अद्वैत वेदांत रिट्रीट",
+        "ru": "Ретрит Адвайта Веданты"
+      },
+      "info": {
+        "en": "Silent meditation on 'Tat Tvam Asi' (Thou Art That) with guided self-inquiry sessions. Morning lectures on Upanishads and evening Ganga Aarti. Includes private consultations with Swami-ji on overcoming maya (illusion). Strict no-technology policy.",
+        "hi": "'तत् त्वम् असि' (तू वही है) पर मौन ध्यान और आत्म-पूछताछ सत्र। उपनिषदों पर सुबह के व्याख्यान और शाम को गंगा आरती। माया (भ्रम) पर स्वामी जी के साथ निजी परामर्श शामिल है। प्रौद्योगिकी पर पूर्ण प्रतिबंध।",
+        "ru": "Молчаливая медитация на 'Тат Твам Аси' (Ты есть То) с сессиями самоисследования. Утренние лекции по Упанишадам и вечерняя Ганга-Аарти. Индивидуальные консультации со Свами-джи по преодолению майи (иллюзии). Полный отказ от гаджетов."
+      },
+      "type": "retreat",
+      "time": "2024-10-10T06:30:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//99.jpg"
+      ],
+      "city_id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "event_category": "retreat",
+      "culture": "advaita",
+      "has_online_stream": false,
+      "end_time": "2024-10-17T18:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "ff4863bd-1d0d-4a6e-9823-f1f1ca393155",
+      "name": {
+        "en": "Intergalactic Unity Festival",
+        "hi": "अंतरग्रहीय एकता उत्सव",
+        "ru": "Межгалактический фестиваль единства"
+      },
+      "info": {
+        "en": "A 72-hour non-stop celebration where traditions of Earth's religions merge with speculative alien spirituality. Highlights: 1) Zero-gravity Ganga Aarti performed by astronauts aboard the ISS (live-streamed), 2) AI-generated 'Cosmic Sutras' — sacred texts blending Quranic verses, Upanishads, and fictional exoplanet wisdom, 3) 'Temple of the Future' installation with 3D-printed deities from 100 imagined faiths, 4) Vegan manna from replicators tasting like ambrosia described in 14 Earth religions. Special guests: a robot imam reciting binary adhan, a holographic Dalai Lama, and a CRISPR-edited talking cow debating philosophers. Participants receive NFT prayer beads that change design based on their meditation biometrics.",
+        "hi": "72 घंटे का अहिंसक उत्सव जहां पृथ्वी के धर्मों का विलय अंतरिक्षीय आध्यात्मिकता से होता है। आकर्षण: 1) अंतर्राष्ट्रीय अंतरिक्ष स्टेशन से शून्य गुरुत्वाकर्षण में गंगा आरती, 2) एआई-रचित 'ब्रह्मांडीय सूत्र' — कुरान, उपनिषद और काल्पनिक ग्रहों के ज्ञान का मिश्रण, 3) 100 काल्पनिक धर्मों के 3D-मुद्रित देवताओं वाला 'भविष्य का मंदिर', 4) 14 धर्मों में वर्णित अमृत के स्वाद वाली वीगन मन्ना। विशेष: रोबोट इमाम, होलोग्राफिक दलाई लामा और CRISPR-संवादी गाय। प्रतिभागियों को बायोमेट्रिक ध्यान के आधार पर बदलने वाली NFT-माला मिलेगी।",
+        "ru": "72-часовой марафон, где земные религии соединяются с гипотетической инопланетной духовностью. Основное: 1) Ганга-аарти в невесомости с МКС (прямая трансляция), 2) 'Космические сутры' от ИИ — смесь Корана, Упанишад и мудрости вымышленных цивилизаций, 3) Инсталляция 'Храм будущего' с 3D-божествами из 100 фантастических верований, 4) Веганская манна из репликаторов со вкусом амброзии. Гости: робот-имам, читающий азан в двоичном коде, голографический Далай-лама и говорящая корова с CRISPR. Участники получат NFT-чётки, меняющие узор по биометрии медитации."
+      },
+      "type": "festival",
+      "time": "2025-01-01T00:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//108.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//109.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//110.jpg"
+      ],
+      "city_id": "c6e79df0-a749-4865-95fc-b06d747c9966",
+      "event_category": "festival",
+      "culture": "hinduism",
+      "has_online_stream": true,
+      "end_time": "2025-01-04T00:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "a5fe39be-b150-4446-9e08-eabcccb49ce9",
+      "name": {
+        "en": "Krishna Lila: Digital Raas",
+        "hi": "कृष्ण लीला: डिजिटल रास",
+        "ru": "Кришна-Лила: Цифровая Раса"
+      },
+      "info": {
+        "en": "Modern reimagining of Krishna's dance...",
+        "hi": "कृष्ण के नृत्य का आधुनिक रूपांतर...",
+        "ru": "Современная интерпретация танца Кришны..."
+      },
+      "type": "festival",
+      "time": "2025-08-23T20:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//113.jpg"
+      ],
+      "city_id": "c6e79df0-a749-4865-95fc-b06d747c9966",
+      "event_category": "festival",
+      "culture": "hinduism",
+      "has_online_stream": true,
+      "end_time": "2025-08-24T06:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "f588a167-9d8b-423d-85a1-4ee9c1b7913e",
+      "name": {
+        "en": "Easter Retreat",
+        "hi": "ईस्टर रिट्रीट",
+        "ru": "Пасхальный ретрит"
+      },
+      "info": {
+        "en": "Silent meditation retreat focused on Christ's resurrection. Includes daily Gospel readings, icon painting workshops, and Orthodox chant practice. Accommodation in monastery cells with fasting meals. On Easter night, participants will join the Jerusalem Fire ceremony and procession with candles.",
+        "hi": "मौन ध्यान रिट्रीट जो मसीह के पुनरुत्थान पर केंद्रित है। दैनिक गॉस्पेल पाठ, आइकन पेंटिंग कार्यशालाएं और ऑर्थोडॉक्स भजन अभ्यास शामिल हैं। मठ की कोठरियों में रहने और उपवास भोजन की व्यवस्था। ईस्टर की रात को, प्रतिभागी जेरूसलम फायर समारोह और मोमबत्तियों के साथ जुलूस में शामिल होंगे।",
+        "ru": "Молчаливый ретрит, посвященный воскресению Христа. В программе: чтение Евангелия, мастер-классы по иконописи и обучение православному пению. Проживание в монастырских кельях с постной трапезой. В пасхальную ночь - церемония Благодатного огня и крестный ход со свечами."
+      },
+      "type": "retreat",
+      "time": "2025-04-19T15:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//33.jpg"
+      ],
+      "city_id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "event_category": "retreat",
+      "culture": "christianity",
+      "has_online_stream": false,
+      "end_time": "2025-04-27T12:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "dd4a5bb7-9871-4fd4-ae06-e60ba5309128",
+      "name": {
+        "en": "Interfaith Harmony Festival",
+        "hi": "अंतरधार्मिक सद्भाव उत्सव",
+        "ru": "Фестиваль межрелигиозной гармонии"
+      },
+      "info": {
+        "en": "Unique event where Hindu pandits, Christian priests, Muslim imams, and Buddhist monks share one stage. Includes: comparative theology debates, multi-faith choir performance, and joint peace meditation. Food court with vegetarian/vegan dishes from all traditions.",
+        "hi": "अनूठा आयोजन जहाँ हिंदू पंडित, ईसाई पादरी, मुस्लिम इमाम और बौद्ध भिक्षु एक मंच साझा करते हैं। तुलनात्मक धर्मशास्त्र पर बहस, बहु-धर्मी गायन और संयुक्त शांति ध्यान शामिल है। सभी परंपराओं के शाकाहारी/वीगन व्यंजनों के साथ फूड कोर्ट।",
+        "ru": "Уникальное событие, где индуистские пандиты, христианские священники, мусульманские имамы и буддийские монахи выступают вместе. В программе: дебаты по сравнительному богословию, выступления межконфессионального хора и совместная медитация за мир. Фудкорт с вегетарианскими блюдами разных традиций."
+      },
+      "type": "festival",
+      "time": "2025-01-15T11:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//66.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//150.jpg"
+      ],
+      "city_id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "event_category": "festival",
+      "culture": "advaita",
+      "has_online_stream": true,
+      "end_time": "2025-01-18T20:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "34daf5d9-c99a-424d-be29-7834da054ff6",
+      "name": {
+        "en": "Quantum Shiva Puja",
+        "hi": "क्वांटम शिव पूजा",
+        "ru": "Квантовая Пуджа Шиве"
+      },
+      "info": {
+        "en": "A ritual where particles in superposition collapse into sacred patterns. Features: 1) Entangled bell (ghanta) that rings simultaneously in 5 locations, 2) Holographic ash (vibhuti) forming yantras based on observer effect, 3) AI Pandit analyzing quantum fluctuations to determine optimal mantra timing. Participants receive Schrödinger's prasadam (simultaneously exists/not exists until observed).",
+        "hi": "एक अनुष्ठान जहां सुपरपोजिशन में कण पवित्र पैटर्न बनाते हैं। विशेषताएँ: 1) 5 स्थानों पर एक साथ बजने वाली घंटी, 2) प्रेक्षक प्रभाव से बनते होलोग्राफिक भस्म यंत्र, 3) मंत्रों का इष्टतम समय निर्धारित करता एआई पंडित। प्रसाद देखने तक अस्तित्व/अनस्तित्व में रहता है।",
+        "ru": "Ритуал, где квантовые частицы формируют священные узоры. В программе: 1) Колокол, звонящий одновременно в 5 точках, 2) Голографическая вибхути, меняющая форму при наблюдении, 3) ИИ-пандит, выбирающий мантры по квантовым флуктуациям. Прасад существует/не существует до момента наблюдения."
+      },
+      "type": "puja",
+      "time": "2025-04-14T21:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//115.jpg"
+      ],
+      "city_id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "event_category": "puja",
+      "culture": "hinduism",
+      "has_online_stream": true,
+      "end_time": "2025-04-14T23:30:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    },
+    {
+      "id": "837af520-8bc2-4422-a4b9-98fd2c06ca10",
+      "name": {
+        "en": "Maha Shivaratri Puja",
+        "hi": "महा शिवरात्रि पूजा",
+        "ru": "Пуджа Маха Шиваратри"
+      },
+      "info": {
+        "en": "The Great Night of Shiva: all-night vigil with abhishekam (ritual bathing of Shiva Lingam), chanting of Om Namah Shivaya, and meditation. At midnight, 108 offerings of bilva leaves will be made. Participants receive prasad of sacred vibhuti and rudraksha beads. Live streaming from Kashi Vishwanath Temple.",
+        "hi": "शिव की महान रात: शिव लिंगम का अभिषेक, 'ॐ नमः शिवाय' का जाप और ध्यान सहित रात्रि जागरण। मध्यरात्रि में 108 बिल्व पत्रों का भोग लगाया जाएगा। भक्तों को पवित्र विभूति और रुद्राक्ष का प्रसाद मिलेगा। काशी विश्वनाथ मंदिर से सीधा प्रसारण।",
+        "ru": "Великая ночь Шивы: всенощное бдение с абхишекой (ритуальное омовение лингама), повторением мантры 'Ом Намах Шивая' и медитацией. В полночь - подношение 108 листьев бильвы. Участники получат прасад (вибхути и рудракшу). Трансляция из храма Каши Вишванатх."
+      },
+      "type": "puja",
+      "time": "2025-02-26T20:00:00+00:00",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//55.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//77.jpg"
+      ],
+      "city_id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "event_category": "puja",
+      "culture": "hinduism",
+      "has_online_stream": false,
+      "end_time": "2025-02-27T06:00:00+00:00",
+      "views_count": 0,
+      "favorites_count": 0
+    }
+  ]
+}

@@ -1,0 +1,276 @@
+{
+  "metadata": {
+    "table_name": "cities",
+    "backup_time": "2025-09-27 15:35:26",
+    "row_count": 11,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "88c07571-cf1c-49f5-ac64-48acbe212464"
+      },
+      {
+        "column": "name",
+        "type": "JSON",
+        "sample": "{'en': 'Haridwar', 'hi': 'हरिद्वार', 'ru': 'Харидв..."
+      },
+      {
+        "column": "info",
+        "type": "JSON",
+        "sample": "{'en': 'one of the holiest cities in India, locate..."
+      },
+      {
+        "column": "spots_count",
+        "type": "int",
+        "sample": "9"
+      },
+      {
+        "column": "routes_count",
+        "type": "int",
+        "sample": "0"
+      },
+      {
+        "column": "events_count",
+        "type": "int",
+        "sample": "1"
+      },
+      {
+        "column": "country",
+        "type": "str",
+        "sample": "5771970d-b118-4250-82f4-d0c395836c37"
+      },
+      {
+        "column": "images",
+        "type": "Array",
+        "sample": "['https://rxvckkqqunyqtxjyabub.supabase.co/storage..."
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "88c07571-cf1c-49f5-ac64-48acbe212464",
+      "name": {
+        "en": "Haridwar",
+        "hi": "हरिद्वार",
+        "ru": "Харидвар"
+      },
+      "info": {
+        "en": "one of the holiest cities in India, located in Uttarakhand on the banks of the sacred Ganges River. It is a major pilgrimage destination, famous for the Ganga Aarti at Har Ki Pauri, where devotees gather to witness the mesmerizing evening ritual. The city is a gateway to the Char Dham Yatra and is known for its spiritual energy and ancient temples. Haridwar hosts the grand Kumbh Mela every 12 years, attracting millions of pilgrims. It is a vibrant blend of devotion, culture, and natural beauty.",
+        "hi": "भारत के सबसे पवित्र शहरों में से एक है, जो उत्तराखंड में पवित्र गंगा नदी के तट पर स्थित है। यह एक प्रमुख तीर्थ स्थल है, जो हर की पौड़ी पर होने वाली गंगा आरती के लिए प्रसिद्ध है, जहाँ भक्तों की भीड़ इस मनमोहक संध्या अनुष्ठान को देखने के लिए जुटती है। यह शहर चार धाम यात्रा का प्रवेश द्वार है और अपनी आध्यात्मिक ऊर्जा और प्राचीन मंदिरों के लिए जाना जाता है। हरिद्वार हर 12 साल में विशाल कुंभ मेले की मेजबानी करता है, जिसमें लाखों तीर्थयात्री आते हैं। यह भक्ति, संस्कृति और प्राकृतिक सौंदर्य का जीवंत मिश्रण है।",
+        "ru": "один из священных городов Индии, расположенный в штате Уттаракханд на берегах священной реки Ганг. Это важный паломнический центр, известный вечерней аарти в Хар-ки-Паури, где верующие собираются, чтобы увидеть завораживающий ритуал. Город служит отправной точкой для паломничества Чар-Дхам и славится своей духовной энергией и древними храмами. Каждые 12 лет в Харидваре проходит грандиозный Кумбх-Мела, привлекающий миллионы паломников. Это место, где сочетаются преданность, культура и природная красота."
+      },
+      "spots_count": 9,
+      "routes_count": 0,
+      "events_count": 1,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//005haridvar.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//f2a5e4bfa182404fb7561e4b29bc17ec.jpg"
+      ]
+    },
+    {
+      "id": "bd5e679a-7efc-4c11-92f9-e687c4d86343",
+      "name": {
+        "en": "Vrindavan",
+        "hi": "वृंदावन",
+        "ru": "Вриндаван"
+      },
+      "info": {
+        "en": "Сity in the Mathura district of Uttar Pradesh. It is the place where Lord Krishna spent his childhood. There are many temples dedicated to the worship of Radha and Krishna, these temples are the true treasures of the Vaishnavas, which show what they worship - Love and Beauty.",
+        "hi": "वृंदावन उत्तर प्रदेश राज्य के मथुरा जिले में एक शहर है। यह वह स्थान है जहां भगवान कृष्ण ने अपना बचपन बिताया था। राधा और कृष्ण की पूजा के लिए समर्पित कई मंदिर हैं, ये मंदिर वैष्णवों के सच्चे खजाने हैं, जो दर्शाते हैं कि वे किसकी पूजा करते हैं - प्रेम और सौंदर्य।",
+        "ru": "Вриндаван — город в округе Матхура штата Уттар-Прадеш. Это место, где Господь Кришна провел свои детские годы. Существует множество храмов, посвященных поклонению Радхе и Кришне, это храмы истинные сокровища вайшнавов, которые показываю чему они поклоняются - Любви и Красоте."
+      },
+      "spots_count": 108,
+      "routes_count": 0,
+      "events_count": 1,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//2164723863004f8187a46d24284ce6d4.jpg"
+      ]
+    },
+    {
+      "id": "7b55d52f-ab5b-4a41-a1a7-f83da26aa9ad",
+      "name": {
+        "en": "Dvaraka",
+        "hi": "द्वारका",
+        "ru": "Дварака"
+      },
+      "info": {
+        "en": "sacred city on the shores of the Arabian Sea. In the Mahabharata and other ancient texts, it is described as a flourishing kingdom of Lord Krishna, created overnight and designed to protect the inhabitants of Mathura from demon raids.\n\nThe legendary Dvaraka after Krishna left this world was swallowed up by the ocean, but now there is a small town with the same name on the coast - also quite ancient by European standards. Archaeological evidence confirms that at least six settlements existed on this site, which, one after the other, went into oblivion, swallowed up by time and the sea.\n\nFor many years, Dvaraka was considered a mythical kingdom, until in 1982. Indian doctor Rao as a result of an underwater expedition did not discover the remains of an ancient kingdom. The approximate age of the found city is 12 thousand years.\n\nNow it is one of the four holiest places dedicated to Lord Vishnu (Krishna) and one of the main centers of pilgrimage with a rich history and spiritual traditions.",
+        "hi": "द्वारका अरब सागर के किनारे स्थित एक पवित्र नगर है। महाभारत और अन्य प्राचीन ग्रंथों में इसे भगवान कृष्ण के समृद्ध राज्य के रूप में वर्णित किया गया है। द्वारका भगवान कृष्ण के निवास स्थान के रूप में एक प्रमुख तीर्थ स्थल है।",
+        "ru": "священный город на берегу Аравийского моря. В Махабхарате и других древних текстах он описывается как процветающее королевство Господа Кришны, созданное за одну ночь и призванное защитить жителей Матхуры от набегов демонов.\n\nЛегендарная Дварака после ухода Кришны из этого мира была затоплена. Сегодня на побережье стоит небольшой город с тем же названием - по европейским меркам тоже довольно древний. Археологические свидетельства подтверждают, что на этом месте существовало как минимум шесть поселений, которые одно за другим уходили в небытие, поглощаемые временем и морем. \n\nМногие годы Дварака считалась мифическим королевством, пока в 1982г. индийский доктор Рао в результате подводной экспедиции не обнаружил остатки древнего царства. Примерный возраст найденного города – 12 тыс. лет.\n\nСейчас это одно из четырех самых святых мест, посвященных Господу Вишну (Кришне) и один из главных центров паломничества с богатой историей и духовными традициями.\n"
+      },
+      "spots_count": 17,
+      "routes_count": 0,
+      "events_count": 0,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//f63eaff9f99c4a94955a833f0610c28a.jpg"
+      ]
+    },
+    {
+      "id": "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+      "name": {
+        "en": "Rishikesh",
+        "hi": "ऋषिकेश",
+        "ru": "Ришикеш"
+      },
+      "info": {
+        "en": "serene spiritual hub in Uttarakhand, India, known as the 'Yoga Capital of the World'. Situated on the banks of the sacred Ganges River and surrounded by lush Himalayan foothills, it attracts seekers of peace and adventure alike. The city is famous for its ashrams, yoga centers, and the iconic Laxman Jhula and Ram Jhula suspension bridges. Rishikesh is also a gateway to the Char Dham pilgrimage and a popular spot for white-water rafting. Its tranquil atmosphere and spiritual energy make it a perfect retreat for meditation and self-discovery.",
+        "hi": "ऋषिकेश उत्तराखंड, भारत में एक शांत आध्यात्मिक केंद्र है, जिसे 'योग की राजधानी' के रूप में जाना जाता है। पवित्र गंगा नदी के तट पर स्थित और हरे-भरे हिमालय की तलहटी से घिरा यह स्थान शांति और रोमांच दोनों की तलाश करने वालों को आकर्षित करता है। यह शहर अपने आश्रमों, योग केंद्रों और प्रतिष्ठित लक्ष्मण झूला व राम झूला पुलों के लिए प्रसिद्ध है। ऋषिकेश चार धाम यात्रा का प्रवेश द्वार भी है और व्हाइट-वाटर राफ्टिंग के लिए एक लोकप्रिय स्थान है। इसकी शांत वातावरण और आध्यात्मिक ऊर्जा इसे ध्यान और आत्म-खोज के लिए एक आदर्श स्थान बनाती है।",
+        "ru": "духовный центр в индийском штате Уттаракханд, известный как 'Мировая столица йоги'. Расположенный на берегах священной Ганги и окружённый зелёными предгорьями Гималаев, он привлекает искателей покоя и любителей приключений. Город славится ашрамами, центрами йоги и знаменитыми подвесными мостами Лакшман-Джула и Рам-Джула. Ришикеш также служит отправной точкой паломничества Чар-Дхам и популярен для рафтинга. Его умиротворённая атмосфера и духовная энергия делают его идеальным местом для медитации и самопознания."
+      },
+      "spots_count": 17,
+      "routes_count": 0,
+      "events_count": 3,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//d2f6ed8abc544e3e8e42e121cdf44363.jpg"
+      ]
+    },
+    {
+      "id": "c11c1557-daa3-43a1-8cef-337cba6e6c09",
+      "name": {
+        "en": "Ekachakra",
+        "hi": "एकचक्र",
+        "ru": "Экачакра"
+      },
+      "info": {
+        "en": "small village, located 20 km away from the town of Rampurhat in the Birbhum District of West Bengal. The five Pandavas from the epic, Mahabharata are described as staying in Ekachakra during their years in exile. It is also famous as the birthplace of Nityananda Rama, a principal religious figure in the Gaudiya Vaishnava tradition.",
+        "hi": "एक छोटा सा गाँव है, जो पश्चिम बंगाल के बीरभूम जिले में रामपुरहाट नगर से 20 किमी दूर स्थित है। महाभारत के अनुसार, पाँच पांडव अपने वनवास के समय एकचक्र में रहे थे। यह गाँव नित्यानंद राम के जन्मस्थान के रूप में भी प्रसिद्ध है, जो गौड़ीय वैष्णव परंपरा के एक प्रमुख धार्मिक व्यक्ति थे।",
+        "ru": "небольшая деревня, расположенная в 20 км. от города Рампурат в Западной Бенгалии. В этом месте, согласно древнему эпосу Махабхарата, во время своего изгнания проживали пять братьев Пандавов. Так же это место знаменито как место рождения Шри Нитьянанды."
+      },
+      "spots_count": 21,
+      "routes_count": 0,
+      "events_count": 0,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//a4943d99e1bf439ab211a391658544ce.jpg"
+      ]
+    },
+    {
+      "id": "7d31f79d-b528-4887-952a-3bfb26d4f0fe",
+      "name": {
+        "en": "Devprayag",
+        "hi": "देवप्रयाग",
+        "ru": "Девапрайяг"
+      },
+      "info": {
+        "en": "scenic town in Uttarakhand, India, where the sacred Alaknanda and Bhagirathi rivers merge to form the Ganges. It is an important pilgrimage site, surrounded by majestic mountains and lush valleys. The town is famous for the ancient Raghunath Temple, dedicated to Lord Rama. Devprayag is renowned for its spiritual aura and breathtaking natural beauty. It’s a perfect destination for those seeking peace and a connection with nature.",
+        "hi": "उत्तराखंड का एक मनोरम शहर है, जहाँ पवित्र अलकनंदा और भागीरथी नदियाँ मिलकर गंगा नदी का निर्माण करती हैं। यह एक महत्वपूर्ण तीर्थ स्थल है, जो ऊँचे पहाड़ों और हरी-भरी घाटियों से घिरा हुआ है। यहाँ प्राचीन रघुनाथ मंदिर स्थित है, जो भगवान राम को समर्पित है। देवप्रयाग अपनी आध्यात्मिक छवि और प्राकृतिक सुंदरता के लिए प्रसिद्ध है। यह शांति और प्रकृति से जुड़ने की तलाश करने वालों के लिए एक आदर्श स्थान है।",
+        "ru": "живописный город в индийском штате Уттаракханд, место слияния священных рек Алакнанда и Бхагиратхи, образующих Ганг. Это важный паломнический центр, окружённый величественными горами и зелеными долинами. Город известен древним храмом Рагхунатх, посвящённым Господу Раме. Девапрайяг славится духовной атмосферой и потрясающими природными пейзажами. Это идеальное место для тех, кто ищет умиротворение и связь с природой."
+      },
+      "spots_count": 2,
+      "routes_count": 0,
+      "events_count": 0,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//c2ebcc6b31fa424b9008b4a1348875fe.jpg"
+      ]
+    },
+    {
+      "id": "d6da9ad3-ad0e-45b1-9e45-cad573cb9907",
+      "name": {
+        "en": "Angkor-Wat",
+        "hi": "अंकोर-वाट मंदिर",
+        "ru": "Ангкор-Ват"
+      },
+      "info": {
+        "en": "largest religious monument in the world, located in Siem Reap, Cambodia. Built in the 12th century as a Hindu temple dedicated to Vishnu, it later transformed into a Buddhist site. This architectural masterpiece is renowned for its grand scale, intricate bas-reliefs, and iconic lotus-shaped towers. Surrounded by a vast moat, Angkor Wat symbolizes Mount Meru, the center of the universe in Hindu and Buddhist cosmology. A UNESCO World Heritage Site, it remains one of the most awe-inspiring ancient wonders and a must-visit destination in Southeast Asia.",
+        "hi": "अंगकोर वाट कंबोडिया के सिएम रीप में स्थित दुनिया का सबसे बड़ा धार्मिक स्मारक है। 12वीं शताब्दी में विष्णु को समर्पित एक हिंदू मंदिर के रूप में बनाया गया, यह बाद में एक बौद्ध स्थल में परिवर्तित हो गया। यह वास्तुशिल्प उत्कृष्टता अपने विशाल पैमाने, जटिल मूर्तियों और प्रतिष्ठित कमल के आकार के टावरों के लिए प्रसिद्ध है। एक विशाल खाई से घिरा, अंगकोर वाट हिंदू और बौद्ध पौराणिक कथाओं में ब्रह्मांड के केंद्र माउंट मेरु का प्रतीक है। यूनेस्को की विश्व धरोहर स्थल, यह सबसे प्रभावशाली प्राचीन अजूबों में से एक और दक्षिण पूर्व एशिया में अवश्य देखने योग्य स्थान है।",
+        "ru": "крупнейший религиозный памятник в мире, расположенный в Сиемреапе (Камбоджа). Построенный в XII веке как индуистский храм, посвящённый Вишну, он позже стал буддийским святилищем. Этот архитектурный шедевр славится грандиозными масштабами, изысканными барельефами и узнаваемыми лотосообразными башнями. Окружённый огромным рвом, Ангкор-Ват символизирует гору Меру — центр вселенной в индуистской и буддийской космологии. Объект ЮНЕСКО остаётся одним из самых впечатляющих древних чудес света и обязательным к посещению в Юго-Восточной Азии."
+      },
+      "spots_count": 91,
+      "routes_count": 1,
+      "events_count": 1,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//001angkorwat.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//824464d36cb14b509a4f27624c890d58.jpg"
+      ]
+    },
+    {
+      "id": "2acf4181-97e0-47e5-8856-49f92c4f377a",
+      "name": {
+        "en": "Nabadwip",
+        "hi": "नबद्वीप",
+        "ru": "Навадвипа"
+      },
+      "info": {
+        "en": "originally Naodah (ˌnæbəˈdwi:p), city, a municipality in Nadia district in West Bengal (India), on the western bank of the Bhagirathi river. It was a center of learning and philosophy in medieval India and is still noted for its traditional Sanskrit schools. The Navya Nyaya school of logic was reached its peak under the philosophers of Nabadwip. Sri Chaitanya Mahaprabhu was born here, making this place an important pilgrimage centre in Bengal. Many devotees from worldwide who adhere to Gaudiya Vaishnavism come to Nabadwip for pilgrimage on the auspicious occasion of the Birthday celebration of Shri Mahaprabhu on the Phalguni Purnima (i.e. on the Full moon day of the March every year), and for various festivals in relation to Leelas of Shri Mahaprabhu like Sri Nabadwip-mandala Parikrama and other festivities like Dol jatra, Ras purnima Gaura-purnima.",
+        "hi": " भारत के पश्चिम बंगाल में नदिया जिले में स्थित एक नगर और नगरपालिका है, जो भागीरथी नदी के पश्चिमी किनारे पर है। यह मध्यकालीन भारत में एक महत्वपूर्ण शिक्षा और दर्शन का केंद्र था और आज भी इसके पारंपरिक संस्कृत विद्यालयों के लिए प्रसिद्ध है। नव्य न्याय स्कूल का चरम विकास नबद्वीप के दार्शनिकों के तहत हुआ। श्री चैतन्य महाप्रभु का जन्म यहीं हुआ था, जिससे यह स्थान बंगाल में एक महत्वपूर्ण तीर्थ स्थल बन गया। वैश्णव धर्म के अनुयायी यहां श्री महाप्रभु के जन्मदिन समारोह और अन्य उत्सवों के लिए आते हैं।",
+        "ru": "город в округе Надия индийского штата Западная Бенгалия. Также — историческая область в месте слияния рек Ганги и Джаланги, с центром в городе Навадвипа. «Навадвипа» в переводе с бенгальского языка означает «девять островов». Эти острова называются Антардвипа (Маяпур), Симантадвипа, Рудрадвипа, Мадхьядвипа, Годрумадвипа, Ритудвипа, Джахнудвипа, Модадрумадвипа и Коладвипа. Более 500 лет назад здесь прошли божественные игры Шри Чайтаньи Махапрабху. Ежегодно Навадвипу посещают множество паломников, приезжающих со всего мира. Особенной популярностью пользуется фестиваль Гаура-пурнима, накануне которого проводится Навадвипа-мандала-парикрама — паломничество по девяти островам Навадвипы"
+      },
+      "spots_count": 24,
+      "routes_count": 0,
+      "events_count": 0,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//003navadvip.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//607acf01b2dc41b3a8a215104b547bdd.jpg"
+      ]
+    },
+    {
+      "id": "f1cb69f7-d000-4ee6-9aca-fff18251e0f0",
+      "name": {
+        "en": "Badrinath",
+        "hi": "बद्रीनाथ",
+        "ru": "Бадринатх"
+      },
+      "info": {
+        "en": "sacred Hindu pilgrimage town nestled in the Garhwal Himalayas of Uttarakhand, India. It is one of the four Char Dham sites and is dedicated to Lord Vishnu in his Badrinarayan form. The town is famous for the ancient Badrinath Temple, surrounded by the stunning Neelkanth Peak and the Alaknanda River. Pilgrims visit this holy site to seek blessings and bathe in the Tapt Kund hot springs. Badrinath offers a serene spiritual experience amidst breathtaking mountain landscapes.",
+        "hi": "बद्रीनाथ भारत के उत्तराखंड राज्य में गढ़वाल हिमालय में स्थित एक पवित्र हिंदू तीर्थ स्थल है। यह चार धामों में से एक है और भगवान विष्णु के बद्रीनारायण रूप को समर्पित है। यह शहर प्राचीन बद्रीनाथ मंदिर के लिए प्रसिद्ध है, जो नीलकंठ चोटी और अलकनंदा नदी से घिरा हुआ है। तीर्थयात्री आशीर्वाद लेने और तप्त कुंड के गर्म झरनों में स्नान करने के लिए इस पवित्र स्थान पर आते हैं। बद्रीनाथ मनोरम पर्वतीय दृश्यों के बीच एक शांत आध्यात्मिक अनुभव प्रदान करता है।",
+        "ru": "священный город паломничества в Гархвальских Гималаях (Уттаракханд, Индия), входящий в Чар-Дхам. Он посвящён Господу Вишну в форме Бадринараяна. Главная достопримечательность — древний храм Бадринатха, окружённый величественной вершиной Нилкант и рекой Алакнанда. Паломники приезжают сюда за благословением и чтобы окунуться в горячие источники Тapt Кунд. Бадринатх дарует умиротворение и духовное просветление среди захватывающих горных пейзажей."
+      },
+      "spots_count": 5,
+      "routes_count": 0,
+      "events_count": 1,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//002badrinath.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//d1f55a058a7d495892313b9267d7d9c5.jpg"
+      ]
+    },
+    {
+      "id": "c6e79df0-a749-4865-95fc-b06d747c9966",
+      "name": {
+        "en": "Govardhan",
+        "hi": "जगन्नाथ पुरी",
+        "ru": "Говардхан"
+      },
+      "info": {
+        "en": "famous for the Holy Govardhan Hill. There are many temples in this town namely Shri Haridev ji Temple, Daan-Ghati Temple and Mukharbind Temple. The town is also famous for its 21 kilometers long Parikrama of the famous Govardhan hill. The parikrama procession is held in very high religious belief. It's said that Lord Krishna held Govardhan Hill on his little finger to save the town from wrath of the god of rains Indra.\n\nThe town also houses Maanasi-Ganga, a close-ended lake. This is another place for the devotees visiting this town. On the banks of this lake, there are quite a few temples, prominent among them the Mukharbind temple.\n\nOne of the most important day in Goverdhan is Guru Poornima (Also called \"Mudia Poono\"). On this day, Millions of devotees come to Govardhan for parikrama.",
+        "hi": "अपनी पवित्र गोवर्धन पहाड़ी के लिए प्रसिद्ध है। इस नगर में कई मंदिर हैं, जैसे श्री हरिदेव जी मंदिर, दान-घाटी मंदिर और मुखारबिंद मंदिर। यह नगर अपनी 21 किलोमीटर लंबी गोवर्धन पर्वत की परिक्रमा के लिए भी प्रसिद्ध है। परिक्रमा धार्मिक विश्वास के साथ की जाती है। ऐसा कहा जाता है कि भगवान कृष्ण ने अपनी छोटी उंगली पर गोवर्धन पर्वत को उठाया था ताकि नगर को बारिश के देवता इंद्र के क्रोध से बचाया जा सके।\nनगर में मानसी-गंगा भी है, जो एक बंद झील है। यह झील के किनारे पर कई मंदिर हैं, जिनमें प्रमुख है मुखारबिंद मंदिर।\nगोवर्धन का सबसे महत्वपूर्ण दिन गुरु पूर्णिमा (जिसे \"मुडिया पूनो\" भी कहा जाता है) है। इस दिन, लाखों भक्त गोवर्धन में परिक्रमा के लिए आते हैं।",
+        "ru": "Именно здесь находится святой Холм Говардхан, вокруг которого можно найти множество храмов, а так же совершить парикраму длиной в 21 км.  Одним из важных праздников в Говардхане является Гуру Пурнима, когда миллионы преданных приезжают сюда со всего мира."
+      },
+      "spots_count": 75,
+      "routes_count": 0,
+      "events_count": 2,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//3bbd77cc42a346e28c7ba7ac5d5fec91.jpg"
+      ]
+    },
+    {
+      "id": "f9284903-b9ed-464c-b7e5-6a4357d84d1c",
+      "name": {
+        "en": "Puri",
+        "hi": "जगन्नाथ पुरी",
+        "ru": "Джаганнатха Пури"
+      },
+      "info": {
+        "en": "city and a Municipality of Odisha. It is the district headquarters of Puri district, Odisha, eastern India. It is situated on the Bay of Bengal, 60 kilometres (37 mi) south of the state capital of Bhubaneswar. It is also known as Jagannath Puri after the 12th-century Jagannath Temple located in the city. It is one of the original Char Dham pilgrimage sites for Indian Hindus. ",
+        "hi": "पुरी ओडिशा का एक शहर और नगरपालिका है। यह ओडिशा के पुरी जिले का जिला मुख्यालय है, जो पूर्वी भारत में स्थित है। यह बंगाल की खाड़ी के किनारे, राज्य की राजधानी भुवनेश्वर से 60 किलोमीटर (37 मील) दक्षिण में स्थित है। इसे 12वीं सदी के जगन्नाथ मंदिर के कारण जगन्नाथ पुरी भी कहा जाता है। यह भारतीय हिंदुओं के चार धाम तीर्थ स्थलों में से एक है।\n",
+        "ru": "находится на расстоянии 60 км. от столицы штата Ориссы, города Бубанешвара. Город считается одним из четырех обязательных мест (дхам), которые должен посетить каждый хинду. Особенно Пури почитается у вайшнавов, как место, в котором господь Кришна присутствует в форме Джаганнатха, Господа Вселенной, а также является местом многих из игр Шри Чайтаньи Махапрабху. "
+      },
+      "spots_count": 29,
+      "routes_count": 0,
+      "events_count": 0,
+      "country": "5771970d-b118-4250-82f4-d0c395836c37",
+      "images": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//004puri.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//18217189c20741a39b951ea746582940.jpg"
+      ]
+    }
+  ]
+}

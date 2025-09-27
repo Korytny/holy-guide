@@ -62,7 +62,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         className="absolute inset-0 w-full h-full object-cover z-0"
         onError={(e) => console.error("Video failed to load", e)}
       >
-        <source src="/herovid.mp4" type="video/mp4" />
+        <source src="/earth2.mp4" type="video/mp4" />
         Your browser does not support the video tag.
       </video>
 

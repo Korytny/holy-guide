@@ -1,0 +1,82 @@
+{
+  "metadata": {
+    "table_name": "routes",
+    "backup_time": "2025-09-27 15:35:28",
+    "row_count": 2,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "21bb8d39-02da-41f0-bf17-1e139ac50f3c"
+      },
+      {
+        "column": "name",
+        "type": "JSON",
+        "sample": "{'en': 'Angkor Wat - journey', 'hi': 'नबद्वीप', 'r..."
+      },
+      {
+        "column": "info",
+        "type": "JSON",
+        "sample": "{'en': 'All Hindu temples have an entrance from th..."
+      },
+      {
+        "column": "images",
+        "type": "JSON",
+        "sample": "{'0': 'https://rxvckkqqunyqtxjyabub.supabase.co/st..."
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "21bb8d39-02da-41f0-bf17-1e139ac50f3c",
+      "name": {
+        "en": "Angkor Wat - journey",
+        "hi": "नबद्वीप",
+        "ru": "Путешествие по Ангкор Вату"
+      },
+      "info": {
+        "en": "All Hindu temples have an entrance from the east (along with the sun, creative energy enters the temple, harmonizing everything around). But the entrance to Angkor Wat is oriented towards the West!\" you will object. Not at all. The western gate was intended for foreign rulers, ambassadors and emissaries, as well as for laypeople during special ceremonies. Every day, the emperor, leaving the palace chambers on an elephant, made his way from the northern part of the complex to the eastern entrance of the main temple building. It is in the east, in the course of the movement of the sun, that the path of the royal pilgrimage begins. Bypassing the temple, the emperor bypassed the entire universe and the Guardian God Vishnu Himself.",
+        "hi": "सभी हिंदू मंदिरों में पूर्व से एक प्रवेश द्वार है (सूर्य के साथ, रचनात्मक ऊर्जा मंदिर में प्रवेश करती है, चारों ओर सब कुछ सामंजस्य करती है) ।  लेकिन अंगकोर वाट का प्रवेश द्वार पश्चिम की ओर उन्मुख है!\"आप आपत्ति करेंगे। बिल्कुल नहीं ।  पश्चिमी द्वार विदेशी शासकों, राजदूतों और दूतों के लिए था, साथ ही विशेष समारोहों के दौरान आम लोगों के लिए भी था ।  हर दिन, सम्राट, एक हाथी पर महल के कक्षों को छोड़कर, परिसर के उत्तरी भाग से मुख्य मंदिर भवन के पूर्वी प्रवेश द्वार तक अपना रास्ता बनाता था ।  यह पूर्व में है, सूर्य की गति के दौरान, शाही तीर्थयात्रा का मार्ग शुरू होता है ।  मंदिर को दरकिनार करते हुए, सम्राट ने पूरे ब्रह्मांड और स्वयं संरक्षक भगवान विष्णु को दरकिनार कर दिया ।",
+        "ru": "Во все индуистские храмы вход располагается с востока (вместе с солнцем в храм попадает созидательная энергия, гармонизируя всё вокруг). «Но вход в Ангкор-Ват ориентирован на запада!» — возразите вы. Вовсе нет. Западные ворота предназначались для иноземных правителей, послов и эмиссаров, а также для мирян во время особых церемоний. Ежедневно же император, покидая на слоне дворцовые палаты, из северной части комплекса держал путь к восточному входу главной храмовой постройки. Именно на востоке, по ходу движения солнца, начинается путь королевского паломничества. Обходя храм, император обходил всю Вселенную и Самого Бога-Хранителя Вишну."
+      },
+      "images": {
+        "0": "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//eb6ffa615996463daa6acba9f49c1529.jpg",
+        "1": "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//327d6c7611dc49c2b18b59f93c0fd569.jpg",
+        "2": "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//325d3a545e814b80b663e15a03f447b9.jpg",
+        "3": "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//ac023478e617406785ff0bcd2a92cca5.jpg",
+        "ru": [
+          "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//eb6ffa615996463daa6acba9f49c1529.jpg",
+          "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//327d6c7611dc49c2b18b59f93c0fd569.jpg",
+          "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//325d3a545e814b80b663e15a03f447b9.jpg",
+          "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//ac023478e617406785ff0bcd2a92cca5.jpg",
+          [
+            "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//eb6ffa615996463daa6acba9f49c1529.jpg",
+            "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//327d6c7611dc49c2b18b59f93c0fd569.jpg",
+            "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//325d3a545e814b80b663e15a03f447b9.jpg",
+            "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/holyspots//ac023478e617406785ff0bcd2a92cca5.jpg",
+            "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//108.jpg"
+          ],
+          "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/smbot//108.jpg"
+        ]
+      }
+    },
+    {
+      "id": "4c811c0d-52f3-4707-9c41-7800235f15b1",
+      "name": {
+        "en": "",
+        "hi": "",
+        "ru": "Говардан парикрама"
+      },
+      "info": {
+        "en": "",
+        "hi": "",
+        "ru": ""
+      },
+      "images": {
+        "en": "",
+        "hi": "",
+        "ru": ""
+      }
+    }
+  ]
+}

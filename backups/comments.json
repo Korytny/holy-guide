@@ -1,0 +1,97 @@
+{
+  "metadata": {
+    "table_name": "comments",
+    "backup_time": "2025-09-27 15:35:27",
+    "row_count": 4,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "c71c28e3-675b-4448-a98d-dcc2bd8708d0"
+      },
+      {
+        "column": "created_at",
+        "type": "str",
+        "sample": "2025-04-27T19:59:26.356231+00:00"
+      },
+      {
+        "column": "user_id",
+        "type": "str",
+        "sample": "99ed403f-eaa1-49da-8de0-f5d1f9290854"
+      },
+      {
+        "column": "entity_type",
+        "type": "str",
+        "sample": "city"
+      },
+      {
+        "column": "entity_id",
+        "type": "str",
+        "sample": "f1cb69f7-d000-4ee6-9aca-fff18251e0f0"
+      },
+      {
+        "column": "text",
+        "type": "str",
+        "sample": "Комментарий с фото"
+      },
+      {
+        "column": "updated_at",
+        "type": "str",
+        "sample": "2025-04-27T20:21:41.811+00:00"
+      },
+      {
+        "column": "photo_url",
+        "type": "Array",
+        "sample": "['https://rxvckkqqunyqtxjyabub.supabase.co/storage..."
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "c71c28e3-675b-4448-a98d-dcc2bd8708d0",
+      "created_at": "2025-04-27T19:59:26.356231+00:00",
+      "user_id": "99ed403f-eaa1-49da-8de0-f5d1f9290854",
+      "entity_type": "city",
+      "entity_id": "f1cb69f7-d000-4ee6-9aca-fff18251e0f0",
+      "text": "Комментарий с фото",
+      "updated_at": "2025-04-27T20:21:41.811+00:00",
+      "photo_url": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/comments/99ed403f-eaa1-49da-8de0-f5d1f9290854/c71c28e3-675b-4448-a98d-dcc2bd8708d0/c71c28e3-675b-4448-a98d-dcc2bd8708d0_1745784779322.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/comments/99ed403f-eaa1-49da-8de0-f5d1f9290854/c71c28e3-675b-4448-a98d-dcc2bd8708d0/c71c28e3-675b-4448-a98d-dcc2bd8708d0_1745785297584.jpg",
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/comments/99ed403f-eaa1-49da-8de0-f5d1f9290854/c71c28e3-675b-4448-a98d-dcc2bd8708d0/c71c28e3-675b-4448-a98d-dcc2bd8708d0_1745785297585.jpg"
+      ]
+    },
+    {
+      "id": "3dd15751-8ddc-4fb2-9cea-2e609eea4198",
+      "created_at": "2025-04-27T21:09:22.676773+00:00",
+      "user_id": "99ed403f-eaa1-49da-8de0-f5d1f9290854",
+      "entity_type": "route",
+      "entity_id": "21bb8d39-02da-41f0-bf17-1e139ac50f3c",
+      "text": "Комент про маршрут",
+      "updated_at": "2025-04-27T21:09:22.676773+00:00",
+      "photo_url": []
+    },
+    {
+      "id": "dc0d95f1-5996-486f-9fdb-89ae0a97f006",
+      "created_at": "2025-04-27T21:33:05.667005+00:00",
+      "user_id": "99ed403f-eaa1-49da-8de0-f5d1f9290854",
+      "entity_type": "event",
+      "entity_id": "e2590a3b-52ea-4550-8ec8-8db40becafa6",
+      "text": "Комент на событие",
+      "updated_at": "2025-04-27T21:33:05.667005+00:00",
+      "photo_url": [
+        "https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/comments/99ed403f-eaa1-49da-8de0-f5d1f9290854/dc0d95f1-5996-486f-9fdb-89ae0a97f006/dc0d95f1-5996-486f-9fdb-89ae0a97f006_1745789585377.jpg"
+      ]
+    },
+    {
+      "id": "afe24203-6593-40dd-8e44-160d7e8d9dd1",
+      "created_at": "2025-05-28T11:26:45.787783+00:00",
+      "user_id": "c793e0f2-076e-435d-b49b-df119dc6b5ed",
+      "entity_type": "city",
+      "entity_id": "88c07571-cf1c-49f5-ac64-48acbe212464",
+      "text": "Twice I have visited Haridwar. Be sure to feel the Ganga in the puja! It is unforgettable!",
+      "updated_at": "2025-05-28T11:26:45.787783+00:00",
+      "photo_url": []
+    }
+  ]
+}

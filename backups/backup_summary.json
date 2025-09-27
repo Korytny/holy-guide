@@ -1,0 +1,48 @@
+{
+  "project": "holyspots",
+  "discovery_method": "optimized",
+  "tables": {
+    "spots": {
+      "row_count": 396,
+      "file": "backups/holyspots_complete/spots.json",
+      "columns": 11
+    },
+    "profiles": {
+      "row_count": 6,
+      "file": "backups/holyspots_complete/profiles.json",
+      "columns": 8
+    },
+    "countries": {
+      "row_count": 2,
+      "file": "backups/holyspots_complete/countries.json",
+      "columns": 5
+    },
+    "cities": {
+      "row_count": 11,
+      "file": "backups/holyspots_complete/cities.json",
+      "columns": 8
+    },
+    "comments": {
+      "row_count": 4,
+      "file": "backups/holyspots_complete/comments.json",
+      "columns": 8
+    },
+    "comment_likes": {
+      "row_count": 1,
+      "file": "backups/holyspots_complete/comment_likes.json",
+      "columns": 3
+    },
+    "routes": {
+      "row_count": 2,
+      "file": "backups/holyspots_complete/routes.json",
+      "columns": 4
+    },
+    "events": {
+      "row_count": 9,
+      "file": "backups/holyspots_complete/events.json",
+      "columns": 13
+    }
+  },
+  "total_rows": 431,
+  "discovered_at": "2025-09-27 15:35:20"
+}

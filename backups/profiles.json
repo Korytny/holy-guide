@@ -1,0 +1,147 @@
+{
+  "metadata": {
+    "table_name": "profiles",
+    "backup_time": "2025-09-27 15:35:25",
+    "row_count": 6,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "42010cc3-be16-4808-86bb-f813997337c7"
+      },
+      {
+        "column": "full_name",
+        "type": "str",
+        "sample": "Елизавета Несова"
+      },
+      {
+        "column": "avatar_url",
+        "type": "str",
+        "sample": "https://lh3.googleusercontent.com/a/ACg8ocIk0o4rjs..."
+      },
+      {
+        "column": "updated_at",
+        "type": "str",
+        "sample": "2025-04-16T11:23:12.860476+00:00"
+      },
+      {
+        "column": "cities_like",
+        "type": "Array",
+        "sample": "['f1cb69f7-d000-4ee6-9aca-fff18251e0f0', '7d31f79d..."
+      },
+      {
+        "column": "routes_like",
+        "type": "Array",
+        "sample": "['21bb8d39-02da-41f0-bf17-1e139ac50f3c']"
+      },
+      {
+        "column": "events_like",
+        "type": "Array",
+        "sample": "['e2590a3b-52ea-4550-8ec8-8db40becafa6']"
+      },
+      {
+        "column": "places_like",
+        "type": "Array",
+        "sample": "['c1173edf-dbe1-4a91-88ed-da24ce98e5a8']"
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "42010cc3-be16-4808-86bb-f813997337c7",
+      "full_name": "Елизавета Несова",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocIk0o4rjs9VKCxdqcyqWQkT1RVKyiOmIss4Yo4i6mdm4ooFbCVX=s96-c",
+      "updated_at": "2025-04-16T11:23:12.860476+00:00",
+      "cities_like": [
+        "f1cb69f7-d000-4ee6-9aca-fff18251e0f0",
+        "7d31f79d-b528-4887-952a-3bfb26d4f0fe"
+      ],
+      "routes_like": [
+        "21bb8d39-02da-41f0-bf17-1e139ac50f3c"
+      ],
+      "events_like": [
+        "e2590a3b-52ea-4550-8ec8-8db40becafa6"
+      ],
+      "places_like": [
+        "c1173edf-dbe1-4a91-88ed-da24ce98e5a8"
+      ]
+    },
+    {
+      "id": "23e87683-2fd8-4c78-950a-7410fa1e61a4",
+      "full_name": "Makhonchor das",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocIMinQ1Y-Xa2oh0wTvfqmzb9-XXhRgIcpOa8gobCpnUBa57BXI=s96-c",
+      "updated_at": "2025-04-18T18:14:42.014767+00:00",
+      "cities_like": [
+        "2acf4181-97e0-47e5-8856-49f92c4f377a",
+        "f9284903-b9ed-464c-b7e5-6a4357d84d1c",
+        "c11c1557-daa3-43a1-8cef-337cba6e6c09",
+        "c6e79df0-a749-4865-95fc-b06d747c9966",
+        "bd5e679a-7efc-4c11-92f9-e687c4d86343"
+      ],
+      "routes_like": null,
+      "events_like": null,
+      "places_like": null
+    },
+    {
+      "id": "99ed403f-eaa1-49da-8de0-f5d1f9290854",
+      "full_name": "Евгений Корытный",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJjduVv86bQE8fHlvDBSox08spe9-OEqEOq_NzLXEOG6pw4w7bN=s96-c",
+      "updated_at": "2025-04-05T07:00:19.222173+00:00",
+      "cities_like": [
+        "d6da9ad3-ad0e-45b1-9e45-cad573cb9907",
+        "c6e79df0-a749-4865-95fc-b06d747c9966",
+        "bd5e679a-7efc-4c11-92f9-e687c4d86343",
+        "87c0d42b-daf1-4087-9ead-5c2359ea5b62",
+        "c11c1557-daa3-43a1-8cef-337cba6e6c09",
+        "f1cb69f7-d000-4ee6-9aca-fff18251e0f0"
+      ],
+      "routes_like": [
+        "21bb8d39-02da-41f0-bf17-1e139ac50f3c"
+      ],
+      "events_like": [
+        "e2590a3b-52ea-4550-8ec8-8db40becafa6"
+      ],
+      "places_like": [
+        "5608eb44-cf81-42d4-9939-0e05e4255f60",
+        "86c4c53a-bb36-49b8-9b98-8148246b1d5a",
+        "8ca30615-af39-4cb2-a8cc-ece4fa081f0a",
+        "9204e775-c4a8-4966-83bb-7cffbb4b9509",
+        "8b91e1a9-3d95-4e7b-8323-b8f79876c7c3"
+      ]
+    },
+    {
+      "id": "99fff613-abae-45f8-83f8-0b30fed08d49",
+      "full_name": "Александр Novelty",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocL7T2RPszyJPiNx6aGVqQ7hFoF3iNfPuEKX1DL3mFw_K-ef85tE=s96-c",
+      "updated_at": "2025-04-13T13:57:26.113539+00:00",
+      "cities_like": [
+        "d6da9ad3-ad0e-45b1-9e45-cad573cb9907"
+      ],
+      "routes_like": null,
+      "events_like": null,
+      "places_like": null
+    },
+    {
+      "id": "c793e0f2-076e-435d-b49b-df119dc6b5ed",
+      "full_name": "Йоги в Дороге",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJo5JZ5sVRBfaKhbASJrZrkcF8Tmu45sHu6Dpg2v4KUQfigYlzZ=s96-c",
+      "updated_at": "2025-05-28T11:24:14.177491+00:00",
+      "cities_like": null,
+      "routes_like": null,
+      "events_like": null,
+      "places_like": null
+    },
+    {
+      "id": "04f3c837-93fa-42a9-aecd-bff867910582",
+      "full_name": "Даниял",
+      "avatar_url": "https://lh3.googleusercontent.com/a/ACg8ocJor8VBqqdDzqqRB4LDlvhLobDqgZuFGQhj-adLUaH31xo_=s96-c",
+      "updated_at": "2025-06-03T13:41:54.632743+00:00",
+      "cities_like": [
+        "c11c1557-daa3-43a1-8cef-337cba6e6c09"
+      ],
+      "routes_like": null,
+      "events_like": null,
+      "places_like": null
+    }
+  ]
+}

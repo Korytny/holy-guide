@@ -1,0 +1,62 @@
+{
+  "metadata": {
+    "table_name": "countries",
+    "backup_time": "2025-09-27 15:35:26",
+    "row_count": 2,
+    "structure": [
+      {
+        "column": "id",
+        "type": "str",
+        "sample": "5771970d-b118-4250-82f4-d0c395836c37"
+      },
+      {
+        "column": "name",
+        "type": "JSON",
+        "sample": "{'en': 'India', 'hi': 'भारत', 'ru': 'Индия'}"
+      },
+      {
+        "column": "info",
+        "type": "JSON",
+        "sample": "{'ru': ''}"
+      },
+      {
+        "column": "images",
+        "type": "Array",
+        "sample": "[]"
+      },
+      {
+        "column": "cities_count",
+        "type": "int",
+        "sample": "0"
+      }
+    ]
+  },
+  "data": [
+    {
+      "id": "5771970d-b118-4250-82f4-d0c395836c37",
+      "name": {
+        "en": "India",
+        "hi": "भारत",
+        "ru": "Индия"
+      },
+      "info": {
+        "ru": ""
+      },
+      "images": [],
+      "cities_count": 0
+    },
+    {
+      "id": "1a78054a-6e82-4dc1-9166-82e5a4c6d681",
+      "name": {
+        "en": "Cambodia",
+        "hi": "कंबोडिया",
+        "ru": "Камбоджа"
+      },
+      "info": {
+        "ru": ""
+      },
+      "images": [],
+      "cities_count": 0
+    }
+  ]
+}

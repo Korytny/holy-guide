@@ -1,0 +1,31 @@
+{
+  "metadata": {
+    "table_name": "comment_likes",
+    "backup_time": "2025-09-27 15:35:28",
+    "row_count": 1,
+    "structure": [
+      {
+        "column": "user_id",
+        "type": "str",
+        "sample": "99ed403f-eaa1-49da-8de0-f5d1f9290854"
+      },
+      {
+        "column": "comment_id",
+        "type": "str",
+        "sample": "c71c28e3-675b-4448-a98d-dcc2bd8708d0"
+      },
+      {
+        "column": "created_at",
+        "type": "str",
+        "sample": "2025-04-27T22:14:07.620996+00:00"
+      }
+    ]
+  },
+  "data": [
+    {
+      "user_id": "99ed403f-eaa1-49da-8de0-f5d1f9290854",
+      "comment_id": "c71c28e3-675b-4448-a98d-dcc2bd8708d0",
+      "created_at": "2025-04-27T22:14:07.620996+00:00"
+    }
+  ]
+}
