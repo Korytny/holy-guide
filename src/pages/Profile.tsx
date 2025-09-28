@@ -8,6 +8,7 @@ import ProfileHeader from "../components/profile/ProfileHeader";
 import FavoritesSection from "../components/profile/FavoritesSection";
 import UserCommentsSection from "../components/profile/UserCommentsSection";
 import { PilgrimagePlanner } from "../components/profile/PilgrimagePlanner";
+import { GuruPlanner } from "../components/profile/GuruPlanner";
 // PilgrimageRouteMap and PlannedItem imports are no longer needed here
 
 interface FavoriteCounts {
@@ -86,6 +87,14 @@ const Profile = () => {
             // onItemsChange is no longer needed
           />
           {/* PilgrimageRouteMap is no longer rendered here directly */}
+        </div>
+        <div className="mt-8">
+          <h2 className="text-xl font-semibold mb-4">{t('guru_planner_main_title')}</h2>
+          <GuruPlanner 
+            auth={authContextValue} 
+            language={language} 
+            t={t} 
+          />
         </div>
         <div className="mt-10"> {/* Added wrapper with margin-top */}
           <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />

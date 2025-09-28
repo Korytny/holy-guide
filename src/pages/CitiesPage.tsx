@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react'; // Import useRef
+import { useEffect, useState } from 'react';
 import { getCities } from '../services/api';
 import { City, Language } from '../types';
 import CityCard from '../components/CityCard';
@@ -13,7 +13,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { getLocalizedText } from '../utils/languageUtils';
 import { motion } from 'framer-motion';
 import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner';
-import { GuruPlanner } from '../components/profile/GuruPlanner'; // Import GuruPlanner
 import { AnimatedText } from '@/components/ui/animated-underline-text-one'; // Import AnimatedText
 import { WordPullUp } from '@/components/ui/word-pull-up';
 
@@ -28,9 +27,7 @@ const CitiesPage = () => {
   const [imageCloudItems, setImageCloudItems] = useState<ImageCloudItem[]>([]);
   const isCloudLoading = areCitiesLoading;
 
-  const guruSectionRef = useRef<HTMLDivElement>(null); // Ref for Guru section
-  const [isGuruSectionInView, setIsGuruSectionInView] = useState(false); // State to track if Guru section is in view
-
+  
   // heroText can be removed if not used elsewhere or defined locally in HeroSection
 
   useEffect(() => {
@@ -97,23 +94,7 @@ const CitiesPage = () => {
           isCloudLoading={isCloudLoading}
         />
       </div>
-      {/* Guru Planner Section - Added below Hero */}
-      <div ref={guruSectionRef} className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8"> {/* Attach ref to Guru section container */}
-        <section aria-labelledby="guru-planner-heading" className="mb-12">
-          <div className="text-center mt-20 mb-20">
-            <WordPullUp
-              className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white"
-              words={t('guru_planner_main_title', { defaultValue: 'Spiritual Event Guide' })}
-            />
-          </div>
-          <GuruPlanner
-            auth={authContext}
-            language={language}
-            t={t}
-          />
-        </section>
-      </div>
-
+      
       {/* Existing Cities List Section */}
       <div className="bg-gradient-to-b from-orange-50 to-orange-100 py-8 px-4 sm:px-6 lg:px-8">
         <div className="max-w-7xl mx-auto">
