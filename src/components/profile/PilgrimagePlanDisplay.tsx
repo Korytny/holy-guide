@@ -1,10 +1,10 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, DroppableProvided } from 'react-beautiful-dnd'; 
 import { Language, PlannedItem, City, Place, Event, Route } from '../../types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, GripVertical } from 'lucide-react';
+import { Trash2, PlusCircle, GripVertical, Search, Dice5 } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { cn } from '@/lib/utils';
 
@@ -15,6 +15,8 @@ interface PilgrimagePlanDisplayProps {
   onUpdateDateTime: (itemToUpdate: PlannedItem, date?: string, time?: string) => void;
   onRemoveItem: (itemToRemove: PlannedItem) => void;
   onAddPlacesForCity?: (cityId: string) => void;
+  onSearchAndAddPlace?: (cityId: string, searchTerm: string) => Promise<Place[]>;
+  onAddSpecificPlace?: (place: Place, cityId: string) => void;
   onReorderItems: (reorderedItems: PlannedItem[]) => void; 
 }
 
@@ -30,8 +32,18 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   onUpdateDateTime,
   onRemoveItem,
   onAddPlacesForCity,
+  onSearchAndAddPlace,
+  onAddSpecificPlace,
   onReorderItems,
 }) => {
+  const searchTimeout = useRef<NodeJS.Timeout>();
+  const [searchResultsForCity, setSearchResultsForCity] = useState<Record<string, Place[]>>({});
+
+  const existingPlaceIds = useMemo(() => new Set(
+    plannedItems
+      .filter(item => item.type === 'place')
+      .map(item => item.data.id)
+  ), [plannedItems]);
 
   const groupedItems = useMemo(() => {
     const groups: PlanGroup[] = [];
@@ -58,6 +70,15 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
       childItems: (itemMap.get(group.cityItem.data.id) || []).sort((a,b) => a.orderIndex - b.orderIndex)
     })).filter(group => group.cityItem && group.cityItem.data); // Ensure cityItem and its data exist
   }, [plannedItems]);
+
+  // Cleanup timeout on component unmount
+  React.useEffect(() => {
+    return () => {
+      if (searchTimeout.current) {
+        clearTimeout(searchTimeout.current);
+      }
+    };
+  }, []);
 
   const handleOnDragEnd = (result: DropResult) => {
     const { source, destination, type } = result;
@@ -135,37 +156,141 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                         {...providedCity.draggableProps} 
                         className="mb-2 border rounded-md shadow-sm"
                       >
-                        <div {...providedCity.dragHandleProps} className="flex items-center p-2 bg-blue-50 hover:bg-blue-100 cursor-grab rounded-t-md">
-                          <GripVertical size={20} className="text-gray-500 mr-2" />
-                          <span className="font-semibold text-blue-700">
-                            <Link 
-                              to={`/cities/${group.cityItem.data.id}`}
-                              target="_blank"
-                              className="hover:underline"
-                            >
-                              {getLocalizedText((group.cityItem.data as City).name, language)}
-                            </Link>
-                          </span>
-                          {onAddPlacesForCity && (
+                        <div className="flex items-center justify-between p-2 bg-blue-50 hover:bg-blue-100 rounded-t-md">
+                          <div className="flex items-center flex-1 gap-3">
+                            <div {...providedCity.dragHandleProps} className="cursor-grab">
+                              <GripVertical size={20} className="text-gray-500" />
+                            </div>
+                            <span className="font-semibold text-blue-700">
+                              <Link 
+                                to={`/cities/${group.cityItem.data.id}`}
+                                target="_blank"
+                                className="hover:underline"
+                              >
+                                {getLocalizedText((group.cityItem.data as City).name, language)}
+                              </Link>
+                            </span>
+                            
+                            {onSearchAndAddPlace && onAddSpecificPlace && (
+                              <>
+                              <div className="relative flex-1 max-w-xs">
+                                <div className="flex items-center">
+                                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" size={16} />
+                                  <Input
+                                    type="text"
+                                    placeholder={t('search_places_placeholder')}
+                                    className="pl-9 w-full text-sm h-8"
+                                    onChange={(e) => {
+                                      const searchTerm = e.target.value;
+                                      
+                                      if (searchTimeout.current) {
+                                        clearTimeout(searchTimeout.current);
+                                      }
+                                      
+                                      searchTimeout.current = setTimeout(async () => {
+                                        if (searchTerm.trim()) {
+                                          const results = await onSearchAndAddPlace(group.cityItem.data.id, searchTerm);
+                                          setSearchResultsForCity(prev => ({ ...prev, [group.cityItem.data.id]: results }));
+                                        } else {
+                                          setSearchResultsForCity(prev => ({ ...prev, [group.cityItem.data.id]: [] }));
+                                        }
+                                      }, 300);
+                                    }}
+                                  />
+                                </div>
+                                
+                                {searchResultsForCity[group.cityItem.data.id]?.length > 0 && (
+                                  <div className="absolute top-full left-0 right-0 mt-1 w-full bg-white border border-gray-200 rounded-lg shadow-lg z-50 max-h-60 overflow-y-auto">
+                                    {searchResultsForCity[group.cityItem.data.id]
+                                      .filter(place => !existingPlaceIds.has(place.id))
+                                      .map((place) => (
+                                        <div
+                                          key={place.id}
+                                          className="p-3 hover:bg-gray-50 border-b last:border-b-0 cursor-pointer transition-colors"
+                                          onClick={() => {
+                                            onAddSpecificPlace!(place, group.cityItem.data.id);
+                                            // Очищаем поиск и результаты
+                                            const inputs = document.querySelectorAll('input');
+                                            inputs.forEach(input => {
+                                              if (input.placeholder?.includes('Search') || input.placeholder?.includes('search')) {
+                                                input.value = '';
+                                              }
+                                            });
+                                            setSearchResultsForCity(prev => ({ ...prev, [group.cityItem.data.id]: [] }));
+                                          }}
+                                        >
+                                          <div className="flex items-start gap-2 mb-1">
+                                            <div className={`w-2 h-2 rounded-full flex-shrink-0 mt-1.5 ${
+                                              place.type === 1 ? "bg-blue-500" :
+                                              place.type === 2 ? "bg-red-500" :
+                                              place.type === 3 ? "bg-green-500" :
+                                              place.type === 4 ? "bg-yellow-500" :
+                                              "bg-indigo-500"
+                                            }`}></div>
+                                            <div className="flex-1">
+                                              <div className={`text-sm font-medium ${
+                                                place.type === 1 ? "text-blue-700" :
+                                                place.type === 2 ? "text-red-700" :
+                                                place.type === 3 ? "text-green-700" :
+                                                place.type === 4 ? "text-yellow-700" :
+                                                "text-indigo-700"
+                                              }`}>
+                                                {getLocalizedText(place.name, language)}
+                                              </div>
+                                              {place.type && (
+                                                <div className="text-xs text-gray-500 mt-0.5">
+                                                  {t(`place_type_${
+                                                    place.type === 1 ? 'temple' :
+                                                    place.type === 2 ? 'samadhi' :
+                                                    place.type === 3 ? 'kunda' :
+                                                    place.type === 4 ? 'sacred_site' : ''
+                                                  }`)}
+                                                </div>
+                                              )}
+                                            </div>
+                                          </div>
+                                          {place.description && (
+                                            <p className="text-xs text-gray-600 ml-4 line-clamp-2">
+                                              {getLocalizedText(place.description, language)}
+                                            </p>
+                                          )}
+                                          {place.rating && (
+                                            <div className="text-xs text-gray-500 ml-4 mt-1">
+                                              ⭐ {place.rating}
+                                            </div>
+                                          )}
+                                        </div>
+                                      ))}
+                                  </div>
+                                )}
+                              </div>
+                              </>
+                            )}
+                          </div>
+                          
+                          <div className="flex items-center gap-1">
+                            {onAddPlacesForCity && (
+                              <Button 
+                                  variant="ghost" 
+                                  size="icon" 
+                                  onClick={() => onAddPlacesForCity!(group.cityItem.data.id)} 
+                                  className="text-blue-600 hover:text-blue-800 h-8 w-8"
+                                  title={t('add_random_place_for_city_tooltip', {defaultValue: 'Add random place for this city'})}
+                              >
+                                  <Dice5 size={18} />
+                              </Button>
+                            )}
+                            
                             <Button 
-                                variant="ghost" 
-                                size="icon" 
-                                onClick={() => onAddPlacesForCity!(group.cityItem.data.id)} 
-                                className="ml-auto text-green-600 hover:text-green-800 h-7 w-7"
-                                title={t('add_places_for_city_tooltip', {defaultValue: 'Add places for this city'})}
-                            >
-                                <PlusCircle size={18} />
-                            </Button>
-                          )}
-                           <Button 
                               variant="ghost" 
                               size="icon" 
                               onClick={() => onRemoveItem(group.cityItem)} 
-                              className="ml-1 text-red-500 hover:text-red-700 h-7 w-7"
+                              className="text-red-500 hover:text-red-700 h-8 w-8"
                               title={t('remove_item_tooltip', {defaultValue: 'Remove city from plan'})}
-                          >
+                            >
                               <Trash2 size={18} />
-                          </Button>
+                            </Button>
+                          </div>
                         </div>
 
                         <Droppable droppableId={group.cityItem.data.id} type="ITEM_IN_CITY">
@@ -181,14 +306,29 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                         {...providedItem.draggableProps} 
                                         className="flex items-center p-1.5 mb-1 bg-gray-50 hover:bg-gray-100 rounded shadow-xs"
                                       >
-                                        <div {...providedItem.dragHandleProps} className="cursor-grab pr-2">
+                                        <div {...providedItem.dragHandleProps} className="cursor-grab pr-3 flex items-center">
                                           <GripVertical size={16} className="text-gray-400" />
                                         </div>
-                                        <div className="flex-grow">
+                                        <div className="flex-grow pl-1">
                                           <Link 
                                             to={`/${item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
                                             target="_blank"
-                                            className="text-sm text-gray-700 hover:text-gray-900 hover:underline"
+                                            className={cn(
+                                              "text-sm hover:underline",
+                                              item.type === 'place' ? (() => {
+                                                const place = item.data as Place;
+                                                if (!place.type) return "text-gray-600 hover:text-gray-800";
+                                                switch(place.type) {
+                                                  case 1: return "text-blue-600 hover:text-blue-800"; // temple
+                                                  case 2: return "text-red-600 hover:text-red-800"; // samadhi
+                                                  case 3: return "text-green-600 hover:text-green-800"; // kunda
+                                                  case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
+                                                  default: return "text-indigo-600 hover:text-indigo-800";
+                                                }
+                                              })() :
+                                              item.type === 'route' ? "text-green-600 hover:text-green-800" :
+                                              "text-purple-600 hover:text-purple-800"
+                                            )}
                                           >
                                             {getLocalizedText((item.data as Place | Route | Event).name, language)}
                                           </Link>

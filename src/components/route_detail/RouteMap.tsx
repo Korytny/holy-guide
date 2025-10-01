@@ -30,9 +30,19 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
     if (process.env.NODE_ENV === 'development') {
       console.debug('Valid places for map:', validPlaces);
     }
-    const polylinePoints = validPlaces
-        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity))
+    const sortedPlaces = validPlaces
+        .sort((a, b) => (a.order ?? Infinity) - (b.order ?? Infinity));
+    
+    const polylinePoints = sortedPlaces
         .map(place => [place.location.latitude, place.location.longitude] as [number, number]);
+    
+    if (process.env.NODE_ENV === 'development') {
+      console.debug('🗺️ Sorted places for polyline:', sortedPlaces.map(p => ({
+        name: p.name,
+        order: p.order,
+        coordinates: [p.location.latitude, p.location.longitude]
+      })));
+    }
 
     if (places.length === 0) {
         return null; // Don't render map if no places

@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(env:*)",
+      "Read(//Users/pele/**)",
+      "Read(//usr/local/lib/node_modules/@anthropic-ai/claude-code/**)",
+      "Bash(brew install:*)",
+      "Bash(HOMEBREW_NO_AUTO_UPDATE=1 brew install:*)",
+      "Bash(sed:*)",
+      "Bash(python3:*)",
+      "Bash(npm run build:*)",
+      "Bash(git checkout:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}

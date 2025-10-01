@@ -28,12 +28,12 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
         return false;
       }
     })
-    .map((item, index) => {
+    .map((item) => {
       try {
         const placeData = item.data as PlaceType;
         return {
           ...placeData,
-          order: placeData.order ?? item.order ?? index,
+          order: item.orderIndex, // Используем orderIndex из PlannedItem для правильной сортировки
         };
       } catch (e) {
         console.error('Error mapping place item:', item, e);
@@ -41,6 +41,15 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
       }
     })
     .filter(Boolean) as PlaceType[];
+
+  // Логируем порядок мест для маршрута
+  if (process.env.NODE_ENV === 'development') {
+    console.log('📍 Places for route (sorted by orderIndex):', placesForRoute.map(p => ({
+      name: p.name,
+      order: p.order,
+      coordinates: [p.location?.latitude, p.location?.longitude]
+    })));
+  }
 
   useEffect(() => {
     // Create a string representation of essential parts of plannedItems for comparison.

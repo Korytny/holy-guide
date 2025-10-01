@@ -9,10 +9,12 @@ import { getEvents } from "../../services/eventsApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api'; 
 import { supabase } from '../../integrations/supabase/client';
+import { getLocalizedText } from '../../utils/languageUtils';
 
 import { PilgrimagePlannerControls, PlaceSubtype, EventSubtype } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
 import PilgrimageRouteMap from "./PilgrimageRouteMap";
+import { FilteredResults } from "./FilteredResults";
 
 const placeTypeNumberToSubtypeString: Record<number, PlaceSubtype | undefined> = {
   1: 'temple',
@@ -58,8 +60,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [currentLoadedGoalId, setCurrentLoadedGoalId] = useState<string | null>(null);
   const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); 
  
-  const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple']);
-  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['practice', 'retreat', 'vipassana']);
+  const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple', 'samadhi', 'kunda', 'sacred_site']);
+  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'retreat', 'vipassana', 'lecture', 'puja', 'guru_festival']);
 
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
@@ -181,6 +183,16 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
 
   const handleAddFilteredItemsToPlan = () => {
+    console.log('=== handleAddFilteredItemsToPlan called ===');
+    console.log('filterControlSelectedCityIds:', filterControlSelectedCityIds);
+    console.log('selectedPlaceSubtypes:', selectedPlaceSubtypes);
+    console.log('selectedEventSubtypes:', selectedEventSubtypes);
+    console.log('availablePlaces count:', availablePlaces.length);
+    console.log('availableEvents count:', availableEvents.length);
+    console.log('filteredPlaces count:', filteredPlaces.length);
+    console.log('filteredEvents count:', filteredEvents.length);
+    console.log('isLoadingPlacesAndEvents:', isLoadingPlacesAndEvents);
+    
     const onlyCitiesSelected =
       filterControlSelectedCityIds.length > 0 &&
       selectedPlaceSubtypes.length === 0 &&
@@ -234,14 +246,27 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
       const allNewSubItems = [...newPlaceItems, ...newEventItems];
 
-      // Если выбраны города в контролах, но по категориям для них ничего не нашлось
+      // Если выбраны города в контролах, но по категориям для них ничего не нашлось,
+      // добавляем только сами города (это лучше, чем показывать ошибку)
       if (allNewSubItems.length === 0 && filterControlSelectedCityIds.length > 0) {
-        alert(t('no_items_match_filters_for_selected_cities', { defaultValue: 'No places or events match the category filters for the selected cities.' }));
-        // Решаем, что делать: можно очистить план, или добавить только города.
-        // По ТЗ, если категории выбраны, то должны быть объекты категорий.
-        // Если ничего не нашлось, то план будет пуст.
-        setPlannedItems([]);
-        return;
+        const cityItemsToAdd = availableCities
+          .filter(city => filterControlSelectedCityIds.includes(city.id))
+          .map((cityData) => ({
+            type: 'city' as 'city',
+            data: cityData,
+            city_id_for_grouping: cityData.id,
+            time: getRandomTime(),
+            orderIndex: 0,
+          }));
+        
+        if (cityItemsToAdd.length > 0) {
+          itemsForPlan = cityItemsToAdd;
+        } else {
+          // Это маловероятный сценарий, но на всякий случай оставляем обработку
+          alert(t('no_cities_selected_or_found', { defaultValue: 'Selected cities were not found.' }));
+          setPlannedItems([]);
+          return;
+        }
       }
       
       // Если sub-элементы (места/события) найдены, или если фильтр по городам был пуст (поиск по всем городам)
@@ -324,6 +349,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       .map(item => ({ ...item, orderIndex: currentOrderIndex++ }));
     
     setPlannedItems(finalSortedItems);
+    
+    // Автоматически распределяем даты, если выбран диапазон и есть элементы
+    if (selectedDateRange && selectedDateRange.from && finalSortedItems.length > 0) {
+      distributeDatesForItems(finalSortedItems);
+    }
   };
 
   const handleAddPlacesForCity = async (cityId: string) => {
@@ -379,6 +409,102 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     }
   };
 
+  const handleSearchAndAddPlace = async (cityId: string, searchTerm: string) => {
+    try {
+      const placesData = await getPlacesByCityId(cityId);
+      
+      if (!placesData || placesData.length === 0) {
+        return [];
+      }
+
+      const searchLower = searchTerm.toLowerCase().trim();
+      
+      if (!searchLower) {
+        return [];
+      }
+
+      const filteredPlaces = placesData.filter(place => {
+        // Поиск по названию (проверяем на всех языках)
+        const nameEn = typeof place.name === 'string' ? place.name.toLowerCase() : (place.name?.en || '').toLowerCase();
+        const nameRu = typeof place.name === 'string' ? place.name.toLowerCase() : (place.name?.ru || '').toLowerCase();
+        const nameHi = typeof place.name === 'string' ? place.name.toLowerCase() : (place.name?.hi || '').toLowerCase();
+        const primaryName = getLocalizedText(place.name, language).toLowerCase();
+        
+          
+        // Поиск по описанию
+        const description = getLocalizedText(place.description, language).toLowerCase();
+        
+        // Поиск по типу места (если есть)
+        const typeName = place.type ? 
+          ['', 'temple', 'samadhi', 'kunda', 'sacred_site'][place.type] || '' : '';
+        
+        // Ищем вхождение в любом из полей на всех языках
+        const nameMatch = primaryName.includes(searchLower) || 
+                         nameEn.includes(searchLower) || 
+                         nameRu.includes(searchLower) || 
+                         nameHi.includes(searchLower);
+        
+        const descMatch = description.includes(searchLower);
+        const typeMatch = typeName.includes(searchLower);
+        
+        // Дополнительные проверки для разных типов мест
+        const typeKeywords = {
+          1: ['храм', 'temple', 'mandir', 'मंदिर'],
+          2: ['самадхи', 'samadhi', 'समाधि'],
+          3: ['кунда', 'kunda', 'कुंड'],
+          4: ['святое место', 'sacred site', 'पवित्र स्थल']
+        };
+        
+        const isCurrentType = place.type && typeKeywords[place.type as keyof typeof typeKeywords]?.some(keyword => 
+          primaryName.includes(keyword) || 
+          nameEn.includes(keyword) || 
+          nameRu.includes(keyword) || 
+          nameHi.includes(keyword) ||
+          description.includes(keyword)
+        );
+        
+        const searchInTypeKeywords = Object.values(typeKeywords).flat().some(keyword => keyword.includes(searchLower));
+        
+        const matches = nameMatch || descMatch || typeMatch || (isCurrentType && searchInTypeKeywords);
+        
+          
+        return matches;
+      });
+
+      // Сортируем по релевантности
+      const sortedPlaces = filteredPlaces.sort((a, b) => {
+        const aName = getLocalizedText(a.name, language).toLowerCase();
+        const bName = getLocalizedText(b.name, language).toLowerCase();
+        
+        const aStartsWith = aName.startsWith(searchLower);
+        const bStartsWith = bName.startsWith(searchLower);
+        
+        if (aStartsWith && !bStartsWith) return -1;
+        if (!aStartsWith && bStartsWith) return 1;
+        
+        return (b.rating || 0) - (a.rating || 0);
+      });
+
+      return sortedPlaces;
+    } catch (error) {
+      console.error("Error searching places for city:", cityId, error);
+      return [];
+    }
+  };
+
+  const handleAddSpecificPlace = (place: Place, cityId: string) => {
+    const dateOfCity = plannedItems.find(item => item.type === 'city' && item.data.id === cityId)?.date;
+    const newPlannedItem: PlannedItem = {
+      type: 'place',
+      data: place,
+      city_id_for_grouping: cityId,
+      time: getRandomTime(),
+      date: dateOfCity,
+      orderIndex: getNextOrderIndex(plannedItems),
+    };
+    setPlannedItems(prevItems => [...prevItems, newPlannedItem]);
+  };
+
   const handleDistributeDates = () => {
     if (!selectedDateRange || !selectedDateRange.from) {
       alert(t('please_select_date_range_first'));
@@ -388,39 +514,69 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       alert(t('please_add_cities_to_plan_first'));
       return;
     }
+    distributeDatesForItems(plannedItems);
+  };
+
+  const distributeDatesForItems = (itemsToDistribute: PlannedItem[]) => {
+    if (!selectedDateRange || !selectedDateRange.from) {
+      alert(t('please_select_date_range_first'));
+      return;
+    }
+    if (itemsToDistribute.length === 0) {
+      alert(t('please_add_cities_to_plan_first'));
+      return;
+    }
     
     const startDate = selectedDateRange.from;
     const endDate = selectedDateRange.to || selectedDateRange.from;
     const intervalDays = eachDayOfInterval({ start: startDate, end: endDate });
     if (intervalDays.length === 0) return;
     
-    const updatedPlannedItems = plannedItems.map(pItem => ({ ...pItem }));
-    const itemsCount = plannedItems.length;
+    const updatedPlannedItems = itemsToDistribute.map(pItem => ({ ...pItem }));
+    const itemsCount = itemsToDistribute.length;
     const daysCount = intervalDays.length;
     
-    // Use Bresenham's algorithm for even distribution
-    let error = daysCount / 2;
-    const step = daysCount / itemsCount;
-    let currentDayIndex = 0;
-    
-    plannedItems.forEach((item, itemIndex) => {
-      const targetDate = intervalDays[currentDayIndex];
+    // Calculate even distribution
+    if (itemsCount <= daysCount) {
+      // If we have fewer items than days, distribute them evenly
+      const step = daysCount / itemsCount;
       
-      const itemInUpdateArray = updatedPlannedItems.find(pi => 
-        pi.type === item.type && pi.data.id === item.data.id
-      );
+      itemsToDistribute.forEach((item, itemIndex) => {
+        const dayIndex = Math.min(Math.floor(itemIndex * step), daysCount - 1);
+        const targetDate = intervalDays[dayIndex];
+        
+        const itemInUpdateArray = updatedPlannedItems.find(pi => 
+          pi.type === item.type && pi.data.id === item.data.id
+        );
+        
+        if (itemInUpdateArray) {
+          itemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
+        }
+      });
+    } else {
+      // If we have more items than days, distribute multiple items per day
+      const itemsPerDay = Math.ceil(itemsCount / daysCount);
+      let currentItemIndex = 0;
       
-      if (itemInUpdateArray) {
-        itemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
+      for (let dayIndex = 0; dayIndex < daysCount && currentItemIndex < itemsCount; dayIndex++) {
+        const itemsForThisDay = Math.min(itemsPerDay, itemsCount - currentItemIndex);
+        
+        for (let i = 0; i < itemsForThisDay && currentItemIndex < itemsCount; i++) {
+          const item = itemsToDistribute[currentItemIndex];
+          const targetDate = intervalDays[dayIndex];
+          
+          const itemInUpdateArray = updatedPlannedItems.find(pi => 
+            pi.type === item.type && pi.data.id === item.data.id
+          );
+          
+          if (itemInUpdateArray) {
+            itemInUpdateArray.date = format(targetDate, 'yyyy-MM-dd');
+          }
+          
+          currentItemIndex++;
+        }
       }
-      
-      // Update Bresenham's algorithm variables
-      error -= step;
-      if (error < 0) {
-        currentDayIndex++;
-        error += daysCount;
-      }
-    });
+    }
     
     setPlannedItems(updatedPlannedItems);
   };
@@ -507,8 +663,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setStagedForPlanningCities([]);
     setGoalNameForInput('');
     setCurrentLoadedGoalId(null);
-    setSelectedPlaceSubtypes([]);
-    setSelectedEventSubtypes([]);
+    setSelectedPlaceSubtypes(['temple', 'samadhi', 'kunda', 'sacred_site']);
+    setSelectedEventSubtypes(['festival', 'practice', 'retreat', 'vipassana', 'lecture', 'puja', 'guru_festival']);
     setFilteredPlaces([]);
     setFilteredEvents([]);
     setCityPlaceSuggestions({});
@@ -532,6 +688,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         return;
       }
       if (data) {
+        console.log('📂 Загруженные цели:', data);
         setSavedGoals(data);
       }
     } catch (error) {
@@ -557,49 +714,133 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   }, [fetchGoals]); // handleClearPlan is stable, no need to add as dependency if defined outside or via useCallback
 
   const handleSaveOrUpdateGoal = async (currentGoalName: string) => {
+    console.log('💾 Начало сохранения цели:', currentGoalName);
+    console.log('📋 PlannedItems для сохранения:', plannedItems);
+    
     if (!authContext?.auth?.user?.id) {
+      console.error('❌ Пользователь не аутентифицирован');
       alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
       return;
     }
+    
     const itemsToSave = plannedItems.map((item, index) => ({
       ...item,
       orderIndex: item.orderIndex ?? index 
     }));
-    const goalData = {
-        user_id: authContext.auth.user.id,
-        title: currentGoalName.trim() || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
-        planned_items: itemsToSave.map(pi => ({ 
+    
+    console.log('🔄 ItemsToSave:', itemsToSave);
+    
+    // Separate items by type for the existing schema
+    const cities = itemsToSave
+      .filter(item => item.type === 'city')
+      .map(item => ({
+        id: item.data.id,
+        name: getLocalizedText((item.data as any).name, language),
+        imageUrl: (item.data as City).imageUrl,
+        dates: item.date ? [item.date] : [],
+        orderIndex: item.orderIndex,
+        time: item.time
+      }));
+    
+    const places = itemsToSave
+      .filter(item => item.type === 'place')
+      .map(item => ({
+        id: item.data.id,
+        name: getLocalizedText((item.data as any).name, language),
+        city_id: item.city_id_for_grouping,
+        dates: item.date ? [item.date] : [],
+        orderIndex: item.orderIndex,
+        time: item.time,
+        location: (item.data as Place).location
+      }));
+    
+    const routes = itemsToSave
+      .filter(item => item.type === 'route')
+      .map(item => ({
+        id: item.data.id,
+        name: getLocalizedText((item.data as any).name, language),
+        city_id: item.city_id_for_grouping,
+        dates: item.date ? [item.date] : [],
+        orderIndex: item.orderIndex,
+        time: item.time
+      }));
+    
+    const events = itemsToSave
+      .filter(item => item.type === 'event')
+      .map(item => ({
+        id: item.data.id,
+        name: getLocalizedText((item.data as any).name, language),
+        city_id: item.city_id_for_grouping,
+        dates: item.date ? [item.date] : [],
+        orderIndex: item.orderIndex,
+        time: item.time,
+        location: (item.data as Event).location
+      }));
+    
+    // Also keep the planned_items structure for potential future migration
+    const planned_items = itemsToSave.map(pi => {
+        const itemData = {
             type: pi.type, 
             data_id: pi.data.id,
             city_id_for_grouping: pi.city_id_for_grouping,
             date: pi.date,
             time: pi.time,
             orderIndex: pi.orderIndex,
-            name: (pi.data as any).name, 
+            name: getLocalizedText((pi.data as any).name, language), 
             location: pi.type === 'place' || pi.type === 'event' ? (pi.data as Place | Event).location : undefined
-        })),
+        };
+        console.log(`📝 Processing item ${pi.type}:`, itemData);
+        return itemData;
+    });
+    
+    const goalData = {
+        user_id: authContext.auth.user.id,
+        title: currentGoalName.trim() || `Паломничество ${format(new Date(), 'dd.MM.yyyy')}`,
+        cities: cities.length > 0 ? cities : null,
+        places: places.length > 0 ? places : null,
+        routes: routes.length > 0 ? routes : null,
+        events: events.length > 0 ? events : null,
         start_date: selectedDateRange?.from ? format(selectedDateRange.from, 'yyyy-MM-dd') : null,
         end_date: selectedDateRange?.to ? format(selectedDateRange.to, 'yyyy-MM-dd') : null,
-        selected_place_subtypes: selectedPlaceSubtypes,
-        selected_event_subtypes: selectedEventSubtypes,
+        total_items: itemsToSave.length,
+        // Note: planned_items, selected_place_subtypes, and selected_event_subtypes 
+        // are not included as they don't exist in the current database schema
       };
 
     try {
+      console.log('📤 Отправка данных в Supabase:', {
+        hasUserId: !!goalData.user_id,
+        title: goalData.title,
+        itemsCount: goalData.planned_items?.length,
+        isUpdate: !!currentLoadedGoalId
+      });
+      
       if (currentLoadedGoalId) {
+        console.log('🔄 Обновление существующей цели:', currentLoadedGoalId);
         const { error } = await supabase.from('goals').update(goalData).eq('id', currentLoadedGoalId).eq('user_id', authContext.auth.user.id);
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Ошибка обновления цели:', error);
+          throw error;
+        }
+        console.log('✅ Цель успешно обновлена');
         alert(t('goal_updated_successfully', {defaultValue: 'Goal updated successfully.'}));
       } else {
+        console.log('🆕 Создание новой цели');
         const { data: insertedGoal, error } = await supabase.from('goals').insert([goalData]).select();
-        if (error) throw error;
+        if (error) {
+          console.error('❌ Ошибка создания цели:', error);
+          throw error;
+        }
         if (insertedGoal && insertedGoal.length > 0) {
+            console.log('✅ Цель успешно создана:', insertedGoal[0].id);
             setCurrentLoadedGoalId(insertedGoal[0].id);
         }
         alert(t('goal_saved_successfully'));
       }
+      console.log('📂 Обновление списка целей');
       fetchGoals();
     } catch (error) {
-      console.error("Error saving/updating goal:", error);
+      console.error("❌ Error saving/updating goal:", error);
       alert(t('error_saving_goal'));
     }
   };
@@ -631,7 +872,76 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         return;
       }
       
-      const loadedPlannedItemsStubs = goal.planned_items || [];
+      console.log('📂 Загрузка цели:', goal);
+      
+      // Try to load from planned_items first (new format)
+      let loadedPlannedItemsStubs = goal.planned_items || [];
+      
+      // If planned_items is empty, try to reconstruct from separate columns (old format)
+      if (loadedPlannedItemsStubs.length === 0) {
+        console.log('🔄 Восстановление из отдельных колонок...');
+        const reconstructedStubs: any[] = [];
+        
+        // Reconstruct cities
+        if (goal.cities && Array.isArray(goal.cities)) {
+          goal.cities.forEach((city: any) => {
+            reconstructedStubs.push({
+              type: 'city',
+              data_id: city.id,
+              city_id_for_grouping: city.id,
+              date: city.dates?.[0],
+              time: city.time,
+              orderIndex: city.orderIndex || 0
+            });
+          });
+        }
+        
+        // Reconstruct places
+        if (goal.places && Array.isArray(goal.places)) {
+          goal.places.forEach((place: any) => {
+            reconstructedStubs.push({
+              type: 'place',
+              data_id: place.id,
+              city_id_for_grouping: place.city_id,
+              date: place.dates?.[0],
+              time: place.time,
+              orderIndex: place.orderIndex || 0
+            });
+          });
+        }
+        
+        // Reconstruct routes
+        if (goal.routes && Array.isArray(goal.routes)) {
+          goal.routes.forEach((route: any) => {
+            reconstructedStubs.push({
+              type: 'route',
+              data_id: route.id,
+              city_id_for_grouping: route.city_id,
+              date: route.dates?.[0],
+              time: route.time,
+              orderIndex: route.orderIndex || 0
+            });
+          });
+        }
+        
+        // Reconstruct events
+        if (goal.events && Array.isArray(goal.events)) {
+          goal.events.forEach((event: any) => {
+            reconstructedStubs.push({
+              type: 'event',
+              data_id: event.id,
+              city_id_for_grouping: event.city_id,
+              date: event.dates?.[0],
+              time: event.time,
+              orderIndex: event.orderIndex || 0
+            });
+          });
+        }
+        
+        loadedPlannedItemsStubs = reconstructedStubs;
+        console.log('📝 Восстановленные элементы:', loadedPlannedItemsStubs);
+      }
+      
       const reconstructedItems: PlannedItem[] = [];
       const itemFetchPromises = loadedPlannedItemsStubs.map(async (itemStub: any) => {
         let fullData: City | Place | Route | Event | null = null;
@@ -743,19 +1053,19 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   return (
-    <>
+    <div className="flex flex-col gap-6">
+      {/* Верхняя панель с контролами */}
       <PilgrimagePlannerControls
         availableCities={availableCities}
-        filterSelectedCityIds={filterControlSelectedCityIds} // Pass state to controls
-        onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds} // Pass setter to controls
+        filterSelectedCityIds={filterControlSelectedCityIds}
+        onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds}
         plannedItems={plannedItems} 
         selectedDateRange={selectedDateRange} 
         language={language}
         t={t}
         onDateRangeChange={handleDateRangeChange}
-        // onCitySelect, onRemoveStagedCity, onAddStagedCities removed as they are not in PilgrimagePlannerControlsProps
-        onAddFavoritesToPlan={handleAddFavoritesToPlan}
         onDistributeDates={handleDistributeDates}
+        onAddFavoritesToPlan={handleAddFavoritesToPlan}
         goalNameValue={goalNameForInput}
         onGoalNameChange={setGoalNameForInput}
         currentLoadedGoalId={currentLoadedGoalId}
@@ -769,29 +1079,91 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         onSelectedEventSubtypesChange={setSelectedEventSubtypes} 
         onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
         onClearPlan={handleClearPlan}
-        isLoadingData={isLoadingCities || isLoadingPlacesAndEvents} // Pass combined loading state
+        isLoadingData={isLoadingCities || isLoadingPlacesAndEvents}
       />
-      {(isLoadingCities || isLoadingPlacesAndEvents) && <div className="text-center p-4">{t('loading_data', { defaultValue: 'Loading data...'})}</div>}
+
+      {/* Основной контент с трехколоночной структурой */}
+      {!isLoadingCities && !isLoadingPlacesAndEvents && (
+        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 min-h-[600px]">
+          {/* Левая колонка - Фильтры (30%) */}
+          <div className="lg:col-span-3">
+            <div className="sticky top-6">
+              <h3 className="text-lg font-semibold mb-4">
+                {t('filter_results', { defaultValue: 'Фильтры' })}
+              </h3>
+              <div className="text-sm text-gray-600 mb-4">
+                <p>{t('selected_cities', { defaultValue: 'Выбрано городов' })}: {filterControlSelectedCityIds.length}</p>
+                <p>{t('selected_place_types', { defaultValue: 'Типы мест' })}: {selectedPlaceSubtypes.length}</p>
+                <p>{t('selected_event_types', { defaultValue: 'Типы событий' })}: {selectedEventSubtypes.length}</p>
+              </div>
+            </div>
+          </div>
+
+          {/* Средняя колонка - Результаты (30%) */}
+          <div className="lg:col-span-3">
+            <FilteredResults
+              filteredPlaces={filteredPlaces}
+              filteredEvents={filteredEvents}
+              availableCities={availableCities}
+              filterSelectedCityIds={filterControlSelectedCityIds}
+              selectedPlaceSubtypes={selectedPlaceSubtypes}
+              selectedEventSubtypes={selectedEventSubtypes}
+              language={language}
+              t={t}
+              plannedItems={plannedItems}
+            />
+          </div>
+
+          {/* Правая колонка - Карта (40%) */}
+          <div className="lg:col-span-4">
+            <h3 className="text-lg font-semibold mb-4">
+              {t('map_preview', { defaultValue: 'Предпросмотр карты' })}
+            </h3>
+            <div className="h-full border rounded-lg overflow-hidden">
+              {(filterControlSelectedCityIds.length > 0 || plannedItems.length > 0) ? (
+                <PilgrimageRouteMap plannedItems={plannedItems.length > 0 ? sortedItemsForDisplay : []} />
+              ) : (
+                <div className="h-full flex items-center justify-center text-gray-500">
+                  {t('select_cities_to_see_map', { defaultValue: 'Выберите города, чтобы увидеть карту' })}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* План путешествия (если есть элементы) */}
       {!isLoadingCities && !isLoadingPlacesAndEvents && isPlanInitiated && (
-        <div className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-6"> 
-          <div className="md:col-span-1"> 
-            <PilgrimagePlanDisplay
+        <div className="mt-8">
+          <h3 className="text-xl font-semibold mb-4">
+            {t('travel_plan', { defaultValue: 'План путешествия' })}
+          </h3>
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div>
+              <PilgrimagePlanDisplay
                 plannedItems={sortedItemsForDisplay}
                 language={language}
                 t={t}
                 onUpdateDateTime={handleUpdatePlannedItemDateTime}
                 onRemoveItem={handleRemovePlannedItem} 
                 onAddPlacesForCity={handleAddPlacesForCity}
+                onSearchAndAddPlace={handleSearchAndAddPlace}
+                onAddSpecificPlace={handleAddSpecificPlace}
                 onReorderItems={handlePlannedItemsReorder}
-            />
-          </div>
-          <div className="md:col-span-1"> 
-            {plannedItems.length > 0 && (
-              <PilgrimageRouteMap plannedItems={sortedItemsForDisplay} /> 
-            )}
+              />
+            </div>
+            <div>
+              <PilgrimageRouteMap plannedItems={sortedItemsForDisplay} />
+            </div>
           </div>
         </div>
       )}
-    </>
+
+      {(isLoadingCities || isLoadingPlacesAndEvents) && (
+        <div className="text-center p-4">
+          {t('loading_data', { defaultValue: 'Loading data...'})}
+        </div>
+      )}
+    </div>
   );
 }

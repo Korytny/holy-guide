@@ -23,7 +23,7 @@ const Navbar = ({ className = '' }: NavbarProps) => {
 
   return (
     <div className={`bg-white shadow-sm border-b ${className}`}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-full">
         <div className="flex h-14 sm:h-16 items-center">
           <div className="flex items-center gap-2 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-4">

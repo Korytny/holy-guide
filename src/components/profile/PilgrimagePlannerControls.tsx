@@ -1,7 +1,7 @@
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 import { Language, City, PlannedItem } from '../../types';
 import { type DateRange } from 'react-day-picker';
-import { PilgrimageCalendar } from './PilgrimageCalendar';
+import { SimpleDateSelector } from './SimpleDateSelector';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
 import {
   Carousel,
@@ -20,14 +20,6 @@ import {
 } from 'lucide-react'; 
 import { getLocalizedText } from '../../utils/languageUtils';
 import { Input } from "@/components/ui/input";
-import { format } from 'date-fns';
-import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
-import { DateFieldComponent } from '@/components/ui/date-field';
-import {
-  parseDate,
-  getLocalTimeZone,
-} from '@internationalized/date';
-import type { DateValue } from '@internationalized/date';
 import { Label } from "@/components/ui/label";
 import useMobile from '../../hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
@@ -42,7 +34,7 @@ export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Ic
   { value: 'sacred_site', labelKey: 'place_type_sacred_site', Icon: Sparkles },
 ];
 
-export const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Icon: React.ElementType }[] = [
+const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: "festival", labelKey: "event_type_festival", Icon: PartyPopper },
   { value: "practice", labelKey: "event_type_practice", Icon: Zap },
   { value: "retreat", labelKey: "event_type_retreat", Icon: MountainSnow },
@@ -52,9 +44,6 @@ export const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Ic
   { value: "guru_festival", labelKey: "event_type_guru_festival", Icon: Flame },
 ];
 
-const dateFnsLocales: Record<string, DateFnsLocale> = {
-  en: enUS, ru: ru, hi: hi,
-};
 
 interface PilgrimagePlannerControlsProps {
   availableCities: City[];
@@ -113,33 +102,9 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   onClearPlan,
   isLoadingData,
 }) => {
-  const currentLocale = dateFnsLocales[language] || enUS;
   const isMobile = useMobile();
   const { fonts } = useFont();
   const [showPlanNameInput, setShowPlanNameInput] = React.useState(false);
-
-  const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
-    if (!date) return null;
-    try { return parseDate(format(date, 'yyyy-MM-dd')); } catch (e) { console.error("Error parsing date for DateValue:", e); return null; }
-  };
-
-  const convertToJSDate = (dateValue: DateValue | null): Date | undefined => {
-    if (!dateValue) return undefined;
-    try { return dateValue.toDate(getLocalTimeZone()); } catch (e) { console.error("Error converting DateValue to JS Date:", e); return undefined; }
-  };
-
-  const handleDateFieldChange = (dateValue: DateValue | null, field: 'from' | 'to') => {
-    const jsDate = convertToJSDate(dateValue);
-    let newRange: DateRange;
-    if (field === 'from') {
-      newRange = { from: jsDate, to: selectedDateRange?.to };
-      if (newRange.to && jsDate && jsDate > newRange.to) newRange.to = jsDate;
-    } else {
-      newRange = { from: selectedDateRange?.from, to: jsDate };
-      if (newRange.from && jsDate && jsDate < newRange.from) newRange.from = jsDate;
-    }
-    onDateRangeChange((!newRange.from && !newRange.to) ? undefined : newRange);
-  };
 
   const plannedCityIdsInMainPlan = useMemo(() => new Set(plannedItems.filter(item => item.type === 'city').map(item => item.data.id)), [plannedItems]);
   const saveButtonTextKey = currentLoadedGoalId ? 'update_button' : 'save_button';
@@ -151,64 +116,49 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
     setter(newSelection);
   };
 
-  const DateFieldsSection = () => (
-    <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4 ${fonts.body.className}`}> {/* Applied shadow-lg, rounded-lg, removed border */}
+  const SimpleDateSection = () => (
+    <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4 ${fonts.body.className}`}>
       <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_dates')}</h3>
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('start_date_label')} value={convertToDateValue(selectedDateRange?.from)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'from')} />
-        <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('end_date_label')} value={convertToDateValue(selectedDateRange?.to)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'to')} />
-      </div>
+      <SimpleDateSelector
+        selectedDateRange={selectedDateRange}
+        onDateRangeChange={onDateRangeChange}
+      />
       {selectedDateRange && selectedDateRange.from && (
-              <Button 
-                variant="outline" 
-                className={`w-full ${fonts.subheading.className}`}
-                onClick={() => {
-                  try {
-                    if (!selectedDateRange?.from || !selectedDateRange?.to) {
-                      console.error('Invalid date range');
-                      return;
-                    }
-                    if (!plannedItems.length) {
-                      console.error('No items to distribute dates');
-                      return;
-                    }
-                    onDistributeDates();
-                  } catch (error) {
-                    console.error('Error distributing dates:', error);
-                  }
-                }}
-              >
-                {t('distribute_dates_to_cities_button')}
-              </Button>
+        <Button 
+          variant="outline" 
+          className={`w-full ${fonts.subheading.className}`}
+          onClick={() => {
+            try {
+              if (!selectedDateRange?.from || !selectedDateRange?.to) {
+                console.error('Invalid date range');
+                return;
+              }
+              if (!plannedItems.length) {
+                console.error('No items to distribute dates');
+                return;
+              }
+              onDistributeDates();
+            } catch (error) {
+              console.error('Error distributing dates:', error);
+            }
+          }}
+        >
+          {t('distribute_dates_to_cities_button')}
+        </Button>
       )}
     </div>
   );
 
   return (
-    <div className={`flex flex-col md:flex md:flex-row ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Main container already has shadow-xl, this is fine */}
-      {!isMobile && (
-        <div className={`md:w-1/2 space-y-6 flex flex-col p-3`}> {/* Changed to md:w-1/2 and added p-3 */}
-          <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg flex flex-col flex-grow`}>  {/* Applied shadow-lg, rounded-lg, removed border */}
-            <h3 className={`text-lg font-semibold mb-4 text-center ${fonts.subheading.className}`}>{t('select_dates')}</h3>
-            <PilgrimageCalendar selectedRange={selectedDateRange} onDateRangeChange={onDateRangeChange} locale={currentLocale} className={fonts.body.className} headerClassName={fonts.subheading.className}/>
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mt-4">
-              <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('start_date_label')} value={convertToDateValue(selectedDateRange?.from)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'from')} />
-              <DateFieldComponent labelClassName={fonts.subheading.className} className={fonts.body.className} label={t('end_date_label')} value={convertToDateValue(selectedDateRange?.to)} onChange={(dateValue) => handleDateFieldChange(dateValue, 'to')} />
-            </div>
-            {selectedDateRange && selectedDateRange.from && (
-              <Button variant="outline" className={`w-full mt-4 ${fonts.subheading.className}`} onClick={onDistributeDates}>{t('distribute_dates_to_cities_button')}</Button>
-            )}
-          </div>
-        </div>
-      )}
+    <div className={`flex flex-col ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}> {/* Changed to flex-col for vertical layout */}
+      {/* Date Selection Section - Always on top */}
+      <SimpleDateSection />
 
-      <div className={`space-y-6 ${isMobile ? 'w-full p-3' : 'md:w-1/2 p-3'}`}> {/* Changed to md:w-1/2 and added p-3 */}
-        {/* H2 title moved inside the card below */}
-        {isMobile && <DateFieldsSection />}
+      {/* Filters and Actions Section - Below calendar */}
+      <div className={`space-y-6`}>
         
-        {/* Merged Filters and Actions Card - Maximizing horizontal content space */}
-        <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4 flex flex-col flex-grow`}> {/* Applied shadow-lg, rounded-lg, removed border */}
-          <div> 
+        <div className={`p-4 rounded-lg ${CARD_BACKGROUND_CLASS} shadow-lg space-y-4`}>
+          <div>
             <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_cities_to_plan')}</h3>
             <div className="mb-2 mt-2"> 
             {isMobile ? (
@@ -440,7 +390,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               </div>
             </div>
           )}
-        </div> 
+        </div>
       </div>
     </div>
   );

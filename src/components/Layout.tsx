@@ -7,17 +7,17 @@ interface LayoutProps {
   children: ReactNode;
   hideNavbar?: boolean;
   hideSecondaryNav?: boolean;
+  fullwidth?: boolean; // New prop for full-width sections
 }
 
-const Layout = ({ children, hideNavbar = false, hideSecondaryNav = false }: LayoutProps) => {
+const Layout = ({ children, hideNavbar = false, hideSecondaryNav = false, fullwidth = false }: LayoutProps) => {
   // Assume navbar height is 4rem (64px)
   const navbarHeight = '4rem';
   return (
     <FontProvider>
       <div className="min-h-screen flex flex-col">
-      {!hideNavbar && <Navbar className="sticky top-0 z-50" />}
-      {/* Removed background from main element */}
-      <main className={`flex-grow w-full`}>
+      {!hideNavbar && <Navbar />}
+        <main className="flex-grow">
         {children}
       </main>
       </div>

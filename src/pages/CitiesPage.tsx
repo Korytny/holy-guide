@@ -12,7 +12,6 @@ import { useIsSmallScreen } from '../hooks/use-small-screen';
 import { Skeleton } from '@/components/ui/skeleton';
 import { getLocalizedText } from '../utils/languageUtils';
 import { motion } from 'framer-motion';
-import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner';
 import { AnimatedText } from '@/components/ui/animated-underline-text-one'; // Import AnimatedText
 import { WordPullUp } from '@/components/ui/word-pull-up';
 
@@ -138,22 +137,7 @@ const CitiesPage = () => {
         </div>
       </div>
 
-      {/* Existing Pilgrimage Planner Section - kept at the bottom */}
-      <div className="max-w-7xl mx-auto py-8 px-4 sm:px-6 lg:px-8">
-        <section aria-labelledby="pilgrimage-planner-heading" className="mb-8">
-          <WordPullUp
-            id="pilgrimage-planner-heading"
-            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mt-20 mb-20"
-            words={t('pilgrimage_plan', { defaultValue: 'Pilgrimage Plan' })}
-          />
-          <PilgrimagePlanner
-            auth={authContext}
-            language={language}
-            t={t}
-          />
-        </section>
-      </div>
-    </>
+        </>
   );
 };
 

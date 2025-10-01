@@ -1,5 +1,5 @@
 {
-  "app_title": "पवित्र स्थान",
+  "app_title": "तीर्थयात्री",
   "no_date": "कोई तारीख नहीं",
     "explore": "खोजें",
     "back_to_cities": "शहरों पर वापस जाएं",
@@ -19,7 +19,7 @@
     "place_type_temple": "मंदिर",
     "place_type_samadhi": "समाधि",
     "place_type_kunda": "कुंड",
-    "place_type_sacred_site": "पवित्र स्थल",
+    "place_type_sacred_site": "फोटो स्थान",
     "sign_in": "साइन इन करें",
     "signin": "साइन इन",
     "sign_out": "साइन आउट करें",
@@ -192,6 +192,11 @@
     "goal_name_placeholder": "लक्ष्य का नाम दर्ज करें...",
     "start_date_label": "आरंभ तिथि",
     "end_date_label": "अंतिम तिथि",
+    "select_date": "तिथि चुनें",
+    "period_1_week": "1 सप्ताह",
+    "period_2_weeks": "2 सप्ताह",
+    "period_1_month": "1 महीना",
+    "period_3_months": "3 महीने",
     "goal_saved_successfully": "लक्ष्य सफलतापूर्वक सहेजा गया",
     "error_saving_goal": "लक्ष्य सहेजने में त्रुटि",
     "goal_updated_successfully": "लक्ष्य सफलतापूर्वक अपडेट किया गया",
@@ -214,7 +219,7 @@
     "event_type_vipassana": "विपश्यना",
     "event_type_puja": "पूजा",
     "event_type_lecture": "व्याख्यान",
-    "event_type_guru_festival": "गुरु उत्सव",
+    "event_type_guru_festival": "ध्यान",
     "event_culture_atheism": "नास्तिकता",
     "event_culture_hinduism": "हिन्दू धर्म",
     "event_culture_christianity": "ईसाई धर्म",
@@ -265,5 +270,8 @@
   "clear_date_range_button": "अवधि सीमित न करें",
   "feature_in_development": "सुविधा विकासधीन है。",
   "add_filtered_to_plan_button": "खोजें",
-  "clear_short_button_text": "साफ़ करें"
+  "search_tooltip": "चयनित फ़िल्टर के अनुसार वस्तुएं खोजें",
+  "search_with_dates_tooltip": "वस्तुएं खोजें और चयनित तिथियों को स्वचालित रूप से वितरित करें",
+  "clear_short_button_text": "साफ़ करें",
+    "click_to_load_goal": "योजना लोड करने के लिए क्लिक करें"
 }
