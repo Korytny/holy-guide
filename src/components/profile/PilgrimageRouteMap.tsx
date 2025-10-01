@@ -95,7 +95,7 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
 
   if (placesForRoute.length === 0) {
     return (
-      <div className="h-full flex items-center justify-center text-center py-4 mt-4 border-t">
+      <div className="h-full flex items-center justify-center text-center">
         <p>{t('no_route_items_for_map', { defaultValue: 'Нет элементов для отображения маршрута на карте.'})}</p>
       </div>
     );

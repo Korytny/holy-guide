@@ -63,9 +63,9 @@ export function SimpleDateSelector({
   const endDisplay = selectedDateRange?.to ? format(selectedDateRange.to, 'dd.MM.yyyy') : 'Выберите дату';
 
   return (
-    <div className={cn("space-y-4", className)}>
+    <div className={cn("space-y-2", className)}>
       {/* Поля для выбора дат */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
         {/* Дата начала */}
         <Popover open={startCalendarOpen} onOpenChange={setStartCalendarOpen}>
           <PopoverTrigger asChild>
@@ -118,9 +118,9 @@ export function SimpleDateSelector({
       </div>
 
       {/* Кнопки длительности */}
-      <div className="space-y-2">
+      <div className="space-y-1">
         <p className="text-sm font-medium">Быстрый выбор длительности:</p>
-        <div className="flex gap-2">
+        <div className="flex gap-1">
           {DURATION_OPTIONS.map((option) => (
             <Button
               key={option.value}

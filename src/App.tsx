@@ -43,7 +43,6 @@ const routesWithLayout = [
   { path: "/events/:id", element: <EventDetail /> },
   { path: "/profile", element: <Profile /> },
   { path: "/test", element: <TestPage /> },
-  { path: "/pilgrimage-planner", element: <PilgrimagePlannerPage /> },
 ];
 
 
@@ -52,6 +51,7 @@ const routesWithoutLayout = [
   { path: "/language", element: <LanguageSelection /> },
   { path: "/auth", element: <Auth /> },
   { path: "/auth/callback", element: <AuthCallback /> },
+  { path: "/pilgrimage-planner", element: <PilgrimagePlannerPage /> },
 ];
 
 const App = () => (

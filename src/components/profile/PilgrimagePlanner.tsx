@@ -63,7 +63,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); 
  
   const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple', 'samadhi', 'kunda', 'sacred_site']);
-  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'visit', 'lecture', 'puja', 'guru_festival']);
+  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'lecture', 'puja', 'guru_festival']);
 
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
@@ -667,7 +667,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setGoalNameForInput('');
     setCurrentLoadedGoalId(null);
     setSelectedPlaceSubtypes(['temple', 'samadhi', 'kunda', 'sacred_site']);
-    setSelectedEventSubtypes(['festival', 'practice', 'visit', 'lecture', 'puja', 'guru_festival']);
+    setSelectedEventSubtypes(['festival', 'practice', 'lecture', 'puja', 'guru_festival']);
     setFilteredPlaces([]);
     setFilteredEvents([]);
     setCityPlaceSuggestions({});
@@ -815,7 +815,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       console.log('📤 Отправка данных в Supabase:', {
         hasUserId: !!goalData.user_id,
         title: goalData.title,
-        itemsCount: goalData.planned_items?.length,
+        itemsCount: goalData.total_items,
         isUpdate: !!currentLoadedGoalId
       });
       
@@ -1057,18 +1057,18 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   return (
-    <div className="flex flex-col">
+    <div className="flex flex-col h-screen">
       {/* Основной контент с трехколоночной структурой */}
       {!isLoadingCities && !isLoadingPlacesAndEvents && (
-        <div className="grid grid-cols-1 xl:grid-cols-10 gap-0 min-h-[600px]">
+        <div className="grid grid-cols-1 xl:grid-cols-10 gap-0 flex-1">
           {/* Левая колонка - Фильтры (30%) */}
-          <div className="xl:col-span-3 order-1">
+          <div className="xl:col-span-3 order-1 h-full flex flex-col min-h-0">
             <PilgrimagePlannerControls
               availableCities={availableCities}
               filterSelectedCityIds={filterControlSelectedCityIds}
               onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds}
-              plannedItems={plannedItems} 
-              selectedDateRange={selectedDateRange} 
+              plannedItems={plannedItems}
+              selectedDateRange={selectedDateRange}
               language={language}
               t={t}
               onDateRangeChange={handleDateRangeChange}
@@ -1083,8 +1083,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
               savedGoals={savedGoals}
               selectedPlaceSubtypes={selectedPlaceSubtypes}
               selectedEventSubtypes={selectedEventSubtypes}
-              onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes} 
-              onSelectedEventSubtypesChange={setSelectedEventSubtypes} 
+              onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes}
+              onSelectedEventSubtypesChange={setSelectedEventSubtypes}
               onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
               onClearPlan={handleClearPlan}
               isLoadingData={isLoadingCities || isLoadingPlacesAndEvents}
@@ -1092,14 +1092,14 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
           </div>
 
           {/* Средняя колонка - Список городов и мест (30%) */}
-          <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full">
+          <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full flex flex-col">
             {showSearchResults ? (
               <PilgrimagePlanDisplay
                 plannedItems={sortedItemsForDisplay}
                 language={language}
                 t={t}
                 onUpdateDateTime={handleUpdatePlannedItemDateTime}
-                onRemoveItem={handleRemovePlannedItem} 
+                onRemoveItem={handleRemovePlannedItem}
                 onAddPlacesForCity={handleAddPlacesForCity}
                 onSearchAndAddPlace={handleSearchAndAddPlace}
                 onAddSpecificPlace={handleAddSpecificPlace}
@@ -1118,8 +1118,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
           </div>
 
           {/* Правая колонка - Карта (40%) */}
-          <div className="xl:col-span-4 order-3 border-l border-gray-200 h-full">
-            <PilgrimageRouteMap plannedItems={plannedItems.length > 0 ? sortedItemsForDisplay : []} />
+          <div className="xl:col-span-4 order-3 border-l border-gray-200 h-full flex flex-col min-h-0">
+            <div className="flex-1 min-h-0">
+              <PilgrimageRouteMap plannedItems={plannedItems.length > 0 ? sortedItemsForDisplay : []} />
+            </div>
           </div>
         </div>
       )}

@@ -4,6 +4,7 @@ import { City, Language } from '../types';
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
 import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner';
+import { FontProvider } from '../context/FontContext';
 import { WordPullUp } from '@/components/ui/word-pull-up';
 
 const PilgrimagePlannerPage = () => {
@@ -25,15 +26,17 @@ const PilgrimagePlannerPage = () => {
   }, []);
 
   return (
-    <div className="min-h-screen bg-orange-50">
-      <div className="w-full">
-        <PilgrimagePlanner
-          auth={authContext}
-          language={language}
-          t={t}
-        />
+    <FontProvider>
+      <div className="h-screen bg-orange-50 overflow-hidden">
+        <div className="w-full h-full">
+          <PilgrimagePlanner
+            auth={authContext}
+            language={language}
+            t={t}
+          />
+        </div>
       </div>
-    </div>
+    </FontProvider>
   );
 };
 

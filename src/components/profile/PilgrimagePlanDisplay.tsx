@@ -150,16 +150,16 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
 
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
-      <div className="border rounded-md p-0 bg-white overflow-hidden h-full">
+      <div className="border rounded-md p-0 bg-white h-full">
         {groupedItems.length === 0 && plannedItems.length === 0 ? (
           <div className="p-4 text-gray-500">{t('plan_results_placeholder')}</div>
         ) : (
           <Droppable droppableId="all-cities" type="CITY_GROUP">
             {(providedOuter: DroppableProvided) => (
-              <div 
-                {...providedOuter.droppableProps} 
+              <div
+                {...providedOuter.droppableProps}
                 ref={providedOuter.innerRef}
-                className="overflow-y-auto h-[calc(100%-theme(space.16))]">
+                className="h-full max-h-[calc(100vh-150px)] overflow-y-auto">
                 {groupedItems.map((group, cityIndex) => (
                   <Draggable key={group.cityItem.data.id} draggableId={group.cityItem.data.id} index={cityIndex}>
                     {(providedCity: DraggableProvided) => (
