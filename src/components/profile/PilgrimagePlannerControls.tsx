@@ -37,8 +37,7 @@ export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Ic
 const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: "festival", labelKey: "event_type_festival", Icon: PartyPopper },
   { value: "practice", labelKey: "event_type_practice", Icon: Zap },
-  { value: "retreat", labelKey: "event_type_retreat", Icon: MountainSnow },
-  { value: "vipassana", labelKey: "event_type_vipassana", Icon: Eye },
+  { value: "visit", labelKey: "event_type_visit", Icon: Eye },
   { value: "lecture", labelKey: "event_type_lecture", Icon: BookOpenText },
   { value: "puja", labelKey: "event_type_puja", Icon: Flame },
   { value: "guru_festival", labelKey: "event_type_guru_festival", Icon: Flame },
@@ -123,29 +122,6 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
         selectedDateRange={selectedDateRange}
         onDateRangeChange={onDateRangeChange}
       />
-      {selectedDateRange && selectedDateRange.from && (
-        <Button 
-          variant="outline" 
-          className={`w-full ${fonts.subheading.className}`}
-          onClick={() => {
-            try {
-              if (!selectedDateRange?.from || !selectedDateRange?.to) {
-                console.error('Invalid date range');
-                return;
-              }
-              if (!plannedItems.length) {
-                console.error('No items to distribute dates');
-                return;
-              }
-              onDistributeDates();
-            } catch (error) {
-              console.error('Error distributing dates:', error);
-            }
-          }}
-        >
-          {t('distribute_dates_to_cities_button')}
-        </Button>
-      )}
     </div>
   );
 
@@ -310,30 +286,30 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
             </div>
           </div>
           
-          <div className="flex flex-col sm:flex-row sm:gap-2 pt-4 mt-auto border-t">
+          <div className="flex flex-col sm:flex-row sm:gap-1 pt-4 mt-auto border-t">
             <Button 
-              size="lg" 
+              size="sm" 
               onClick={onAddFilteredItemsToPlan} 
-              className={`w-full sm:w-1/4 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className} mt-2 sm:mt-0`}
+              className={`flex-1 min-w-0 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className} mt-2 sm:mt-0 text-sm px-2`}
               disabled={isLoadingData}
             >
               {isLoadingData ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_to_plan_button')}
             </Button>
 
             { (currentLoadedGoalId || showPlanNameInput) ? (
-              <div className="w-full sm:w-1/4 flex flex-col gap-2 mt-2 sm:mt-0">
+              <div className="flex-1 min-w-0 flex flex-col gap-1 mt-2 sm:mt-0">
                 <Label htmlFor="goalNameInputPilgrimage" className="sr-only">{t('goal_name_placeholder')}</Label>
                 <Input
                   id="goalNameInputPilgrimage"
                   placeholder={t('goal_name_placeholder')}
                   value={goalNameValue}
                   onChange={(e) => onGoalNameChange(e.target.value)}
-                  className={`${fonts.body.className} text-sm`}
+                  className={`${fonts.body.className} text-sm h-8`}
                 />
                 <Button 
-                  size="lg"
+                  size="sm"
                   variant="outline"
-                  className={`w-full ${fonts.subheading.className}`}
+                  className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
                   onClick={() => {
                       onSaveOrUpdateGoal(goalNameValue);
                       if (showPlanNameInput && !currentLoadedGoalId) { 
@@ -347,9 +323,9 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               </div>
             ) : (
               <Button 
-                size="lg" 
+                size="sm" 
                 variant="outline"
-                className={`w-full sm:w-1/4 mt-2 sm:mt-0 ${fonts.subheading.className}`}
+                className={`flex-1 min-w-0 mt-2 sm:mt-0 ${fonts.subheading.className} text-sm px-2`}
                 onClick={() => setShowPlanNameInput(true)} 
               >
                 {t(saveButtonTextKey)}
@@ -357,19 +333,19 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
             )}
             
             <Button 
-              size="lg" 
+              size="sm" 
               variant="outline" 
-              className={`w-full sm:w-1/4 ${fonts.subheading.className} mt-2 sm:mt-0`} 
+              className={`flex-1 min-w-0 ${fonts.subheading.className} mt-2 sm:mt-0 text-sm px-2`} 
               onClick={onAddFavoritesToPlan}
             >
               {t('find_from_favorites')}
             </Button>
 
             <Button 
-              size="lg"
+              size="sm"
               variant="outline" 
               onClick={onClearPlan} 
-              className={`w-full sm:w-1/4 border-destructive text-destructive hover:bg-destructive/10 ${fonts.subheading.className} mt-2 sm:mt-0`}
+              className={`flex-1 min-w-0 border-destructive text-destructive hover:bg-destructive/10 ${fonts.subheading.className} mt-2 sm:mt-0 text-sm px-2`}
             >
                 {t('clear_short_button_text', {defaultValue: 'Clear'})}
             </Button>

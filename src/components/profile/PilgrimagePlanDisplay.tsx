@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, D
 import { Language, PlannedItem, City, Place, Event, Route } from '../../types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, GripVertical, Search, Dice5 } from 'lucide-react';
+import { Trash2, PlusCircle, GripVertical, Search, Dice5, ChevronDown } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { cn } from '@/lib/utils';
 
@@ -38,6 +38,19 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
 }) => {
   const searchTimeout = useRef<NodeJS.Timeout>();
   const [searchResultsForCity, setSearchResultsForCity] = useState<Record<string, Place[]>>({});
+  const [collapsedCities, setCollapsedCities] = useState<Set<string>>(new Set());
+
+  const toggleCityCollapse = (cityId: string) => {
+    setCollapsedCities(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(cityId)) {
+        newSet.delete(cityId);
+      } else {
+        newSet.add(cityId);
+      }
+      return newSet;
+    });
+  };
 
   const existingPlaceIds = useMemo(() => new Set(
     plannedItems
@@ -138,7 +151,6 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
       <div className="border rounded-md p-0 bg-white overflow-hidden h-full">
-        <h3 className="text-lg font-semibold mb-0 p-4 sticky top-0 bg-white z-10">{t('pilgrimage_plan')}</h3>
         {groupedItems.length === 0 && plannedItems.length === 0 ? (
           <div className="p-4 text-gray-500">{t('plan_results_placeholder')}</div>
         ) : (
@@ -161,15 +173,25 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                             <div {...providedCity.dragHandleProps} className="cursor-grab">
                               <GripVertical size={20} className="text-gray-500" />
                             </div>
-                            <span className="font-semibold text-blue-700">
-                              <Link 
-                                to={`/cities/${group.cityItem.data.id}`}
-                                target="_blank"
-                                className="hover:underline"
-                              >
-                                {getLocalizedText((group.cityItem.data as City).name, language)}
-                              </Link>
-                            </span>
+                            <button 
+                              onClick={() => toggleCityCollapse(group.cityItem.data.id)}
+                              className="flex items-center gap-2 hover:bg-blue-200 rounded px-2 py-1 transition-colors"
+                            >
+                              <ChevronDown 
+                                size={16} 
+                                className={`text-blue-700 transition-transform ${collapsedCities.has(group.cityItem.data.id) ? 'rotate-0' : 'rotate-180'}`}
+                              />
+                              <span className="font-semibold text-blue-700">
+                                <Link 
+                                  to={`/cities/${group.cityItem.data.id}`}
+                                  target="_blank"
+                                  className="hover:underline"
+                                  onClick={(e) => e.stopPropagation()}
+                                >
+                                  {getLocalizedText((group.cityItem.data as City).name, language)}
+                                </Link>
+                              </span>
+                            </button>
                             
                             {onSearchAndAddPlace && onAddSpecificPlace && (
                               <>
@@ -293,82 +315,84 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                           </div>
                         </div>
 
-                        <Droppable droppableId={group.cityItem.data.id} type="ITEM_IN_CITY">
-                          {(providedInner: DroppableProvided) => (
-                            <div ref={providedInner.innerRef} {...providedInner.droppableProps} className="p-2 bg-white rounded-b-md min-h-[30px]">
-                              {group.childItems.length > 0 ? group.childItems.map((item, itemIndex) => {
-                                const draggableId = `${item.type}-${item.data.id}-${item.orderIndex}`;
-                                return (
-                                  <Draggable key={draggableId} draggableId={draggableId} index={itemIndex}>
-                                    {(providedItem: DraggableProvided) => (
-                                      <div 
-                                        ref={providedItem.innerRef} 
-                                        {...providedItem.draggableProps} 
-                                        className="flex items-center p-1.5 mb-1 bg-gray-50 hover:bg-gray-100 rounded shadow-xs"
-                                      >
-                                        <div {...providedItem.dragHandleProps} className="cursor-grab pr-3 flex items-center">
-                                          <GripVertical size={16} className="text-gray-400" />
-                                        </div>
-                                        <div className="flex-grow pl-1">
-                                          <Link 
-                                            to={`/${item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
-                                            target="_blank"
-                                            className={cn(
-                                              "text-sm hover:underline",
-                                              item.type === 'place' ? (() => {
-                                                const place = item.data as Place;
-                                                if (!place.type) return "text-gray-600 hover:text-gray-800";
-                                                switch(place.type) {
-                                                  case 1: return "text-blue-600 hover:text-blue-800"; // temple
-                                                  case 2: return "text-red-600 hover:text-red-800"; // samadhi
-                                                  case 3: return "text-green-600 hover:text-green-800"; // kunda
-                                                  case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
-                                                  default: return "text-indigo-600 hover:text-indigo-800";
-                                                }
-                                              })() :
-                                              item.type === 'route' ? "text-green-600 hover:text-green-800" :
-                                              "text-purple-600 hover:text-purple-800"
-                                            )}
-                                          >
-                                            {getLocalizedText((item.data as Place | Route | Event).name, language)}
-                                          </Link>
-                                        </div>
-                                        <Input 
-                                          type="date" 
-                                          value={item.date || ''} 
-                                          onChange={(e) => onUpdateDateTime(item, e.target.value, item.time)} 
-                                          className="w-auto p-1 text-xs ml-2 h-7"
-                                          placeholder={t('date_placeholder')} 
-                                        />
-                                        {item.type === 'event' && (
-                                          <Input
-                                            type="time"
-                                            value={item.time || ''}
-                                            onChange={(e) => onUpdateDateTime(item, item.date, e.target.value)}
-                                            className="w-auto p-1 text-xs ml-2 h-7"
-                                            placeholder={t('time_placeholder')}
-                                          />
-                                        )}
-                                        <Button 
-                                          variant="ghost" 
-                                          size="icon" 
-                                          onClick={() => onRemoveItem(item)} 
-                                          className="ml-1 text-red-400 hover:text-red-600 h-7 w-7"
-                                          title={t('remove_item_tooltip', {defaultValue: 'Remove item'})}
+                        {!collapsedCities.has(group.cityItem.data.id) && (
+                          <Droppable droppableId={group.cityItem.data.id} type="ITEM_IN_CITY">
+                            {(providedInner: DroppableProvided) => (
+                              <div ref={providedInner.innerRef} {...providedInner.droppableProps} className="p-2 bg-white rounded-b-md min-h-[30px]">
+                                {group.childItems.length > 0 ? group.childItems.map((item, itemIndex) => {
+                                  const draggableId = `${item.type}-${item.data.id}-${item.orderIndex}`;
+                                  return (
+                                    <Draggable key={draggableId} draggableId={draggableId} index={itemIndex}>
+                                      {(providedItem: DraggableProvided) => (
+                                        <div 
+                                          ref={providedItem.innerRef} 
+                                          {...providedItem.draggableProps} 
+                                          className="flex items-center p-1.5 mb-1 bg-gray-50 hover:bg-gray-100 rounded shadow-xs"
                                         >
-                                          <Trash2 size={14} />
-                                        </Button>
-                                      </div>
-                                    )}
-                                  </Draggable>
-                                );
-                              }) : (
-                                <p className="text-xs text-gray-400 px-2 py-1">{t('no_items_for_this_city', {defaultValue: 'No items for this city yet. Drag items here or add new ones.'})}</p>
-                              )}
-                              {providedInner.placeholder}
-                            </div>
-                          )}
-                        </Droppable>
+                                          <div {...providedItem.dragHandleProps} className="cursor-grab pr-3 flex items-center">
+                                            <GripVertical size={16} className="text-gray-400" />
+                                          </div>
+                                          <div className="flex-grow pl-1">
+                                            <Link 
+                                              to={`/${item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
+                                              target="_blank"
+                                              className={cn(
+                                                "text-sm hover:underline",
+                                                item.type === 'place' ? (() => {
+                                                  const place = item.data as Place;
+                                                  if (!place.type) return "text-gray-600 hover:text-gray-800";
+                                                  switch(place.type) {
+                                                    case 1: return "text-blue-600 hover:text-blue-800"; // temple
+                                                    case 2: return "text-red-600 hover:text-red-800"; // samadhi
+                                                    case 3: return "text-green-600 hover:text-green-800"; // kunda
+                                                    case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
+                                                    default: return "text-indigo-600 hover:text-indigo-800";
+                                                  }
+                                                })() :
+                                                item.type === 'route' ? "text-green-600 hover:text-green-800" :
+                                                "text-purple-600 hover:text-purple-800"
+                                              )}
+                                            >
+                                              {getLocalizedText((item.data as Place | Route | Event).name, language)}
+                                            </Link>
+                                          </div>
+                                          <Input 
+                                            type="date" 
+                                            value={item.date || ''} 
+                                            onChange={(e) => onUpdateDateTime(item, e.target.value, item.time)} 
+                                            className="w-auto p-1 text-xs ml-2 h-7"
+                                            placeholder={t('date_placeholder')} 
+                                          />
+                                          {item.type === 'event' && (
+                                            <Input
+                                              type="time"
+                                              value={item.time || ''}
+                                              onChange={(e) => onUpdateDateTime(item, item.date, e.target.value)}
+                                              className="w-auto p-1 text-xs ml-2 h-7"
+                                              placeholder={t('time_placeholder')}
+                                            />
+                                          )}
+                                          <Button 
+                                            variant="ghost" 
+                                            size="icon" 
+                                            onClick={() => onRemoveItem(item)} 
+                                            className="ml-1 text-red-400 hover:text-red-600 h-7 w-7"
+                                            title={t('remove_item_tooltip', {defaultValue: 'Remove item'})}
+                                          >
+                                            <Trash2 size={14} />
+                                          </Button>
+                                        </div>
+                                      )}
+                                    </Draggable>
+                                  );
+                                }) : (
+                                  <p className="text-xs text-gray-400 px-2 py-1">{t('no_items_for_this_city', {defaultValue: 'No items for this city yet. Drag items here or add new ones.'})}</p>
+                                )}
+                                {providedInner.placeholder}
+                              </div>
+                            )}
+                          </Droppable>
+                        )}
                       </div>
                     )}
                   </Draggable>

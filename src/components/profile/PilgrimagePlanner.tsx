@@ -15,6 +15,7 @@ import { PilgrimagePlannerControls, PlaceSubtype, EventSubtype } from "./Pilgrim
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
 import PilgrimageRouteMap from "./PilgrimageRouteMap";
 import { FilteredResults } from "./FilteredResults";
+import { Button } from "@/components/ui/button";
 
 const placeTypeNumberToSubtypeString: Record<number, PlaceSubtype | undefined> = {
   1: 'temple',
@@ -54,6 +55,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [selectedDateRange, setSelectedDateRange] = useState<import("react-day-picker").DateRange | undefined>(undefined);
   const [sortedItemsForDisplay, setSortedItemsForDisplay] = useState<PlannedItem[]>([]);
   const [isPlanInitiated, setIsPlanInitiated] = useState<boolean>(false);
+  const [showSearchResults, setShowSearchResults] = useState<boolean>(false);
   const [cityPlaceSuggestions, setCityPlaceSuggestions] = useState<Record<string, CitySuggestionState>>({});
   const [savedGoals, setSavedGoals] = useState<any[]>([]);
   const [goalNameForInput, setGoalNameForInput] = useState('');
@@ -61,7 +63,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); 
  
   const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple', 'samadhi', 'kunda', 'sacred_site']);
-  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'retreat', 'vipassana', 'lecture', 'puja', 'guru_festival']);
+  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'visit', 'lecture', 'puja', 'guru_festival']);
 
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
@@ -349,6 +351,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       .map(item => ({ ...item, orderIndex: currentOrderIndex++ }));
     
     setPlannedItems(finalSortedItems);
+    setShowSearchResults(true); // Показываем результаты поиска
     
     // Автоматически распределяем даты, если выбран диапазон и есть элементы
     if (selectedDateRange && selectedDateRange.from && finalSortedItems.length > 0) {
@@ -664,10 +667,11 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setGoalNameForInput('');
     setCurrentLoadedGoalId(null);
     setSelectedPlaceSubtypes(['temple', 'samadhi', 'kunda', 'sacred_site']);
-    setSelectedEventSubtypes(['festival', 'practice', 'retreat', 'vipassana', 'lecture', 'puja', 'guru_festival']);
+    setSelectedEventSubtypes(['festival', 'practice', 'visit', 'lecture', 'puja', 'guru_festival']);
     setFilteredPlaces([]);
     setFilteredEvents([]);
     setCityPlaceSuggestions({});
+    setShowSearchResults(false); // Скрываем результаты поиска
   };
 
   const fetchGoals = useCallback(async () => {
@@ -1053,93 +1057,43 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   };
 
   return (
-    <div className="flex flex-col gap-6">
-      {/* Верхняя панель с контролами */}
-      <PilgrimagePlannerControls
-        availableCities={availableCities}
-        filterSelectedCityIds={filterControlSelectedCityIds}
-        onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds}
-        plannedItems={plannedItems} 
-        selectedDateRange={selectedDateRange} 
-        language={language}
-        t={t}
-        onDateRangeChange={handleDateRangeChange}
-        onDistributeDates={handleDistributeDates}
-        onAddFavoritesToPlan={handleAddFavoritesToPlan}
-        goalNameValue={goalNameForInput}
-        onGoalNameChange={setGoalNameForInput}
-        currentLoadedGoalId={currentLoadedGoalId}
-        onSaveOrUpdateGoal={handleSaveOrUpdateGoal}
-        onLoadGoal={handleLoadGoal}
-        onDeleteGoal={handleDeleteGoal}
-        savedGoals={savedGoals}
-        selectedPlaceSubtypes={selectedPlaceSubtypes}
-        selectedEventSubtypes={selectedEventSubtypes}
-        onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes} 
-        onSelectedEventSubtypesChange={setSelectedEventSubtypes} 
-        onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
-        onClearPlan={handleClearPlan}
-        isLoadingData={isLoadingCities || isLoadingPlacesAndEvents}
-      />
-
+    <div className="flex flex-col">
       {/* Основной контент с трехколоночной структурой */}
       {!isLoadingCities && !isLoadingPlacesAndEvents && (
-        <div className="grid grid-cols-1 lg:grid-cols-10 gap-6 min-h-[600px]">
+        <div className="grid grid-cols-1 xl:grid-cols-10 gap-0 min-h-[600px]">
           {/* Левая колонка - Фильтры (30%) */}
-          <div className="lg:col-span-3">
-            <div className="sticky top-6">
-              <h3 className="text-lg font-semibold mb-4">
-                {t('filter_results', { defaultValue: 'Фильтры' })}
-              </h3>
-              <div className="text-sm text-gray-600 mb-4">
-                <p>{t('selected_cities', { defaultValue: 'Выбрано городов' })}: {filterControlSelectedCityIds.length}</p>
-                <p>{t('selected_place_types', { defaultValue: 'Типы мест' })}: {selectedPlaceSubtypes.length}</p>
-                <p>{t('selected_event_types', { defaultValue: 'Типы событий' })}: {selectedEventSubtypes.length}</p>
-              </div>
-            </div>
-          </div>
-
-          {/* Средняя колонка - Результаты (30%) */}
-          <div className="lg:col-span-3">
-            <FilteredResults
-              filteredPlaces={filteredPlaces}
-              filteredEvents={filteredEvents}
+          <div className="xl:col-span-3 order-1">
+            <PilgrimagePlannerControls
               availableCities={availableCities}
               filterSelectedCityIds={filterControlSelectedCityIds}
-              selectedPlaceSubtypes={selectedPlaceSubtypes}
-              selectedEventSubtypes={selectedEventSubtypes}
+              onFilterSelectedCityIdsChange={setFilterControlSelectedCityIds}
+              plannedItems={plannedItems} 
+              selectedDateRange={selectedDateRange} 
               language={language}
               t={t}
-              plannedItems={plannedItems}
+              onDateRangeChange={handleDateRangeChange}
+              onDistributeDates={handleDistributeDates}
+              onAddFavoritesToPlan={handleAddFavoritesToPlan}
+              goalNameValue={goalNameForInput}
+              onGoalNameChange={setGoalNameForInput}
+              currentLoadedGoalId={currentLoadedGoalId}
+              onSaveOrUpdateGoal={handleSaveOrUpdateGoal}
+              onLoadGoal={handleLoadGoal}
+              onDeleteGoal={handleDeleteGoal}
+              savedGoals={savedGoals}
+              selectedPlaceSubtypes={selectedPlaceSubtypes}
+              selectedEventSubtypes={selectedEventSubtypes}
+              onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes} 
+              onSelectedEventSubtypesChange={setSelectedEventSubtypes} 
+              onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
+              onClearPlan={handleClearPlan}
+              isLoadingData={isLoadingCities || isLoadingPlacesAndEvents}
             />
           </div>
 
-          {/* Правая колонка - Карта (40%) */}
-          <div className="lg:col-span-4">
-            <h3 className="text-lg font-semibold mb-4">
-              {t('map_preview', { defaultValue: 'Предпросмотр карты' })}
-            </h3>
-            <div className="h-full border rounded-lg overflow-hidden">
-              {(filterControlSelectedCityIds.length > 0 || plannedItems.length > 0) ? (
-                <PilgrimageRouteMap plannedItems={plannedItems.length > 0 ? sortedItemsForDisplay : []} />
-              ) : (
-                <div className="h-full flex items-center justify-center text-gray-500">
-                  {t('select_cities_to_see_map', { defaultValue: 'Выберите города, чтобы увидеть карту' })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* План путешествия (если есть элементы) */}
-      {!isLoadingCities && !isLoadingPlacesAndEvents && isPlanInitiated && (
-        <div className="mt-8">
-          <h3 className="text-xl font-semibold mb-4">
-            {t('travel_plan', { defaultValue: 'План путешествия' })}
-          </h3>
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            <div>
+          {/* Средняя колонка - Список городов и мест (30%) */}
+          <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full">
+            {showSearchResults ? (
               <PilgrimagePlanDisplay
                 plannedItems={sortedItemsForDisplay}
                 language={language}
@@ -1151,14 +1105,26 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
                 onAddSpecificPlace={handleAddSpecificPlace}
                 onReorderItems={handlePlannedItemsReorder}
               />
-            </div>
-            <div>
-              <PilgrimageRouteMap plannedItems={sortedItemsForDisplay} />
-            </div>
+            ) : (
+              <div className="h-full flex items-center justify-center text-gray-500 bg-gray-50 p-4">
+                <div className="text-center">
+                  <div className="text-2xl mb-2">📍</div>
+                  <p className="text-sm">
+                    {t('press_find_to_see_plan', { defaultValue: 'Нажмите "Найти", чтобы увидеть список городов и мест' })}
+                  </p>
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Правая колонка - Карта (40%) */}
+          <div className="xl:col-span-4 order-3 border-l border-gray-200 h-full">
+            <PilgrimageRouteMap plannedItems={plannedItems.length > 0 ? sortedItemsForDisplay : []} />
           </div>
         </div>
       )}
 
+  
       {(isLoadingCities || isLoadingPlacesAndEvents) && (
         <div className="text-center p-4">
           {t('loading_data', { defaultValue: 'Loading data...'})}

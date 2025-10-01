@@ -16,13 +16,25 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
   const placesForRoute: PlaceType[] = (plannedItems || [])
     .filter(item => {
       try {
-        return (
+        console.log('🔍 Processing item:', item);
+        const isValid = (
           item?.type === 'place' && 
           item?.data?.id && 
           (item.data as PlaceType)?.location && 
           (item.data as PlaceType).location.latitude != null && 
           (item.data as PlaceType).location.longitude != null
         );
+        console.log('✅ Item valid:', isValid, 'Type:', item?.type, 'Has data:', !!item?.data);
+        if (isValid) {
+          const place = item.data as PlaceType;
+          console.log('📍 Place location:', {
+            id: place.id,
+            name: place.name,
+            lat: place.location?.latitude,
+            lng: place.location?.longitude
+          });
+        }
+        return isValid;
       } catch (e) {
         console.error('Error processing place item:', item, e);
         return false;
@@ -90,11 +102,9 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({ plannedItems })
   }
 
   return (
-    <div className="bg-white p-6 rounded-lg shadow-sm">
-      <div className="pilgrimage-route-map-container flex items-start h-full w-full max-w-none ml-0 pl-0 pr-0 mr-0">
-        {/* Apply the key to the RouteMap component */}
-        <RouteMap places={placesForRoute} maintainZoom={mapShouldMaintainZoom} key={mapKey} />
-      </div>
+    <div className="pilgrimage-route-map-container h-full w-full">
+      {/* Apply the key to the RouteMap component */}
+      <RouteMap places={placesForRoute} maintainZoom={mapShouldMaintainZoom} key={mapKey} />
     </div>
   );
 };

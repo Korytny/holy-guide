@@ -88,7 +88,9 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
     if (!mapInstance.current || !isMapReady) return;
 
     const map = mapInstance.current;
+    console.log('🗺️ CityMapView received locations:', locations);
     const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
+    console.log('🗺️ Valid locations for map:', validLocations);
 
     // --- Clear previous layers --- 
     map.eachLayer(layer => {
@@ -150,7 +152,7 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
         // --- Fit Bounds --- 
         if (bounds.isValid() && !maintainZoom) {
           try {
-              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 }); // Increased padding slightly
+              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
           } catch (e) {
               console.error("Error fitting map bounds:", e);
           }

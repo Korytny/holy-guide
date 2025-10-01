@@ -26,22 +26,12 @@ const PilgrimagePlannerPage = () => {
 
   return (
     <div className="min-h-screen bg-orange-50">
-      <div className="py-8">
-        <section aria-labelledby="pilgrimage-planner-heading" className="mb-8">
-          <WordPullUp
-            id="pilgrimage-planner-heading"
-            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mt-20 mb-20"
-            words={t('pilgrimage_plan', { defaultValue: 'Pilgrimage Plan' })}
-          />
-        </section>
-        
-        <div className="w-full">
-          <PilgrimagePlanner
-            auth={authContext}
-            language={language}
-            t={t}
-          />
-        </div>
+      <div className="w-full">
+        <PilgrimagePlanner
+          auth={authContext}
+          language={language}
+          t={t}
+        />
       </div>
     </div>
   );

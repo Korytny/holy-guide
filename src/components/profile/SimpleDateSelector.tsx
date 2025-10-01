@@ -137,17 +137,6 @@ export function SimpleDateSelector({
         </div>
       </div>
 
-      {/* Очистка выбора */}
-      {selectedDateRange && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={clearDates}
-          className="w-full"
-        >
-          Очистить даты
-        </Button>
-      )}
-    </div>
+      </div>
   );
 }

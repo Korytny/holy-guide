@@ -123,33 +123,34 @@ export function FilteredResults({
   }
 
   return (
-    <div className="flex flex-col h-full gap-6">
-      {/* Список городов с местами и событиями */}
-      <div className="flex-1 overflow-y-auto">
-        <h3 className="text-lg font-semibold mb-4">
-          {t('found_results', { defaultValue: 'Найденные результаты' })}
-        </h3>
-        <div className="space-y-4">
+    <div className="bg-white rounded-lg shadow-sm border p-4 h-full">
+      <h3 className="text-lg font-semibold mb-4">
+        {t('found_results', { defaultValue: 'Найденные результаты' })}
+      </h3>
+      
+      {hasFilters && Object.keys(itemsByCity).length > 0 ? (
+        <div className="space-y-4 max-h-[450px] overflow-y-auto">
           {Object.values(itemsByCity).map(({ city, places, events }) => (
-            <div key={city.id} className="border rounded-lg p-4">
-              <h4 className="font-medium mb-2">
+            <div key={city.id} className="border border-gray-200 rounded-lg p-3">
+              <h4 className="font-medium text-sm mb-2 flex items-center">
+                <span className="w-2 h-2 bg-blue-500 rounded-full mr-2"></span>
                 {getLocalizedText(city.name, language)}
               </h4>
               
               {places.length > 0 && (
-                <div className="mb-3">
-                  <p className="text-sm text-gray-600 mb-1">
-                    {t('places', { defaultValue: 'Места' })}: {places.length}
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
-                    {places.slice(0, 3).map(place => (
-                      <div key={place.id} className="text-sm p-2 bg-gray-50 rounded">
+                <div className="mb-2">
+                  <div className="text-xs text-gray-600 mb-1 flex items-center">
+                    🏛️ {t('places', { defaultValue: 'Места' })}: {places.length}
+                  </div>
+                  <div className="space-y-1">
+                    {places.slice(0, 2).map(place => (
+                      <div key={place.id} className="text-xs p-2 bg-blue-50 rounded border-l-2 border-blue-200">
                         {getLocalizedText(place.name, language)}
                       </div>
                     ))}
-                    {places.length > 3 && (
-                      <div className="text-sm text-gray-500">
-                        +{places.length - 3} {t('more_places', { defaultValue: 'ещё мест' })}
+                    {places.length > 2 && (
+                      <div className="text-xs text-blue-600">
+                        +{places.length - 2} {t('more_places', { defaultValue: 'ещё' })}
                       </div>
                     )}
                   </div>
@@ -158,43 +159,45 @@ export function FilteredResults({
               
               {events.length > 0 && (
                 <div>
-                  <p className="text-sm text-gray-600 mb-1">
-                    {t('events', { defaultValue: 'События' })}: {events.length}
-                  </p>
-                  <div className="grid grid-cols-1 gap-2">
+                  <div className="text-xs text-gray-600 mb-1 flex items-center">
+                    🎉 {t('events', { defaultValue: 'События' })}: {events.length}
+                  </div>
+                  <div className="space-y-1">
                     {events.slice(0, 2).map(event => (
-                      <div key={event.id} className="text-sm p-2 bg-gray-50 rounded">
+                      <div key={event.id} className="text-xs p-2 bg-purple-50 rounded border-l-2 border-purple-200">
                         {getLocalizedText(event.name, language)}
                       </div>
                     ))}
                     {events.length > 2 && (
-                      <div className="text-sm text-gray-500">
-                        +{events.length - 2} {t('more_events', { defaultValue: 'ещё событий' })}
+                      <div className="text-xs text-purple-600">
+                        +{events.length - 2} {t('more_events', { defaultValue: 'ещё' })}
                       </div>
                     )}
                   </div>
                 </div>
               )}
+              
+              {places.length === 0 && events.length === 0 && (
+                <div className="text-xs text-gray-500 italic">
+                  {t('no_items_in_city', { defaultValue: 'Нет мест или событий в этом городе' })}
+                </div>
+              )}
             </div>
           ))}
         </div>
-      </div>
-
-      {/* Карта */}
-      <div className="flex-1">
-        <h3 className="text-lg font-semibold mb-4">
-          {t('map', { defaultValue: 'Карта' })}
-        </h3>
-        <div className="h-full border rounded-lg overflow-hidden">
-          {mapItems.length > 0 ? (
-            <PilgrimageRouteMap plannedItems={mapItems} />
-          ) : (
-            <div className="h-full flex items-center justify-center text-gray-500">
-              {t('no_items_for_map', { defaultValue: 'Нет элементов для отображения на карте' })}
-            </div>
-          )}
+      ) : (
+        <div className="h-full flex items-center justify-center text-gray-500">
+          <div className="text-center">
+            <div className="text-2xl mb-2">🔍</div>
+            <p className="text-sm">
+              {hasFilters 
+                ? t('no_results_for_filters', { defaultValue: 'Нет результатов по выбранным фильтрам' })
+                : t('select_filters_to_see_results', { defaultValue: 'Выберите фильтры, чтобы увидеть результаты' })
+              }
+            </p>
+          </div>
         </div>
-      </div>
+      )}
     </div>
   );
 }

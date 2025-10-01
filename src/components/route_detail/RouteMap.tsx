@@ -50,14 +50,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
 
     return (
         <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-0 w-full max-w-none">
-            <div className="flex items-center gap-2 mb-4">
-              <MapPin className="w-5 h-5 text-gray-900" />
-              <h2 className={cn(
-                "text-xl font-bold text-gray-900",
-                fonts.heading.className
-              )}>Маршрут на карте</h2>
-            </div>
-            <div className="flex-grow rounded-none overflow-hidden w-full" style={{ height: '500px' }}>
+            <div className="flex-grow rounded-none overflow-hidden w-full h-full">
                 <CityMapView 
                     locations={mapLocations} 
                     polylinePoints={polylinePoints}
