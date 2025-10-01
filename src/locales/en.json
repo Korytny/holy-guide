@@ -48,6 +48,7 @@
     "session_not_established_desc": "Could not establish session. Please try again.",
     "login_to_view_cities": "Please sign in to view cities.",
     "profile": "Profile",
+    "no_places_with_coordinates": "No places with coordinates available for map display",
     "my_profile": "My Profile",
     "your_profile": "Your Profile",
     "welcome": "Welcome!",

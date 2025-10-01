@@ -59,25 +59,49 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
 
   // Initialize map
   useEffect(() => {
-    if (!mapContainer.current || mapInstance.current) return; // Initialize only once
+    console.log('🗺️ Initializing map...');
+    console.log('🗺️ Map container ref:', mapContainer.current);
+    console.log('🗺️ Map instance exists:', !!mapInstance.current);
     
-    const defaultCenter = center || (locations.length > 0 ? 
-      [locations[0].latitude, locations[0].longitude] : 
+    if (!mapContainer.current) {
+      console.error('🗺️ Map container is null!');
+      return;
+    }
+    
+    if (mapInstance.current) {
+      console.log('🗺️ Map already initialized, skipping');
+      return; // Initialize only once
+    }
+    
+    const defaultCenter = center || (locations.length > 0 ?
+      [locations[0].latitude, locations[0].longitude] :
       [0, 0]); // Fallback to 0,0 if no locations
-    mapInstance.current = L.map(mapContainer.current, { 
-      center: defaultCenter, 
-      zoom,
-      preferCanvas: true // Better performance for many markers
-    });
     
-    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-      attribution: '&copy; OpenStreetMap contributors'
-    }).addTo(mapInstance.current);
+    console.log('🗺️ Creating map with center:', defaultCenter, 'zoom:', zoom);
     
-    setIsMapReady(true);
-    return () => { 
+    try {
+      mapInstance.current = L.map(mapContainer.current, {
+        center: defaultCenter,
+        zoom,
+        preferCanvas: true // Better performance for many markers
+      });
+      
+      console.log('🗺️ Map created successfully:', !!mapInstance.current);
+      
+      L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+        attribution: '&copy; OpenStreetMap contributors'
+      }).addTo(mapInstance.current);
+      
+      console.log('🗺️ Tile layer added');
+      setIsMapReady(true);
+    } catch (error) {
+      console.error('🗺️ Error creating map:', error);
+    }
+    
+    return () => {
+      console.log('🗺️ Cleaning up map...');
       if (mapInstance.current) {
-        mapInstance.current.remove(); 
+        mapInstance.current.remove();
         mapInstance.current = null;
       }
     };
@@ -91,6 +115,8 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
     console.log('🗺️ CityMapView received locations:', locations);
     const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
     console.log('🗺️ Valid locations for map:', validLocations);
+    console.log('🗺️ Map instance exists:', !!mapInstance.current);
+    console.log('🗺️ Map container exists:', !!mapContainer.current);
 
     // --- Clear previous layers --- 
     map.eachLayer(layer => {
@@ -166,7 +192,7 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden relative"> {/* Changed h-[400px] to h-full */}
-      <div ref={mapContainer} className="h-full w-full" />
+      <div ref={mapContainer} className="h-full w-full min-h-[400px]" />
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100"><p>Loading map...</p></div>
       )}

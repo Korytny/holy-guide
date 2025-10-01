@@ -37,6 +37,15 @@ const RouteDetail = () => {
         ]);
         console.log('Places data:', placesData);
         console.log('Events data:', eventsData);
+        
+        // Debug: Check if places have valid coordinates
+        const placesWithValidCoords = placesData.filter(place =>
+          place.location?.latitude && place.location?.longitude
+        );
+        console.log('Places with valid coordinates:', placesWithValidCoords);
+        console.log('Total places:', placesData.length);
+        console.log('Places with valid coords:', placesWithValidCoords.length);
+        
         setPlaces(placesData);
         setEvents(eventsData);
       }
@@ -136,7 +145,7 @@ const RouteDetail = () => {
                   />
                 </div>
 
-        {/* Route Map */} 
+        {/* Route Map */}
         <RouteMap places={places} />
         
         {/* Comments Section */} 
