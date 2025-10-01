@@ -14,6 +14,7 @@ import { getLocalizedText } from '../utils/languageUtils';
 import { motion } from 'framer-motion';
 import { AnimatedText } from '@/components/ui/animated-underline-text-one'; // Import AnimatedText
 import { WordPullUp } from '@/components/ui/word-pull-up';
+import { PilgrimagePlanner } from '../components/profile/PilgrimagePlanner';
 
 const CitiesPage = () => {
   const { language, t } = useLanguage();
@@ -135,6 +136,21 @@ const CitiesPage = () => {
             </div>
           )}
         </div>
+      </div>
+
+      {/* PilgrimagePlanner Section - Full Width */}
+      <div className="w-full">
+        <div className="text-center mb-20 pt-20">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Запланируй свое поломничество
+          </h2>
+        </div>
+        
+        <PilgrimagePlanner
+          auth={authContext}
+          language={language}
+          t={t}
+        />
       </div>
 
         </>

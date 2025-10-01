@@ -285,5 +285,7 @@
   "clear_date_range_button": "Не ограничивать период",
   "feature_in_development": "Функция в разработке.",
     "click_to_load_goal": "Нажмите для загрузки плана",
-  "clear_short_button_text": "Очистить"
+  "clear_short_button_text": "Очистить",
+  "saved_goals_title": "Сохраненные маршруты",
+  "press_find_to_see_plan": "Выберите город и что вы в нем хотите посмотреть и в чем поучаствовать"
 }

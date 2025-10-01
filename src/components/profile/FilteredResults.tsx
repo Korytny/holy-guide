@@ -1,7 +1,7 @@
 import React from 'react';
 import { City, Place, Event, Language, PlannedItem } from '../../types';
-import { CityCard } from '../CityCard';
-import { PilgrimageRouteMap } from './PilgrimageRouteMap';
+import CityCard from '../CityCard';
+import PilgrimageRouteMap from './PilgrimageRouteMap';
 import { useLanguage } from '../../context/LanguageContext';
 import { getLocalizedText } from '../../utils/languageUtils';
 
@@ -102,8 +102,7 @@ export function FilteredResults({
     return items;
   }, [itemsByCity]);
 
-  const hasFilters = filterSelectedCityIds.length > 0 || 
-                   selectedPlaceSubtypes.length > 0 || 
+  const hasFilters = selectedPlaceSubtypes.length > 0 ||
                    selectedEventSubtypes.length > 0;
 
   if (!hasFilters) {

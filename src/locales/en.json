@@ -272,5 +272,7 @@
   "distribute_dates_evenly_button": "Distribute Dates Evenly",
   "clear_date_range_button": "Clear Date Range",
     "click_to_load_goal": "Click to load plan",
-  "clear_short_button_text": "Clear"
+  "clear_short_button_text": "Clear",
+  "saved_goals_title": "Saved Routes",
+  "press_find_to_see_plan": "Select a city and what you want to see and participate in there"
 }

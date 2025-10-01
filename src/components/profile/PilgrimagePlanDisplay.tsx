@@ -159,7 +159,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
               <div
                 {...providedOuter.droppableProps}
                 ref={providedOuter.innerRef}
-                className="h-full max-h-[calc(100vh-150px)] overflow-y-auto">
+                className="h-full max-h-[100vh] overflow-y-auto">
                 {groupedItems.map((group, cityIndex) => (
                   <Draggable key={group.cityItem.data.id} draggableId={group.cityItem.data.id} index={cityIndex}>
                     {(providedCity: DraggableProvided) => (

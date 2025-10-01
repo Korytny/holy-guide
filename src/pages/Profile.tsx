@@ -75,40 +75,49 @@ const Profile = () => {
 
   return (
     // Layout might be here or at App.tsx level
-    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-purple-50 p-4 md:p-8">
-      <div className="max-w-6xl mx-auto">
-        <ProfileHeader favoriteCounts={allCounts} />
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">{t('personal_pilgrimage_planner')}</h2>
-          <PilgrimagePlanner 
-            auth={authContextValue} 
-            language={language} 
-            t={t} 
-            // onItemsChange is no longer needed
-          />
-          {/* PilgrimageRouteMap is no longer rendered here directly */}
+    <div className="min-h-screen bg-gradient-to-b from-orange-50 to-purple-50">
+      <div className="p-4 md:p-8">
+        <div className="max-w-6xl mx-auto">
+          <ProfileHeader favoriteCounts={allCounts} />
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-4">{t('guru_planner_main_title')}</h2>
+            <GuruPlanner
+              auth={authContextValue}
+              language={language}
+              t={t}
+            />
+          </div>
+          <div className="mt-10"> {/* Added wrapper with margin-top */}
+            <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
+          </div>
+          <UserCommentsSection onCommentsAndPhotosCountLoaded={handleCommentsAndPhotosCountLoaded} />
+          
+          <div className="mt-8 text-center">
+            <Button
+              variant="ghost"
+              onClick={() => navigate('/')}
+              className="text-gray-600 hover:text-gray-900"
+            >
+              {t('back_to_cities')}
+            </Button>
+          </div>
         </div>
-        <div className="mt-8">
-          <h2 className="text-xl font-semibold mb-4">{t('guru_planner_main_title')}</h2>
-          <GuruPlanner 
-            auth={authContextValue} 
-            language={language} 
-            t={t} 
-          />
+      </div>
+      
+      {/* PilgrimagePlanner Section - Full Width at bottom, outside container */}
+      <div className="w-full bg-gradient-to-b from-orange-50 to-purple-50">
+        <div className="text-center mb-20 pt-20">
+          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+            Запланируй свое поломничество
+          </h2>
         </div>
-        <div className="mt-10"> {/* Added wrapper with margin-top */}
-          <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
-        </div>
-        <UserCommentsSection onCommentsAndPhotosCountLoaded={handleCommentsAndPhotosCountLoaded} />
-        <div className="mt-8 text-center">
-          <Button 
-            variant="ghost" 
-            onClick={() => navigate('/')}
-            className="text-gray-600 hover:text-gray-900"
-          >
-            {t('back_to_cities')} 
-          </Button>
-        </div>
+        
+        <PilgrimagePlanner
+          auth={authContextValue}
+          language={language}
+          t={t}
+          // onItemsChange is no longer needed
+        />
       </div>
     </div>
   );

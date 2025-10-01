@@ -4,12 +4,13 @@ import { type AuthContextType } from "../../context/AuthContext";
 import { type LanguageContextType } from "../../context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem, Location } from "../../types";
 import { getCities } from "../../services/citiesApi";
-import { getPlacesByCityId } from "../../services/placesApi"; 
+import { getPlacesByCityId } from "../../services/placesApi";
 import { getEvents } from "../../services/eventsApi";
 import { format, addDays, eachDayOfInterval } from "date-fns";
-import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api'; 
+import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '../../services/api';
 import { supabase } from '../../integrations/supabase/client';
 import { getLocalizedText } from '../../utils/languageUtils';
+import { useToast } from "@/hooks/use-toast";
 
 import { PilgrimagePlannerControls, PlaceSubtype, EventSubtype } from "./PilgrimagePlannerControls";
 import { PilgrimagePlanDisplay } from "./PilgrimagePlanDisplay";
@@ -49,6 +50,7 @@ const getNextOrderIndex = (items: PlannedItem[]): number => {
 };
 
 export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: authContext, language, t, onItemsChange }) => {
+  const { toast } = useToast();
   const [availableCities, setAvailableCities] = useState<City[]>([]);
   const [stagedForPlanningCities, setStagedForPlanningCities] = useState<City[]>([]);
   const [plannedItems, setPlannedItems] = useState<PlannedItem[]>([]);
@@ -63,7 +65,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   const [filterControlSelectedCityIds, setFilterControlSelectedCityIds] = useState<string[]>([]); 
  
   const [selectedPlaceSubtypes, setSelectedPlaceSubtypes] = useState<PlaceSubtype[]>(['temple', 'samadhi', 'kunda', 'sacred_site']);
-  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'lecture', 'puja', 'guru_festival']);
+  const [selectedEventSubtypes, setSelectedEventSubtypes] = useState<EventSubtype[]>(['festival', 'practice', 'retreat', 'vipassana', 'puja', 'lecture', 'guru_festival', 'visit']);
 
   const [availablePlaces, setAvailablePlaces] = useState<Place[]>([]);
   const [availableEvents, setAvailableEvents] = useState<Event[]>([]);
@@ -86,18 +88,12 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       const cities = await getCities();
       if (cities) {
         setAvailableCities(cities);
-        const rishikeshCity = cities.find(city => 
-          city.name?.en?.toLowerCase() === "rishikesh" || 
-          city.name?.ru === "Решикешь"
-        );
-        if (rishikeshCity) {
-          setFilterControlSelectedCityIds([rishikeshCity.id]);
-        }
+        // No cities selected by default - empty array
       }
       setIsLoadingCities(false);
     };
     fetchInitialCities();
-  }, []); 
+  }, []);
 
   useEffect(() => {
     const finalSortedList = [...plannedItems].sort((a, b) => a.orderIndex - b.orderIndex);
@@ -139,7 +135,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   useEffect(() => {
     let cityIdsToConsider: Set<string>;
     if (filterControlSelectedCityIds.length === 0) {
-      cityIdsToConsider = new Set(availableCities.map(c => c.id)); // All available cities
+      cityIdsToConsider = new Set(); // No cities selected - show nothing
     } else {
       cityIdsToConsider = new Set(filterControlSelectedCityIds); // Specific cities from filter
     }
@@ -148,14 +144,15 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
     if (availablePlaces.length > 0 && cityIdsToConsider.size > 0) {
       tempFilteredPlaces = availablePlaces.filter(p => {
-        if (!cityIdsToConsider.has(p.cityId)) return false; 
+        if (!cityIdsToConsider.has(p.cityId)) return false;
         
-        if (selectedPlaceSubtypes.length === 0) return true; // No subtype filter: include all from considered cities
+        // Only show places if at least one subtype is selected
+        if (selectedPlaceSubtypes.length === 0) return false;
 
         // Subtype filter active:
         if (p.type === undefined) return false; // Place must have a type to match subtype filter
         const subtypeString = placeTypeNumberToSubtypeString[p.type];
-        return subtypeString && selectedPlaceSubtypes.includes(subtypeString); 
+        return subtypeString && selectedPlaceSubtypes.includes(subtypeString);
       });
     }
     setFilteredPlaces(tempFilteredPlaces);
@@ -164,7 +161,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
   useEffect(() => {
     let cityIdsToConsider: Set<string>;
     if (filterControlSelectedCityIds.length === 0) {
-      cityIdsToConsider = new Set(availableCities.map(c => c.id)); // All available cities
+      cityIdsToConsider = new Set(); // No cities selected - show nothing
     } else {
       cityIdsToConsider = new Set(filterControlSelectedCityIds); // Specific cities from filter
     }
@@ -175,7 +172,8 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       tempFilteredEvents = availableEvents.filter(e => {
         if (!cityIdsToConsider.has(e.cityId)) return false;
 
-        if (selectedEventSubtypes.length === 0) return true; // No subtype filter: include all from considered cities
+        // Only show events if at least one subtype is selected
+        if (selectedEventSubtypes.length === 0) return false;
         
         return e.eventTypeField && selectedEventSubtypes.includes(e.eventTypeField);
       });
@@ -283,10 +281,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
 
         const cityItemsForNewPlan: PlannedItem[] = [];
         // Определяем пул городов для поиска родительских:
-        // если в контролах выбраны города - то только они, иначе - все доступные.
+        // если в контролах выбраны города - то только они, иначе - пустой массив (ничего не показываем)
         const sourceCityPool = filterControlSelectedCityIds.length > 0
           ? availableCities.filter(c => filterControlSelectedCityIds.includes(c.id))
-          : availableCities;
+          : [];
         
         sourceCityPool.forEach(cityData => {
           if (cityIdsOfNewSubItems.has(cityData.id)) {
@@ -666,8 +664,9 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     setStagedForPlanningCities([]);
     setGoalNameForInput('');
     setCurrentLoadedGoalId(null);
+    setFilterControlSelectedCityIds([]);
     setSelectedPlaceSubtypes(['temple', 'samadhi', 'kunda', 'sacred_site']);
-    setSelectedEventSubtypes(['festival', 'practice', 'lecture', 'puja', 'guru_festival']);
+    setSelectedEventSubtypes(['festival', 'practice', 'retreat', 'vipassana', 'puja', 'lecture', 'guru_festival', 'visit']);
     setFilteredPlaces([]);
     setFilteredEvents([]);
     setCityPlaceSuggestions({});
@@ -723,7 +722,10 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
     
     if (!authContext?.auth?.user?.id) {
       console.error('❌ Пользователь не аутентифицирован');
-      alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
+      toast({
+        title: t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}),
+        variant: "destructive"
+      });
       return;
     }
     
@@ -827,7 +829,9 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
           throw error;
         }
         console.log('✅ Цель успешно обновлена');
-        alert(t('goal_updated_successfully', {defaultValue: 'Goal updated successfully.'}));
+        toast({
+          title: t('goal_updated_successfully', {defaultValue: 'Goal updated successfully.'})
+        });
       } else {
         console.log('🆕 Создание новой цели');
         const { data: insertedGoal, error } = await supabase.from('goals').insert([goalData]).select();
@@ -839,19 +843,27 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
             console.log('✅ Цель успешно создана:', insertedGoal[0].id);
             setCurrentLoadedGoalId(insertedGoal[0].id);
         }
-        alert(t('goal_saved_successfully'));
+        toast({
+          title: t('goal_saved_successfully')
+        });
       }
       console.log('📂 Обновление списка целей');
       fetchGoals();
     } catch (error) {
       console.error("❌ Error saving/updating goal:", error);
-      alert(t('error_saving_goal'));
+      toast({
+        title: t('error_saving_goal'),
+        variant: "destructive"
+      });
     }
   };
   
   const handleDeleteGoal = async (goalId: string) => {
     if (!authContext?.auth?.user?.id) {
-        alert(t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}));
+        toast({
+          title: t('user_not_authenticated_error_message', {defaultValue: 'User not authenticated.'}),
+          variant: "destructive"
+        });
         return;
     }
     try {
@@ -861,10 +873,15 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
         if (currentLoadedGoalId === goalId) {
           handleClearPlan();
         }
-        alert(t('goal_deleted_successfully'));
+        toast({
+          title: t('goal_deleted_successfully')
+        });
     } catch (error) {
         console.error('Error deleting goal:', error);
-        alert(t('error_deleting_goal'));
+        toast({
+          title: t('error_deleting_goal'),
+          variant: "destructive"
+        });
     }
   };
 
@@ -979,6 +996,7 @@ export const PilgrimagePlanner: React.FC<PilgrimagePlannerProps> = ({ auth: auth
       setIsPlanInitiated(reconstructedItems.length > 0);
       setCurrentLoadedGoalId(goal.id);
       setGoalNameForInput(goal.title || '');
+      setShowSearchResults(true); // Show the plan display when loading a goal
       
       if (goal.start_date || goal.end_date) {
         setSelectedDateRange({

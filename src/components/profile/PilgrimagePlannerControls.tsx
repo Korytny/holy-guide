@@ -24,8 +24,8 @@ import { Label } from "@/components/ui/label";
 import useMobile from '../../hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
 // Removed FontSwitcher import
-export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site'; 
-export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture' | 'guru_festival';
+export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site';
+export type EventSubtype = 'festival' | 'practice' | 'retreat' | 'vipassana' | 'puja' | 'lecture' | 'guru_festival' | 'visit';
 
 export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: 'temple', labelKey: 'place_type_temple', Icon: Church },
@@ -289,6 +289,51 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
               </div>
             )}
           </div>
+
+          {/* Saved Goals Display Section */}
+          {savedGoals.length > 0 && (
+            <div className="flex-shrink-0">
+              <h3 className={`text-lg font-semibold ${fonts.subheading.className} mb-2`}>
+                {t('saved_goals_title', { defaultValue: 'Сохраненные цели' })}
+              </h3>
+              <div className="flex flex-wrap gap-1">
+                {savedGoals.slice(0, 5).map((goal) => (
+                  <div
+                    key={goal.id}
+                    className={`relative group flex items-center gap-1 px-2 py-1 rounded-md border cursor-pointer ${
+                      currentLoadedGoalId === goal.id
+                        ? 'bg-primary text-primary-foreground hover:bg-primary/90 border-primary'
+                        : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'
+                    } ${fonts.body.className}`}
+                    onClick={() => onLoadGoal(goal.id)}
+                    tabIndex={0}
+                    role="button"
+                    aria-label={`Загрузить цель: ${goal.title}`}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        onLoadGoal(goal.id);
+                      }
+                    }}
+                  >
+                    <span className="text-xs truncate max-w-32">
+                      {goal.title}
+                    </span>
+                    <button
+                      className="opacity-0 group-hover:opacity-100 transition-opacity text-xs text-muted-foreground hover:text-destructive focus:opacity-100 focus:outline-none"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onDeleteGoal(goal.id);
+                      }}
+                      aria-label={`Удалить цель: ${goal.title}`}
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Action Buttons Section - at bottom */}
