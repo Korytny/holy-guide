@@ -20,7 +20,6 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 const Auth = lazy(() => import("./pages/Auth"));
 const AuthCallback = lazy(() => import("./pages/AuthCallback"));
 const Profile = lazy(() => import("./pages/Profile"));
-const TestPage = lazy(() => import("./pages/TestPage"));
 const PilgrimagePlannerPage = lazy(() => import("./pages/PilgrimagePlannerPage"));
 
 const queryClient = new QueryClient();
@@ -42,7 +41,6 @@ const routesWithLayout = [
   { path: "/routes/:id", element: <RouteDetail /> },
   { path: "/events/:id", element: <EventDetail /> },
   { path: "/profile", element: <Profile /> },
-  { path: "/test", element: <TestPage /> },
 ];
 
 

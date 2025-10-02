@@ -288,5 +288,22 @@
     "click_to_load_goal": "Нажмите для загрузки плана",
   "clear_short_button_text": "Очистить",
   "saved_goals_title": "Сохраненные маршруты",
-  "press_find_to_see_plan": "Выберите город и что вы в нем хотите посмотреть и в чем поучаствовать"
+  "press_find_to_see_plan": "Выберите город и что вы в нем хотите посмотреть и в чем поучаствовать",
+  "select_date": "Выберите дату",
+  "quick_duration_selection": "Быстрый выбор длительности:",
+  "duration_1_day": "1 день",
+  "duration_1_week": "1 неделя",
+  "duration_1_month": "1 месяц",
+  "no_items_match_current_filters": "Нет элементов, соответствующих текущим фильтрам.",
+  "no_items_match_current_filters_or_no_filters_applied": "Нет элементов, соответствующих фильтрам, или фильтры не дали результатов.",
+  "no_cities_selected_or_found": "Выбранные города не найдены.",
+  "error_fetching_places_for_city": "Ошибка загрузки мест для города {{city}}.",
+  "no_more_places_to_add_for_city": "Нет больше доступных мест для добавления в этот город.",
+  "available_routes": "Доступные маршруты",
+  "no_routes_available": "Нет доступных маршрутов",
+  "route_already_in_plan": "Маршрут '{{routeName}}' уже в плане.",
+  "route_added_to_plan": "Маршрут '{{routeName}}' добавлен в план.",
+  "error_adding_route_to_plan": "Ошибка добавления маршрута в план.",
+  "route_loaded_to_plan": "Маршрут '{{routeName}}' с {{placesCount}} местами загружен в план.",
+  "no_places_in_route": "В этом маршруте не найдено мест."
 }

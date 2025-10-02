@@ -1,5 +1,5 @@
 import React, { useMemo, useState } from 'react';
-import { Language, City, PlannedItem } from '../../types';
+import { Language, City, PlannedItem } from '@/types';
 import { type DateRange } from 'react-day-picker';
 import { SimpleDateSelector } from './SimpleDateSelector';
 import { ToggleGroup, ToggleGroupItem } from "@/components/ui/toggle-group";
@@ -18,10 +18,10 @@ import {
     Church, Archive, Waves, Sparkles, // Icons for PlaceSubtypes
     PartyPopper, Zap, Eye, Leaf, BookOpenText, Flame, MountainSnow // Added MountainSnow for retreat
 } from 'lucide-react'; 
-import { getLocalizedText } from '../../utils/languageUtils';
+import { getLocalizedText } from '@/utils/languageUtils';
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import useMobile from '../../hooks/use-mobile';
+import useMobile from '@/hooks/use-mobile';
 import { useFont } from '@/context/FontContext';
 // Removed FontSwitcher import
 export type PlaceSubtype = 'temple' | 'samadhi' | 'kunda' | 'sacred_site';
@@ -121,16 +121,17 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
       <SimpleDateSelector
         selectedDateRange={selectedDateRange}
         onDateRangeChange={onDateRangeChange}
+        t={t}
       />
     </div>
   );
 
   return (
-    <div className={`flex flex-col h-full p-4 ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}>
+    <div className={`flex flex-col h-full p-3 ${BEIGE_BACKGROUND_CLASS} text-card-foreground rounded-lg shadow-xl ${fonts.body.className}`}>
       {/* All sections in flex layout that fills entire height with scrolling */}
       <div className="flex flex-col h-full">
         {/* Scrollable content area */}
-        <div className="flex-1 overflow-y-auto space-y-4">
+        <div className="flex-1 overflow-y-auto space-y-3">
           {/* Date Selection Section */}
           <div className="flex-shrink-0">
             <SimpleDateSection />
@@ -210,7 +211,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
 
           {/* Place Types Section */}
           <div className="flex-shrink-0">
-            <Label className={`mb-2 block font-medium ${fonts.subheading.className}`}>{t('filter_place_subtypes_label')}</Label>
+            <Label className={`mb-1 block font-medium ${fonts.subheading.className}`}>{t('filter_place_subtypes_label')}</Label>
             {isMobile ? (
               <Carousel opts={{ align: "start", loop: false, dragFree: true }} className="w-full">
                 <CarouselContent className="-ml-1 py-1">
@@ -232,16 +233,16 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
                 <CarouselNext className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
               </Carousel>
             ) : (
-              <div className="flex flex-wrap gap-2">
+              <div className="flex flex-wrap gap-1">
                 {PLACE_SUBTYPES_OPTIONS.map(opt => (
                   <Button 
                     key={opt.value} 
                     variant={selectedPlaceSubtypes.includes(opt.value) ? 'default' : 'outline'}
                     size="sm"
                     onClick={() => toggleFilter(selectedPlaceSubtypes, opt.value, onSelectedPlaceSubtypesChange)}
-                    className={`text-xs ${fonts.body.className}`}
+                    className={`text-xs px-2 py-1 ${fonts.body.className}`}
                   >
-                    <opt.Icon className="mr-1.5 h-4 w-4" />
+                    <opt.Icon className="mr-1 h-3 w-3" />
                     {t(opt.labelKey)}
                   </Button>
                 ))}

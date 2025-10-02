@@ -274,5 +274,20 @@
   "clear_short_button_text": "साफ़ करें",
     "click_to_load_goal": "योजना लोड करने के लिए क्लिक करें",
     "saved_goals_title": "सहेजे गए मार्ग",
-    "press_find_to_see_plan": "एक शहर चुनें और उसमें आप क्या देखना और भाग लेना चाहते हैं"
+    "press_find_to_see_plan": "एक शहर चुनें और उसमें आप क्या देखना और भाग लेना चाहते हैं",
+  "select_date": "तारीख चुनें",
+  "quick_duration_selection": "त्वरित अवधि चयन:",
+  "duration_1_day": "1 दिन",
+  "duration_1_week": "1 सप्ताह",
+  "duration_1_month": "1 महीना",
+  "no_items_match_current_filters": "कोई आइटम वर्तमान फ़िल्टर से मेल नहीं खाता।",
+  "no_items_match_current_filters_or_no_filters_applied": "कोई आइटम वर्तमान फ़िल्टर से मेल नहीं खाता, या कोई फ़िल्टर लागू नहीं किया गया था।",
+  "no_cities_selected_or_found": "चयनित शहर नहीं मिले।",
+  "error_fetching_places_for_city": "शहर {{city}} के लिए स्थान लोड करने में त्रुटि।",
+  "no_more_places_to_add_for_city": "इस शहर में जोड़ने के लिए कोई और स्थान उपलब्ध नहीं है।",
+  "available_routes": "उपलब्ध मार्ग",
+  "no_routes_available": "कोई मार्ग उपलब्ध नहीं",
+  "route_already_in_plan": "मार्ग '{{routeName}}' पहले से ही योजना में है।",
+  "route_added_to_plan": "मार्ग '{{routeName}}' योजना में जोड़ा गया।",
+  "error_adding_route_to_plan": "मार्ग योजना में जोड़ने में त्रुटि।"
 }

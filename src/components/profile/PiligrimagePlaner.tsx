@@ -11,7 +11,7 @@ import { getLocalizedText } from '../../utils/languageUtils';
 
 import { PiligrimageControls } from "./PiligrimageControls";
 import { PiligrimageDisplay } from "./PiligrimageDisplay";
-import PiligrimageRouteMap from "./PiligrimageRouteMap";
+import PilgrimageRouteMap from "./PilgrimageRouteMap";
 
 interface PiligrimagePlanerProps {
   auth: AuthContextType;
@@ -82,6 +82,7 @@ export const PiligrimagePlaner: React.FC<PiligrimagePlanerProps> = ({ auth, lang
         onDateRangeChange={setSelectedDateRange}
         language={language}
         t={t}
+        onAddCity={handleAddPlace}
       />
 
       {plannedItems.length > 0 && (
@@ -93,7 +94,7 @@ export const PiligrimagePlaner: React.FC<PiligrimagePlanerProps> = ({ auth, lang
             language={language}
             t={t}
           />
-          <PiligrimageRouteMap items={plannedItems} />
+          <PilgrimageRouteMap plannedItems={plannedItems} />
         </div>
       )}
     </div>

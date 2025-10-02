@@ -11,18 +11,20 @@ interface SimpleDateSelectorProps {
   selectedDateRange?: DateRange;
   onDateRangeChange: (range: DateRange | undefined) => void;
   className?: string;
+  t?: (key: string, params?: object) => string;
 }
 
 const DURATION_OPTIONS = [
-  { label: '1 день', value: 'day', fn: (date: Date) => addDays(date, 1) },
-  { label: '1 неделя', value: 'week', fn: (date: Date) => addWeeks(date, 1) },
-  { label: '1 месяц', value: 'month', fn: (date: Date) => addMonths(date, 1) },
+  { labelKey: 'duration_1_day', value: 'day', fn: (date: Date) => addDays(date, 1) },
+  { labelKey: 'duration_1_week', value: 'week', fn: (date: Date) => addWeeks(date, 1) },
+  { labelKey: 'duration_1_month', value: 'month', fn: (date: Date) => addMonths(date, 1) },
 ];
 
 export function SimpleDateSelector({
   selectedDateRange,
   onDateRangeChange,
-  className
+  className,
+  t = (key: string, params?: object) => key
 }: SimpleDateSelectorProps) {
   const [startCalendarOpen, setStartCalendarOpen] = useState(false);
   const [endCalendarOpen, setEndCalendarOpen] = useState(false);
@@ -59,8 +61,8 @@ export function SimpleDateSelector({
     onDateRangeChange(undefined);
   };
 
-  const startDisplay = selectedDateRange?.from ? format(selectedDateRange.from, 'dd.MM.yyyy') : 'Выберите дату';
-  const endDisplay = selectedDateRange?.to ? format(selectedDateRange.to, 'dd.MM.yyyy') : 'Выберите дату';
+  const startDisplay = selectedDateRange?.from ? format(selectedDateRange.from, 'dd.MM.yyyy') : t('select_date', { defaultValue: 'Выберите дату' });
+  const endDisplay = selectedDateRange?.to ? format(selectedDateRange.to, 'dd.MM.yyyy') : t('select_date', { defaultValue: 'Выберите дату' });
 
   return (
     <div className={cn("space-y-2", className)}>
@@ -119,7 +121,7 @@ export function SimpleDateSelector({
 
       {/* Кнопки длительности */}
       <div className="space-y-1">
-        <p className="text-sm font-medium">Быстрый выбор длительности:</p>
+        <p className="text-sm font-medium">{t('quick_duration_selection', { defaultValue: 'Быстрый выбор длительности:' })}</p>
         <div className="flex gap-1">
           {DURATION_OPTIONS.map((option) => (
             <Button
@@ -131,7 +133,7 @@ export function SimpleDateSelector({
               className="flex-1"
             >
               <Clock className="mr-1 h-3 w-3" />
-              {option.label}
+              {t(option.labelKey, { defaultValue: option.labelKey })}
             </Button>
           ))}
         </div>

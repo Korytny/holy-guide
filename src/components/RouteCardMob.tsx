@@ -1,32 +1,31 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
 import { Route } from '../types'; // Assume Route might have rating or other stats
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
+import { useFont } from '../context/FontContext';
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
-import { Heart, Route as RouteIcon, Clock } from 'lucide-react'; // Example: Add Clock for duration if available
+import { Route as RouteIcon } from 'lucide-react'; // Example: Add Clock for duration if available
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils";
 
 interface RouteCardMobProps {
   route: Route;
   className?: string;
+  onRouteClick?: (route: Route) => void;
 }
 
-const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
+const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className, onRouteClick }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
+  const { fonts } = useFont();
 
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = getLocalizedText(route.description, language);
   const isRouteFavorite = auth.isAuthenticated && auth.user ? isFavorite('route', route.id) : false;
 
-  const handleFavoriteClick = (event: React.MouseEvent<HTMLButtonElement>) => {
-    event.preventDefault();
-    event.stopPropagation();
-    if (route.id) {
-        toggleFavorite('route', route.id);
+  const handleCardClick = () => {
+    if (onRouteClick && route.id) {
+        onRouteClick(route);
     }
   };
 
@@ -37,7 +36,7 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
             className
         )}
     >
-      <Link to={`/routes/${route.id}`} className="flex p-3 gap-3 items-start">
+      <div className="flex p-3 gap-3 items-start cursor-pointer" onClick={handleCardClick}>
         {/* Image Section */}
         <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
@@ -45,17 +44,6 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
             alt={routeName}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />
-          {route.id && (
-              <Button
-                variant="ghost"
-                size="icon"
-                className="absolute top-1 right-1 h-7 w-7 rounded-full bg-white/80 hover:bg-white text-gray-700 z-10 group-hover:opacity-100 opacity-90 transition-opacity shadow-sm"
-                onClick={handleFavoriteClick}
-                aria-label={isRouteFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
-              >
-                <Heart size={14} className={cn("transition-colors", isRouteFavorite ? "fill-red-500 text-red-500" : "text-gray-600")} />
-              </Button>
-          )}
         </div>
 
         {/* Content Section */}
@@ -63,7 +51,10 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
           {/* Top Row: Title and Stats/Rating */}
           <div className="flex justify-between items-start gap-2 mb-1">
              {/* Title */}
-             <h3 className="text-base font-bold line-clamp-2 flex-grow mr-1 text-[#09332A]" title={routeName}>
+             <h3 className={cn(
+                 "text-base font-bold line-clamp-2 flex-grow mr-1 text-[#09332A]",
+                 fonts.heading.className
+             )} title={routeName}>
                 {routeName}
              </h3>
              {/* Stats and Rating Container */}
@@ -76,11 +67,14 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className }) => {
           </div>
 
           {/* Description */}
-          <p className="text-sm text-black line-clamp-3 overflow-hidden mt-1">
+          <p className={cn(
+              "text-sm text-black line-clamp-2 overflow-hidden mt-1",
+              fonts.body.className
+          )}>
             {routeDescription || t('no_description_available')}
           </p>
         </div>
-      </Link>
+      </div>
     </div>
   );
 };

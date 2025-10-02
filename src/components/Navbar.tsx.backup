@@ -23,14 +23,16 @@ const Navbar = ({ className = '' }: NavbarProps) => {
 
   return (
     <div className={`bg-white shadow-sm border-b ${className}`}>
-      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-full relative">
-        <div className="flex h-14 sm:h-16 items-center justify-between">
+      <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-full">
+        <div className="flex h-14 sm:h-16 items-center">
           <div className="flex items-center gap-2 sm:gap-4">
-            <LanguageSwitcher />
-            <FontSwitcher />
+            <div className="flex items-center gap-2 sm:gap-4">
+              <LanguageSwitcher />
+              <FontSwitcher />
+            </div>
           </div>
 
-          <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="flex-[2] sm:flex-1 flex justify-center">
             <h1 className={`text-xl ${fonts.heading.className} cursor-pointer text-[#09332A]`} onClick={() => navigate('/')}>
               {t('app_title')}
             </h1>

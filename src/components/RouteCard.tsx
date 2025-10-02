@@ -14,9 +14,10 @@ import { Badge } from '@/components/ui/badge';
 interface RouteCardProps {
   route: Route;
   className?: string; 
+  onAddToPlan?: (route: Route) => void;
 }
 
-const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
+const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const { fonts } = useFont();
@@ -34,6 +35,14 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
     }
   };
 
+  const handleAddToPlan = (e: React.MouseEvent) => {
+    e.preventDefault(); 
+    e.stopPropagation();
+    if (onAddToPlan && route.id) {
+        onAddToPlan(route);
+    }
+  };
+
   return (
     <div 
       className={cn(
@@ -42,7 +51,6 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
       )}
     >
       <div className="relative">
-         <Link to={`/routes/${route.id}`} className="absolute inset-0 z-0"></Link> 
         <img 
           src={route.imageUrl || '/placeholder.svg'} 
           alt={routeName}
@@ -64,7 +72,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
             </Button>
           )}
       </div>
-      <Link to={`/routes/${route.id}`} className="p-3 flex-grow flex flex-col justify-between"> 
+      <div className="p-3 flex-grow flex flex-col justify-between"> 
           <div>
              <h3
                 className={cn(
@@ -82,13 +90,23 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className }) => {
               {routeDescription || t('no_description_available')}
             </p>
           </div>
-              <div className="flex items-center mt-1">
+              <div className="flex items-center justify-between mt-1">
                   <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]">
                       <RouteIcon size={12} className="flex-shrink-0" />
                       <span>{t('spiritual_route')}</span>
                   </Badge>
+                  {onAddToPlan && (
+                    <Button 
+                      variant="default" 
+                      size="sm"
+                      onClick={handleAddToPlan}
+                      className="text-xs px-2 py-1"
+                    >
+                      {t('add_to_plan')}
+                    </Button>
+                  )}
               </div>
-      </Link>
+      </div>
     </div>
   );
 };

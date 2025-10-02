@@ -275,5 +275,22 @@
     "click_to_load_goal": "Click to load plan",
   "clear_short_button_text": "Clear",
   "saved_goals_title": "Saved Routes",
-  "press_find_to_see_plan": "Select a city and what you want to see and participate in there"
+  "press_find_to_see_plan": "Select a city and what you want to see and participate in there",
+  "select_date": "Select date",
+  "quick_duration_selection": "Quick duration selection:",
+  "duration_1_day": "1 day",
+  "duration_1_week": "1 week",
+  "duration_1_month": "1 month",
+  "no_items_match_current_filters": "No items match the current filters.",
+  "no_items_match_current_filters_or_no_filters_applied": "No items match the current filters, or no filters were applied to yield results.",
+  "no_cities_selected_or_found": "Selected cities were not found.",
+  "error_fetching_places_for_city": "Error fetching places for city {{city}}.",
+  "no_more_places_to_add_for_city": "No more available places to add for this city.",
+  "available_routes": "Available Routes",
+  "no_routes_available": "No routes available",
+  "route_already_in_plan": "Route '{{routeName}}' is already in the plan.",
+  "route_added_to_plan": "Route '{{routeName}}' added to plan.",
+  "error_adding_route_to_plan": "Error adding route to plan.",
+  "route_loaded_to_plan": "Route '{{routeName}}' with {{placesCount}} places loaded to plan.",
+  "no_places_in_route": "No places found in this route."
 }

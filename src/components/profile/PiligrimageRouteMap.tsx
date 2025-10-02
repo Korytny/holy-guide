@@ -1,9 +1,11 @@
+import React from 'react';
 import { type PlannedItem } from "../../types";
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import { getLocalizedText } from "../../utils/languageUtils";
 
+interface PiligrimageRouteMapProps {
   items: PlannedItem[];
 }
 
@@ -16,7 +18,8 @@ const icon = L.icon({
 
 export const PiligrimageRouteMap: React.FC<PiligrimageRouteMapProps> = ({ items }) => {
   const positions = items
-    .map Handle Place type
+    .map(item => {
+      // Handle Place type
       if (item.type === 'place' && 'location' in item.data) {
         return {
           lat: item.data.location.latitude,
@@ -40,15 +43,13 @@ export const PiligrimageRouteMap: React.FC<PiligrimageRouteMapProps> = ({ items 
     <div className="h-full w-full rounded-lg overflow-hidden">
       <MapContainer
         center={positions[0] || [55.7558, 37.6176]}
-       M{pCnainr
-    ente={psitios[]||[55.7558,37.6176]}
-        zyhm={12}ht: "100%", width: "100%" }}
-    >sl{{ height: "100%, wdth: "100%}}
+        zoom={12}
+        style={{ height: "100%", width: "100%" }}
       >
-      <T<TieLayr
-          ur"="pttps://ss}.tiie.open.rrx.tmnp.org/{z}/{x}/{}.pg"
-          attribution='&aopy; <u hrifonhttps://www.openstreetmap.org/copyri=ht">OpenStreetM'&</a> contributors'y; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-        >
+        <TileLayer
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+        />
         {positions.map((pos, i) => (
           <Marker key={i} position={pos} icon={icon}>
             <Popup>{getLocalizedText(pos.name, "en")}</Popup>

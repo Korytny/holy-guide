@@ -142,7 +142,7 @@ const CitiesPage = () => {
       <div className="w-full">
         <div className="text-center mb-20 pt-20">
           <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-            Запланируй свое поломничество
+            {t('plan_your_pilgrimage', { defaultValue: 'Запланируй свое поломничество' })}
           </h2>
         </div>
         

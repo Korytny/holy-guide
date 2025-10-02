@@ -2,6 +2,28 @@ import { supabase } from '../integrations/supabase/client';
 import { transformRoute } from '@/services/apiUtils';
 import { Route } from '@/types';
 
+export const getAllRoutes = async (): Promise<Route[]> => {
+  if (!supabase) {
+    console.error('[RoutesAPI] Supabase client not available');
+    return [];
+  }
+  try {
+    const { data, error } = await supabase
+      .from('routes')
+      .select('*')
+      .order('name');
+
+    if (error) {
+      console.error('Error fetching all routes:', error);
+      return [];
+    }
+    return data ? data.map(transformRoute) : [];
+  } catch (error) {
+    console.error('Error in getAllRoutes:', error);
+    return [];
+  }
+};
+
 export const getRoutesByCityId = async (cityId: string): Promise<Route[]> => {
   if (!supabase) {
     console.error('[RoutesAPI] Supabase client not available');

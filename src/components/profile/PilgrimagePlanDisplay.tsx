@@ -12,8 +12,8 @@ interface PilgrimagePlanDisplayProps {
   plannedItems: PlannedItem[]; 
   language: Language;
   t: (key: string, options?: any) => string;
-  onUpdateDateTime: (itemToUpdate: PlannedItem, date?: string, time?: string) => void;
-  onRemoveItem: (itemToRemove: PlannedItem) => void;
+  onUpdateDateTime: (itemId: string, itemType: string, newDate: string, newTime: string) => void;
+  onRemoveItem: (itemId: string, itemType: string) => void;
   onAddPlacesForCity?: (cityId: string) => void;
   onSearchAndAddPlace?: (cityId: string, searchTerm: string) => Promise<Place[]>;
   onAddSpecificPlace?: (place: Place, cityId: string) => void;
@@ -62,6 +62,8 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
     const groups: PlanGroup[] = [];
     const itemMap = new Map<string, PlannedItem[]>();
 
+    console.log('🔍 Grouping plannedItems:', plannedItems);
+
     plannedItems.forEach(item => {
       if (item.type === 'city') {
         // Ensure cityItem is not undefined by checking item.data
@@ -78,10 +80,13 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
       }
     });
 
-    return groups.map(group => ({
+    const result = groups.map(group => ({
       ...group,
       childItems: (itemMap.get(group.cityItem.data.id) || []).sort((a,b) => a.orderIndex - b.orderIndex)
     })).filter(group => group.cityItem && group.cityItem.data); // Ensure cityItem and its data exist
+
+    console.log('📊 Grouped result:', result);
+    return result;
   }, [plannedItems]);
 
   // Cleanup timeout on component unmount
@@ -306,7 +311,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => onRemoveItem(group.cityItem)} 
+                              onClick={() => onRemoveItem(group.cityItem.data.id, group.cityItem.type)} 
                               className="text-red-500 hover:text-red-700 h-8 w-8"
                               title={t('remove_item_tooltip', {defaultValue: 'Remove city from plan'})}
                             >
@@ -359,7 +364,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                           <Input 
                                             type="date" 
                                             value={item.date || ''} 
-                                            onChange={(e) => onUpdateDateTime(item, e.target.value, item.time)} 
+                                            onChange={(e) => onUpdateDateTime(item.data.id, item.type, e.target.value, item.time || '')} 
                                             className="w-auto p-1 text-xs ml-2 h-7"
                                             placeholder={t('date_placeholder')} 
                                           />
@@ -367,7 +372,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                             <Input
                                               type="time"
                                               value={item.time || ''}
-                                              onChange={(e) => onUpdateDateTime(item, item.date, e.target.value)}
+                                              onChange={(e) => onUpdateDateTime(item.data.id, item.type, item.date || '', e.target.value)}
                                               className="w-auto p-1 text-xs ml-2 h-7"
                                               placeholder={t('time_placeholder')}
                                             />
@@ -375,7 +380,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                           <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            onClick={() => onRemoveItem(item)} 
+                                            onClick={() => onRemoveItem(item.data.id, item.type)} 
                                             className="ml-1 text-red-400 hover:text-red-600 h-7 w-7"
                                             title={t('remove_item_tooltip', {defaultValue: 'Remove item'})}
                                           >
