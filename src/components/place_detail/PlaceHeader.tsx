@@ -35,7 +35,10 @@ const PlaceHeader: React.FC<PlaceHeaderProps> = ({ place, id, onTabSelect }) => 
 
     const isPlaceFavorite = id ? isFavorite('place', id) : false;
     const placeName = getLocalizedText(place.name, language);
-    const allImages = [ place.imageUrl, ...(Array.isArray(place.images) ? place.images.filter(img => typeof img === 'string') : []) ].filter(Boolean) as string[];
+    const allImages = Array.from(new Set([
+      place.imageUrl,
+      ...(Array.isArray(place.images) ? place.images.filter(img => typeof img === 'string') : [])
+    ].filter(Boolean))) as string[];
     const placeTypeKey = getPlaceTypeKey(place.type);
 
     return (
