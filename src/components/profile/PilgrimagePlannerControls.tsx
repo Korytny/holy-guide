@@ -65,9 +65,9 @@ interface PilgrimagePlannerControlsProps {
   selectedPlaceSubtypes: PlaceSubtype[];
   selectedEventSubtypes: EventSubtype[];
   onSelectedPlaceSubtypesChange: (subtypes: PlaceSubtype[]) => void;
-  onSelectedEventSubtypesChange: (subtypes: EventSubtype[]) => void;
-  onAddFilteredItemsToPlan: () => void;
-  onClearPlan: () => void;
+  onSelectedEventSubtypesChange: (value: any[]) => void;
+  onSearch: () => void;
+  onResetFilters: () => void;
   isLoadingData?: boolean; 
 }
 
@@ -97,8 +97,8 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
   selectedEventSubtypes,
   onSelectedPlaceSubtypesChange,
   onSelectedEventSubtypesChange,
-  onAddFilteredItemsToPlan,
-  onClearPlan,
+  onSearch,
+  onResetFilters,
   isLoadingData,
 }) => {
   const isMobile = useMobile();
@@ -117,7 +117,7 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
 
   const SimpleDateSection = () => (
     <div className={`space-y-2 ${fonts.body.className}`}>
-      <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('select_dates')}</h3>
+      <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>{t('search_by_criteria')}</h3>
       <SimpleDateSelector
         selectedDateRange={selectedDateRange}
         onDateRangeChange={onDateRangeChange}
@@ -337,71 +337,67 @@ export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps>
           )}
         </div>
 
-        {/* Action Buttons Section - at bottom */}
-        <div className="flex-shrink-0">
-          <div className="flex flex-col sm:flex-row sm:gap-1">
-            <Button 
-              size="sm" 
-              onClick={onAddFilteredItemsToPlan} 
-              className={`flex-1 min-w-0 ${ORANGE_BUTTON_CLASS} ${fonts.subheading.className} text-sm px-2`}
-              disabled={isLoadingData}
-            >
-              {isLoadingData ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('add_filtered_to_plan_button')}
+        <div className="flex-shrink-0 pt-2 border-t border-black/10">
+          <div className="space-y-2">
+            <Button onClick={onSearch} className="w-full" disabled={isLoadingData}>
+              {isLoadingData ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('search_button', { defaultValue: 'Search' })}
             </Button>
-
-            { (currentLoadedGoalId || showPlanNameInput) ? (
-              <div className="flex-1 min-w-0 flex flex-col gap-1">
-                <Label htmlFor="goalNameInputPilgrimage" className="sr-only">{t('goal_name_placeholder')}</Label>
-                <Input
-                  id="goalNameInputPilgrimage"
-                  placeholder={t('goal_name_placeholder')}
-                  value={goalNameValue}
-                  onChange={(e) => onGoalNameChange(e.target.value)}
-                  className={`${fonts.body.className} text-sm h-8`}
-                />
+            
+            <div className="flex flex-col sm:flex-row sm:gap-1">
+              { (currentLoadedGoalId || showPlanNameInput) ? (
+                <div className="flex-1 min-w-0 flex flex-col gap-1">
+                  <Label htmlFor="goalNameInputPilgrimage" className="sr-only">{t('goal_name_placeholder')}</Label>
+                  <Input
+                    id="goalNameInputPilgrimage"
+                    placeholder={t('goal_name_placeholder')}
+                    value={goalNameValue}
+                    onChange={(e) => onGoalNameChange(e.target.value)}
+                    className={`${fonts.body.className} text-sm h-8`}
+                  />
+                  <Button 
+                    size="sm"
+                    variant="outline"
+                    className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
+                    onClick={() => {
+                        onSaveOrUpdateGoal(goalNameValue);
+                        if (showPlanNameInput && !currentLoadedGoalId) { 
+                            setShowPlanNameInput(false); 
+                        }
+                    }}
+                    disabled={!goalNameValue.trim()}
+                  >
+                    {t(saveButtonTextKey)}
+                  </Button>
+                </div>
+              ) : (
                 <Button 
-                  size="sm"
+                  size="sm" 
                   variant="outline"
                   className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
-                  onClick={() => {
-                      onSaveOrUpdateGoal(goalNameValue);
-                      if (showPlanNameInput && !currentLoadedGoalId) { 
-                          setShowPlanNameInput(false); 
-                      }
-                  }}
-                  disabled={!goalNameValue.trim()}
+                  onClick={() => setShowPlanNameInput(true)} 
                 >
                   {t(saveButtonTextKey)}
                 </Button>
-              </div>
-            ) : (
+              )}
+              
               <Button 
                 size="sm" 
-                variant="outline"
-                className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
-                onClick={() => setShowPlanNameInput(true)} 
+                variant="outline" 
+                className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`} 
+                onClick={onAddFavoritesToPlan}
               >
-                {t(saveButtonTextKey)}
+                {t('find_from_favorites')}
               </Button>
-            )}
-            
-            <Button 
-              size="sm" 
-              variant="outline" 
-              className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`} 
-              onClick={onAddFavoritesToPlan}
-            >
-              {t('find_from_favorites')}
-            </Button>
 
-            <Button 
-              size="sm"
-              variant="outline" 
-              onClick={onClearPlan} 
-              className={`flex-1 min-w-0 border-destructive text-destructive hover:bg-destructive/10 ${fonts.subheading.className} text-sm px-2`}
-            >
-                {t('clear_short_button_text', {defaultValue: 'Clear'})}
-            </Button>
+              <Button 
+                size="sm"
+                variant="outline" 
+                onClick={onResetFilters} 
+                className={`flex-1 min-w-0 border-destructive text-destructive hover:bg-destructive/10 ${fonts.subheading.className} text-sm px-2`}
+              >
+                  {t('clear_short_button_text', {defaultValue: 'Clear'})}
+              </Button>
+            </div>
           </div>
         </div>
       </div>

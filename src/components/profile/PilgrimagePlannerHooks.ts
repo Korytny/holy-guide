@@ -4,7 +4,7 @@ import { type LanguageContextType } from "@/context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem } from "@/types";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '@/services/api';
-import { getPlacesByRouteId } from '@/services/placesApi';
+import { getPlacesByCityId, getPlacesByRouteId } from '@/services/placesApi';
 import { supabase } from '@/integrations/supabase/client';
 import { getLocalizedText } from '@/utils/languageUtils';
 
@@ -116,6 +116,7 @@ interface UsePilgrimagePlannerHandlersProps {
   filteredPlaces: Place[];
   filteredEvents: Event[];
   availableRoutes: Route[];
+  selectedRoute: Route | null;
   cityPlaceSuggestions: Record<string, CitySuggestionState>;
   currentLoadedGoalId: string | null;
   goalNameForInput: string;
@@ -154,6 +155,7 @@ export const usePilgrimagePlannerHandlers = ({
   availablePlaces,
   availableEvents,
   availableRoutes,
+  selectedRoute,
   cityPlaceSuggestions,
   currentLoadedGoalId,
   goalNameForInput,
@@ -190,156 +192,63 @@ export const usePilgrimagePlannerHandlers = ({
   };
 
   // Основные обработчики
-  const handleAddFilteredItemsToPlan = useCallback(() => {
-    console.log('=== handleAddFilteredItemsToPlan called ===');
-    
-    const onlyCitiesSelected =
-      filterControlSelectedCityIds.length > 0 &&
-      selectedPlaceSubtypes.length === 0 &&
-      selectedEventSubtypes.length === 0;
+  const handleSearch = useCallback(() => {
+    let cityIdsToConsider = new Set(filterControlSelectedCityIds);
 
-    let itemsForPlan: PlannedItem[] = [];
+    // Фильтрация мест
+    let tempFilteredPlaces: Place[] = [];
+    if (availablePlaces.length > 0 && cityIdsToConsider.size > 0 && selectedPlaceSubtypes.length > 0) {
+      const placeTypeMap: Record<number, string> = { 1: 'temple', 2: 'samadhi', 3: 'kunda', 4: 'sacred_site' };
+      tempFilteredPlaces = availablePlaces.filter(p => 
+        cityIdsToConsider.has(p.cityId) && 
+        selectedPlaceSubtypes.includes(placeTypeMap[p.type])
+      );
+    }
+    setFilteredPlaces(tempFilteredPlaces);
 
-    if (onlyCitiesSelected) {
-      const cityItemsToAdd = availableCities
-        .filter(city => filterControlSelectedCityIds.includes(city.id))
-        .map((cityData) => ({
-          type: 'city' as 'city',
-          data: cityData,
-          city_id_for_grouping: cityData.id,
-          time: getRandomTime(),
-          orderIndex: 0,
-        }));
-      itemsForPlan = cityItemsToAdd;
+    // Фильтрация событий
+    let tempFilteredEvents: Event[] = [];
+    if (availableEvents.length > 0 && cityIdsToConsider.size > 0 && selectedEventSubtypes.length > 0) {
+      tempFilteredEvents = availableEvents.filter(e => 
+        cityIdsToConsider.has(e.cityId) && 
+        e.eventTypeField && selectedEventSubtypes.includes(e.eventTypeField)
+      );
+    }
+    setFilteredEvents(tempFilteredEvents);
 
-      if (itemsForPlan.length === 0) {
-        toast({
-          title: t('no_cities_selected_or_found', { defaultValue: 'Selected cities were not found.' }),
-          variant: "destructive"
-        });
-        setPlannedItems([]);
-        return;
-      }
-    } else {
-      const newPlaceItems: PlannedItem[] = availablePlaces.map((place: Place) => ({
-        type: 'place',
-        data: place,
-        city_id_for_grouping: place.cityId,
-        time: getRandomTime(),
-        orderIndex: 0,
-      }));
+    // Фильтрация маршрутов (если нужна)
+    let tempFilteredRoutes: Route[] = [];
+    if (availableRoutes.length > 0 && cityIdsToConsider.size > 0) {
+        tempFilteredRoutes = availableRoutes.filter(route => cityIdsToConsider.has(route.cityId));
+    }
+    setFilteredRoutes(tempFilteredRoutes);
 
-      const newEventItems: PlannedItem[] = availableEvents.map((event: Event) => ({
-        type: 'event',
-        data: event,
-        city_id_for_grouping: event.cityId,
-        time: event.time || getRandomTime(),
-        orderIndex: 0,
-        date: event.date ? event.date.split('T')[0] : undefined,
-      }));
-
-      const allNewSubItems = [...newPlaceItems, ...newEventItems];
-
-      if (allNewSubItems.length === 0 && filterControlSelectedCityIds.length > 0) {
-        const cityItemsToAdd = availableCities
-          .filter(city => filterControlSelectedCityIds.includes(city.id))
-          .map((cityData) => ({
-            type: 'city' as 'city',
-            data: cityData,
-            city_id_for_grouping: cityData.id,
-            time: getRandomTime(),
-            orderIndex: 0,
-          }));
-        
-        if (cityItemsToAdd.length > 0) {
-          itemsForPlan = cityItemsToAdd;
-        } else {
-          toast({
-            title: t('no_cities_selected_or_found', { defaultValue: 'Selected cities were not found.' }),
-            variant: "destructive"
-          });
-          setPlannedItems([]);
-          return;
-        }
-      }
-      
-      if (allNewSubItems.length > 0) {
-        const cityIdsOfNewSubItems = new Set<string>();
-        allNewSubItems.forEach(item => {
-          if (item.city_id_for_grouping) {
-            cityIdsOfNewSubItems.add(item.city_id_for_grouping);
-          }
-        });
-
-        const cityItemsForNewPlan: PlannedItem[] = [];
-        const sourceCityPool = filterControlSelectedCityIds.length > 0
-          ? availableCities.filter(c => filterControlSelectedCityIds.includes(c.id))
-          : [];
-        
-        sourceCityPool.forEach(cityData => {
-          if (cityIdsOfNewSubItems.has(cityData.id)) {
-            cityItemsForNewPlan.push({
-              type: 'city',
-              data: cityData,
-              city_id_for_grouping: cityData.id,
-              time: getRandomTime(),
-              orderIndex: 0,
-            });
-          }
-        });
-        itemsForPlan = [...cityItemsForNewPlan, ...allNewSubItems];
-      } else {
-        if (selectedPlaceSubtypes.length > 0 || selectedEventSubtypes.length > 0) {
-             toast({
-               title: t('no_items_match_current_filters', { defaultValue: 'No items match the current filters.' }),
-               variant: "saffron"
-             });
-        } else {
-             toast({
-               title: t('no_items_match_current_filters_or_no_filters_applied', { defaultValue: 'No items match the current filters, or no filters were applied to yield results.' }),
-               variant: "saffron"
-             });
-        }
-        setPlannedItems([]);
-        return;
-      }
+    if (tempFilteredPlaces.length === 0 && tempFilteredEvents.length === 0) {
+        toast({ title: t('no_items_match_current_filters'), variant: "saffron" });
     }
 
-    let currentOrderIndex = 0;
-    const finalSortedItems = itemsForPlan
-      .sort((a, b) => {
-        if (a.type === 'city' && b.type !== 'city') return -1;
-        if (a.type !== 'city' && b.type === 'city') return 1;
-        
-        if (a.city_id_for_grouping && b.city_id_for_grouping) {
-          const cityGroupCompare = a.city_id_for_grouping.localeCompare(b.city_id_for_grouping);
-          if (cityGroupCompare !== 0) return cityGroupCompare;
-        }
-        
-        if (a.type === 'place' && b.type === 'event') return -1;
-        if (a.type === 'event' && b.type === 'place') return 1;
-        
-        return 0;
-      })
-      .map(item => ({ ...item, orderIndex: currentOrderIndex++ }));
+    // Очищаем предпросмотр маршрута, чтобы не было конфликта
+    setSelectedRoute(null);
+    setSelectedRoutePlaces([]);
     
-    setPlannedItems(finalSortedItems);
+    // Показываем результаты
     setShowSearchResults(true);
-    
-    if (selectedDateRange && selectedDateRange.from && finalSortedItems.length > 0) {
-      distributeDatesForItems(finalSortedItems);
-    }
+
   }, [
-    availableCities, 
     filterControlSelectedCityIds, 
     selectedPlaceSubtypes, 
     selectedEventSubtypes, 
-    selectedDateRange, 
-    t, 
-    setPlannedItems, 
+    availablePlaces, 
+    availableEvents, 
+    availableRoutes,
+    setFilteredPlaces, 
+    setFilteredEvents, 
+    setFilteredRoutes,
     setShowSearchResults,
-    availablePlaces,
-    availableEvents
+    setSelectedRoute,
+    setSelectedRoutePlaces,
+    t,
+    toast
   ]);
 
   const distributeDatesForItems = (itemsToDistribute: PlannedItem[]) => {
@@ -413,7 +322,7 @@ export const usePilgrimagePlannerHandlers = ({
     let currentSuggestions = cityPlaceSuggestions[cityId];
     if (!currentSuggestions || !currentSuggestions.fullyLoaded) {
       try {
-        const placesData = await getPlacesByRouteId(cityId);
+        const placesData = await getPlacesByCityId(cityId);
         if (!placesData) throw new Error("Failed to fetch places.");
         const sortedPlaces = [...placesData].sort((a, b) => (b.rating ?? 0) - (a.rating ?? 0));
         currentSuggestions = { places: sortedPlaces, currentIndex: 0, fullyLoaded: true };
@@ -477,7 +386,7 @@ export const usePilgrimagePlannerHandlers = ({
 
   const handleSearchAndAddPlace = useCallback(async (cityId: string, searchTerm: string): Promise<Place[]> => {
     try {
-      const placesData = await getPlacesByRouteId(cityId);
+      const placesData = await getPlacesByCityId(cityId);
       if (!placesData) throw new Error("Failed to fetch places.");
       
       const matchingPlaces = placesData.filter(place => 
@@ -590,77 +499,49 @@ export const usePilgrimagePlannerHandlers = ({
     setShowSearchResults(false);
   }, [setPlannedItems, setShowSearchResults]);
 
-  const handleClearSearch = useCallback(() => {
-    setShowSearchResults(false);
-  }, [setShowSearchResults]);
+
 
   const handleRouteClick = useCallback(async (route: Route) => {
-    setSelectedRoute(route);
+    const primaryCityId = route.city_id && route.city_id[0];
+    if (!primaryCityId) {
+      console.error("Route object is missing a valid city_id array:", route);
+      toast({ title: "Invalid route data", variant: "destructive" });
+      return;
+    }
+
+    // Очищаем предыдущие результаты поиска, чтобы не было конфликта
+    setFilteredPlaces([]);
+    setFilteredEvents([]);
+    setFilteredRoutes([]);
+
     try {
       const places = await getPlacesByRouteId(route.id);
+      setSelectedRoute(route);
       setSelectedRoutePlaces(places || []);
-      
-      // Добавляем маршрут в план
-      const routeItems: PlannedItem[] = [];
-      
-      // Проверяем, есть ли уже город в плане
-      const existingCity = plannedItems.find(item => 
-        item.type === 'city' && item.city_id_for_grouping === route.cityId
-      );
-      
-      // Добавляем город маршрута только если его еще нет
-      if (!existingCity) {
-        const cityItem: PlannedItem = {
-          type: 'city',
-          data: availableCities.find(c => c.id === route.cityId) || route,
-          city_id_for_grouping: route.cityId,
-          time: getRandomTime(),
-          orderIndex: getNextOrderIndex(plannedItems),
-        };
-        routeItems.push(cityItem);
-      }
-      
-      // Добавляем места маршрута
-      if (places && places.length > 0) {
-        let currentOrderIndex = getNextOrderIndex(plannedItems) + routeItems.length;
-        places.forEach(place => {
-          const placeItem: PlannedItem = {
-            type: 'place',
-            data: place,
-            city_id_for_grouping: route.cityId,
-            time: getRandomTime(),
-            orderIndex: currentOrderIndex++,
-            date: existingCity?.date,
-          };
-          routeItems.push(placeItem);
-        });
-      }
-      
-      setPlannedItems(prev => [...prev, ...routeItems]);
       setShowSearchResults(true);
-      
-      console.log('✅ Route added to plan:', {
-        routeId: route.id,
-        cityId: route.cityId,
-        placesCount: places?.length || 0,
-        routeItems: routeItems,
-        existingCity: !!existingCity,
-        plannedItemsBefore: plannedItems.length,
-        plannedItemsAfter: plannedItems.length + routeItems.length
-      });
-      
+
       toast({
-        title: t('route_added_to_plan', { defaultValue: 'Route added to plan' }),
+        title: t('route_loaded_for_preview', { defaultValue: 'Route loaded for preview' }),
         variant: "default"
       });
+
     } catch (error) {
-      console.error("Error loading route places:", error);
+      console.error("Error loading route places for preview:", error);
       toast({
         title: t('error_loading_route_places', { defaultValue: 'Error loading route places' }),
         variant: "destructive"
       });
     }
-  }, [availableCities, plannedItems, t, setSelectedRoute, setSelectedRoutePlaces, setPlannedItems, setShowSearchResults]);
+  }, [
+    setFilteredPlaces, 
+    setFilteredEvents, 
+    setFilteredRoutes, 
+    setSelectedRoute, 
+    setSelectedRoutePlaces, 
+    setShowSearchResults, 
+    t, 
+    toast
+  ]);
 
   const handleSaveOrUpdateGoal = useCallback(async () => {
     if (!authContext.auth.user) {
@@ -813,9 +694,7 @@ export const usePilgrimagePlannerHandlers = ({
     });
   }, [t]);
 
-  const handleAddRouteToPlan = useCallback((route: Route) => {
-    handleRouteClick(route);
-  }, [handleRouteClick]);
+
 
   const handlePlannedItemsReorder = useCallback((reorderedItems: PlannedItem[]) => {
     const updatedItems = reorderedItems.map((item, index) => ({
@@ -825,9 +704,52 @@ export const usePilgrimagePlannerHandlers = ({
     setPlannedItems(updatedItems);
   }, [setPlannedItems]);
 
+  const handleRemovePreviewItem = useCallback((itemToRemove: Place | Event) => {
+    // Если активен предпросмотр маршрута, удаляем из его списка
+    if (selectedRoute) {
+      setSelectedRoutePlaces(prev => prev.filter(p => p.id !== itemToRemove.id));
+      return;
+    }
+
+    // Иначе, удаляем из списков отфильтрованных результатов
+    if ('eventTypeField' in itemToRemove) { // Это Event
+      setFilteredEvents(prev => prev.filter(e => e.id !== itemToRemove.id));
+    } else { // Это Place
+      setFilteredPlaces(prev => prev.filter(p => p.id !== itemToRemove.id));
+    }
+  }, [selectedRoute, setSelectedRoutePlaces, setFilteredEvents, setFilteredPlaces]);
+
+  const handleResetFilters = useCallback(() => {
+    setFilterControlSelectedCityIds([]);
+    setSelectedPlaceSubtypes(['temple', 'samadhi', 'kunda', 'sacred_site']);
+    setSelectedEventSubtypes(['festival', 'practice', 'retreat', 'vipassana', 'puja', 'lecture', 'guru_festival', 'visit']);
+    setShowSearchResults(false);
+    setSelectedRoute(null);
+    setSelectedRoutePlaces([]);
+    setFilteredPlaces([]);
+    setFilteredEvents([]);
+    setFilteredRoutes([]);
+    toast({
+      title: t('filters_reset', { defaultValue: 'Filters have been reset.' }),
+      variant: "default"
+    });
+  }, [
+    setFilterControlSelectedCityIds,
+    setSelectedPlaceSubtypes,
+    setSelectedEventSubtypes,
+    setFilteredPlaces,
+    setFilteredEvents,
+    setFilteredRoutes,
+    setShowSearchResults,
+    setSelectedRoute,
+    setSelectedRoutePlaces,
+    t,
+    toast
+  ]);
+
   return {
     // Обработчики
-    handleAddFilteredItemsToPlan,
+    handleSearch,
     handleAddPlacesForCity,
     handleSearchAndAddPlace,
     handleAddSpecificPlace,
@@ -839,14 +761,14 @@ export const usePilgrimagePlannerHandlers = ({
     handleDateRangeChange,
     handleUpdatePlannedItemDateTime,
     handleClearPlan,
-    handleClearSearch,
     handleRouteClick,
     handleSaveOrUpdateGoal,
     handleDeleteGoal,
     handleLoadGoal,
     handleAddFavoritesToPlan,
-    handleAddRouteToPlan,
     handlePlannedItemsReorder,
+    handleRemovePreviewItem,
+    handleResetFilters,
 
     // Вспомогательные функции
     getRandomTime,

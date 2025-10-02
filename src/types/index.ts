@@ -76,7 +76,7 @@ export interface Route {
   name: string | { [key in Language]?: string };
   description: string | { [key in Language]?: string };
   imageUrl: string;
-  cityId: string;
+  city_id: string[];
   placeIds: string[];
   eventIds: string[];
   info?: any;

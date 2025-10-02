@@ -93,7 +93,7 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
   // Используем обработчики
   const {
     // Обработчики
-    handleAddFilteredItemsToPlan,
+    handleSearch,
     handleAddPlacesForCity,
     handleSearchAndAddPlace,
     handleAddSpecificPlace,
@@ -105,14 +105,15 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     handleDateRangeChange,
     handleUpdatePlannedItemDateTime,
     handleClearPlan,
-    handleClearSearch,
     handleRouteClick,
+    handleResetFilters,
     handleSaveOrUpdateGoal,
     handleDeleteGoal,
     handleLoadGoal,
     handleAddFavoritesToPlan,
     handleAddRouteToPlan,
     handlePlannedItemsReorder,
+    handleRemovePreviewItem,
 
     // Вспомогательные функции
     getRandomTime,
@@ -134,6 +135,7 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     filteredPlaces,
     filteredEvents,
     availableRoutes,
+    selectedRoute,
     cityPlaceSuggestions,
     currentLoadedGoalId,
     goalNameForInput,
@@ -192,10 +194,10 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
       const allPlacesAccumulated = allPlacesNested.flat().filter(p => p);
 
       const allEvents = await allEventsPromise;
-      const allRoutes = await getAllRoutes();
+      const allRoutes = (await getAllRoutes())?.filter(r => r.city_id && r.city_id.length > 0) || [];
 
       setAvailableEvents(allEvents || []);
-      setAvailableRoutes(allRoutes || []);
+      setAvailableRoutes(allRoutes);
       const uniquePlaces = Array.from(new Map(allPlacesAccumulated.map(p => [p.id, p])).values());
       setAvailablePlaces(uniquePlaces);
       setIsLoadingPlacesAndEvents(false);
@@ -271,10 +273,9 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     let tempFilteredRoutes: any[] = []; 
 
     if (availableRoutes.length > 0 && cityIdsToConsider.size > 0) {
-      tempFilteredRoutes = availableRoutes.filter(route => {
-        if (!cityIdsToConsider.has(route.cityId)) return false;
-        return true;
-      });
+      tempFilteredRoutes = availableRoutes.filter(route => 
+        route.city_id && route.city_id.some(cityId => cityIdsToConsider.has(cityId))
+      );
     }
     setFilteredRoutes(tempFilteredRoutes);
   }, [availableRoutes, filterControlSelectedCityIds, availableCities]);
@@ -286,31 +287,34 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     }
   }, [plannedItems, onItemsChange]);
 
-  // Подготовка данных для карты
-  const getMapItems = () => {
-    if (showSearchResults) {
-      // Если показываем результаты поиска, используем отфильтрованные элементы
-      const allFilteredItems = [
-        ...filteredPlaces,
-        ...filteredEvents,
-        ...filteredRoutes
-      ] as (Place | City | Event | Route)[];
+  // Определяем, что показывать в списке и на карте
+  const getDisplayData = () => {
+    // 1. Режим предпросмотра маршрута
+    if (showSearchResults && selectedRoute) {
       return {
-        items: allFilteredItems,
-        showFiltered: true
-      };
-    } else {
-      // Иначе используем запланированные элементы
-      // Для карты нам нужны только данные из PlannedItem
-      const plannedItemsData = sortedItemsForDisplay.map(item => item.data);
-      return {
-        items: plannedItemsData as (Place | City | Event | Route)[],
-        showFiltered: false
+        listItems: selectedRoutePlaces,
+        mapItems: selectedRoutePlaces,
+        isPreview: true,
       };
     }
+    // 2. Режим результатов поиска
+    if (showSearchResults) {
+      const searchResults = [...filteredPlaces, ...filteredEvents];
+      return {
+        listItems: searchResults,
+        mapItems: searchResults,
+        isPreview: true,
+      };
+    }
+    // 3. Режим отображения плана
+    return {
+      listItems: sortedItemsForDisplay, // PlannedItem[]
+      mapItems: sortedItemsForDisplay.map(item => item.data), // (Place | Event | City)[]
+      isPreview: false,
+    };
   };
 
-  const mapData = getMapItems();
+  const { listItems, mapItems, isPreview } = getDisplayData();
 
   // Debug logging
   console.log('🎬 PilgrimagePlannerMain render:', {
@@ -318,14 +322,10 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     selectedRoute: selectedRoute?.id,
     filteredPlaces: filteredPlaces.length,
     filteredEvents: filteredEvents.length,
-    filteredRoutes: filteredRoutes.length,
     plannedItems: plannedItems.length,
-    sortedItemsForDisplay: sortedItemsForDisplay.length,
-    placesInSortedItems: sortedItemsForDisplay.filter(item => item.type === 'place').length,
-    mapData: {
-      itemsCount: mapData.items.length,
-      showFiltered: mapData.showFiltered
-    }
+    listItemsCount: listItems.length,
+    mapItemsCount: mapItems.length,
+    isPreview: isPreview,
   });
 
   return (
@@ -355,32 +355,35 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
               savedGoals={savedGoals}
               selectedPlaceSubtypes={selectedPlaceSubtypes}
               selectedEventSubtypes={selectedEventSubtypes}
-              onSelectedPlaceSubtypesChange={setSelectedPlaceSubtypes}
-              onSelectedEventSubtypesChange={setSelectedEventSubtypes}
-              onAddFilteredItemsToPlan={handleAddFilteredItemsToPlan}
-              onClearPlan={handleClearPlan}
+              onSelectedPlaceSubtypesChange={setSelectedEventSubtypes}
+              onSearch={handleSearch}
+              onResetFilters={handleResetFilters}
               isLoadingData={isLoadingCities || isLoadingPlacesAndEvents}
             />
           </div>
 
           {/* Средняя колонка - Список городов и мест (30%) */}
           <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full flex flex-col">
-            {showSearchResults || plannedItems.length > 0 ? (
+            {isPreview || plannedItems.length > 0 ? (
               <PilgrimagePlanDisplay
-                plannedItems={sortedItemsForDisplay}
+                itemsToShow={listItems}
+                routePreview={selectedRoute}
+                availableCities={availableCities}
                 language={language}
                 t={t}
                 onUpdateDateTime={handleUpdatePlannedItemDateTime}
                 onRemoveItem={handleRemovePlannedItem}
+                onRemovePreviewItem={handleRemovePreviewItem}
                 onAddPlacesForCity={handleAddPlacesForCity}
                 onSearchAndAddPlace={handleSearchAndAddPlace}
                 onAddSpecificPlace={handleAddSpecificPlace}
                 onReorderItems={handlePlannedItemsReorder}
+                isPreview={isPreview}
               />
             ) : (
               <div className="h-full overflow-y-auto p-4">
                 <div className="space-y-4">
-                  <h3 className={`text-lg font-semibold ${fonts.subheading.className} mb-4`}>{t('available_routes', { defaultValue: 'Available Routes' })}</h3>
+                  <h3 className={`text-lg font-semibold ${fonts.subheading.className} mb-4`}>{t('designed_routes', { defaultValue: 'Designed Routes' })}</h3>
                   {availableRoutes.length > 0 ? (
                     <div className="space-y-4">
                       {availableRoutes
@@ -416,9 +419,9 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
           <div className="xl:col-span-4 order-3 border-l border-gray-200 h-full flex flex-col min-h-0">
             <div className="flex-1 min-h-0">
               <PilgrimageRouteMap 
-                plannedItems={sortedItemsForDisplay}
-                filteredItems={mapData.items}
-                showFilteredItems={mapData.showFiltered}
+                plannedItems={sortedItemsForDisplay} // Для информации о датах/времени, если нужно
+                filteredItems={mapItems}
+                showFilteredItems={isPreview}
               />
             </div>
           </div>

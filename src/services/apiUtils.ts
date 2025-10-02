@@ -111,7 +111,7 @@ export function transformRoute(dbRoute: any): Omit<Route, 'places' | 'events'> {
     // Assume 'info' field contains the localized description for Routes
     description: parseLocalizedText(dbRoute.info),
     imageUrl: mainImageUrl,
-    cityId: dbRoute.city || '',
+    city_id: dbRoute.city_id || [],
     placeIds: dbRoute.spots || [], 
     eventIds: dbRoute.events || [],
     // Omit raw info field

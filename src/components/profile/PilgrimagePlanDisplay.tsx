@@ -9,15 +9,19 @@ import { getLocalizedText } from '../../utils/languageUtils';
 import { cn } from '@/lib/utils';
 
 interface PilgrimagePlanDisplayProps {
-  plannedItems: PlannedItem[]; 
+  itemsToShow: (PlannedItem[] | Place[] | Event[]);
+  routePreview?: Route | null;
+  availableCities: City[];
   language: Language;
   t: (key: string, options?: any) => string;
   onUpdateDateTime: (itemId: string, itemType: string, newDate: string, newTime: string) => void;
   onRemoveItem: (itemId: string, itemType: string) => void;
+  onRemovePreviewItem: (item: Place | Event) => void;
   onAddPlacesForCity?: (cityId: string) => void;
   onSearchAndAddPlace?: (cityId: string, searchTerm: string) => Promise<Place[]>;
   onAddSpecificPlace?: (place: Place, cityId: string) => void;
   onReorderItems: (reorderedItems: PlannedItem[]) => void; 
+  isPreview: boolean;
 }
 
 interface PlanGroup {
@@ -26,19 +30,97 @@ interface PlanGroup {
 }
 
 export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
-  plannedItems, 
+  itemsToShow,
+  routePreview,
+  availableCities,
   language,
   t,
   onUpdateDateTime,
   onRemoveItem,
+  onRemovePreviewItem,
   onAddPlacesForCity,
   onSearchAndAddPlace,
   onAddSpecificPlace,
   onReorderItems,
+  isPreview,
 }) => {
   const searchTimeout = useRef<NodeJS.Timeout>();
   const [searchResultsForCity, setSearchResultsForCity] = useState<Record<string, Place[]>>({});
   const [collapsedCities, setCollapsedCities] = useState<Set<string>>(new Set());
+
+  // Унифицируем данные для отображения в PlannedItem[]
+  const displayItems = useMemo(() => {
+    // Режим предпросмотра маршрута
+    if (routePreview) {
+      const primaryCityId = routePreview.city_id && routePreview.city_id[0];
+      if (!primaryCityId) return []; // Не можем отобразить маршрут без основного города
+
+      // В режиме предпросмотра маршрута создаем синтетический город
+      const cityDataFromRoute = {
+        ...routePreview, // Копируем все свойства из routePreview
+        id: primaryCityId, // Явно устанавливаем id города
+        name: routePreview.name // Явно устанавливаем имя
+      };
+
+      const cityItem: PlannedItem = {
+        type: 'city',
+        data: cityDataFromRoute,
+        city_id_for_grouping: primaryCityId,
+        time: '',
+        orderIndex: -1,
+      };
+      const placeItems: PlannedItem[] = (itemsToShow as Place[]).map((place, index) => ({
+        type: 'place',
+        data: place,
+        city_id_for_grouping: place.cityId, // У мест есть свое поле cityId
+        time: '',
+        orderIndex: index,
+        date: '',
+      }));
+      return [cityItem, ...placeItems];
+    }
+
+    // Режим результатов поиска (массив Place[] или Event[])
+    if (itemsToShow.length > 0 && (!('orderIndex' in itemsToShow[0]))) {
+        const items = itemsToShow as (Place[] | Event[]);
+        const cityGroups: { [cityId: string]: (Place | Event)[] } = {};
+
+        items.forEach(item => {
+            if (!cityGroups[item.cityId]) {
+                cityGroups[item.cityId] = [];
+            }
+            cityGroups[item.cityId].push(item);
+        });
+
+        const plannedItems: PlannedItem[] = [];
+        Object.keys(cityGroups).forEach((cityId, cityIndex) => {
+            const cityData = availableCities.find(c => c.id === cityId);
+            if (cityData) {
+                plannedItems.push({
+                    type: 'city',
+                    data: cityData,
+                    city_id_for_grouping: cityId,
+                    time: '',
+                    orderIndex: cityIndex * 1000,
+                });
+            }
+            cityGroups[cityId].forEach((item, itemIndex) => {
+                plannedItems.push({
+                    type: (item as Event).eventTypeField ? 'event' : 'place',
+                    data: item,
+                    city_id_for_grouping: cityId,
+                    time: '',
+                    orderIndex: cityIndex * 1000 + itemIndex + 1,
+                    date: '',
+                });
+            });
+        });
+        return plannedItems;
+    }
+
+    // Режим обычного плана (уже PlannedItem[])
+    return itemsToShow as PlannedItem[];
+  }, [itemsToShow, routePreview]);
 
   const toggleCityCollapse = (cityId: string) => {
     setCollapsedCities(prev => {
@@ -53,41 +135,10 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   };
 
   const existingPlaceIds = useMemo(() => new Set(
-    plannedItems
+    displayItems
       .filter(item => item.type === 'place')
       .map(item => item.data.id)
-  ), [plannedItems]);
-
-  const groupedItems = useMemo(() => {
-    const groups: PlanGroup[] = [];
-    const itemMap = new Map<string, PlannedItem[]>();
-
-    console.log('🔍 Grouping plannedItems:', plannedItems);
-
-    plannedItems.forEach(item => {
-      if (item.type === 'city') {
-        // Ensure cityItem is not undefined by checking item.data
-        if (item.data) {
-          groups.push({ cityItem: item, childItems: [] });
-        } else {
-          console.warn("City item without data found, skipping:", item);
-        }
-      } else if (item.city_id_for_grouping) {
-        if (!itemMap.has(item.city_id_for_grouping)) {
-          itemMap.set(item.city_id_for_grouping, []);
-        }
-        itemMap.get(item.city_id_for_grouping)!.push(item);
-      }
-    });
-
-    const result = groups.map(group => ({
-      ...group,
-      childItems: (itemMap.get(group.cityItem.data.id) || []).sort((a,b) => a.orderIndex - b.orderIndex)
-    })).filter(group => group.cityItem && group.cityItem.data); // Ensure cityItem and its data exist
-
-    console.log('📊 Grouped result:', result);
-    return result;
-  }, [plannedItems]);
+  ), [displayItems]);
 
   // Cleanup timeout on component unmount
   React.useEffect(() => {
@@ -99,10 +150,12 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   }, []);
 
   const handleOnDragEnd = (result: DropResult) => {
+    if (routePreview) return; // Отключаем D&D в режиме предпросмотра
+
     const { source, destination, type } = result;
     if (!destination) return;
 
-    let newOrderedItems = Array.from(plannedItems);
+    let newOrderedItems = Array.from(displayItems as PlannedItem[]);
 
     if (type === 'CITY_GROUP') {
       if (source.index === destination.index) return; // No change if dropped in the same place
@@ -122,28 +175,24 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
       newOrderedItems = [...otherItems.slice(0, insertAtIndex), ...itemsToMove, ...otherItems.slice(insertAtIndex)];
 
     } else if (type === 'ITEM_IN_CITY') {
-      const sourceDroppableId = source.droppableId; // cityId
-      const destinationDroppableId = destination.droppableId; // cityId
+      const sourceCityId = source.droppableId.replace('city-droppable-', '');
+      const destinationCityId = destination.droppableId.replace('city-droppable-', '');
 
-      if (sourceDroppableId !== destinationDroppableId) {
-        // Moving items BETWEEN cities is more complex: needs to update city_id_for_grouping
-        // and then re-calculate orderIndex for items in both source and destination cities.
-        // For now, we only support reordering within the same city group.
-        console.warn("Moving items between different cities via D&D is not supported in this simplified version.");
+      if (sourceCityId !== destinationCityId) {
+        console.warn("Moving items between different cities via D&D is not supported.");
         return;
       }
-      const cityGroup = groupedItems.find(g => g.cityItem.data.id === sourceDroppableId);
+      const cityGroup = groupedItems.find(g => g.cityItem.data.id === sourceCityId);
       if (!cityGroup) return;
 
       const childItemsCopy = Array.from(cityGroup.childItems);
       const [movedItem] = childItemsCopy.splice(source.index, 1);
       childItemsCopy.splice(destination.index, 0, movedItem);
 
-      // Reconstruct the full plannedItems array with the reordered child list for this city
       newOrderedItems = [];
       groupedItems.forEach(group => {
         newOrderedItems.push(group.cityItem);
-        if (group.cityItem.data.id === sourceDroppableId) {
+        if (group.cityItem.data.id === sourceCityId) {
           newOrderedItems.push(...childItemsCopy);
         } else {
           newOrderedItems.push(...group.childItems);
@@ -153,10 +202,37 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
     onReorderItems(newOrderedItems);
   };
 
+  const groupedItems = useMemo(() => {
+    const groups: PlanGroup[] = [];
+    const itemMap = new Map<string, PlannedItem[]>();
+
+    displayItems.forEach(item => {
+      if (item.type === 'city') {
+        if (item.data) {
+          groups.push({ cityItem: item, childItems: [] });
+        } else {
+          console.warn("City item without data found, skipping:", item);
+        }
+      } else if (item.city_id_for_grouping) {
+        if (!itemMap.has(item.city_id_for_grouping)) {
+          itemMap.set(item.city_id_for_grouping, []);
+        }
+        itemMap.get(item.city_id_for_grouping)!.push(item);
+      }
+    });
+
+    const result = groups.map(group => ({
+      ...group,
+      childItems: (itemMap.get(group.cityItem.data.id) || []).sort((a,b) => a.orderIndex - b.orderIndex)
+    })).filter(group => group.cityItem && group.cityItem.data); // Ensure cityItem and its data exist
+
+    return result;
+  }, [displayItems]);
+
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
       <div className="border rounded-md p-0 bg-white h-full">
-        {groupedItems.length === 0 && plannedItems.length === 0 ? (
+        {groupedItems.length === 0 && displayItems.length === 0 ? (
           <div className="p-4 text-gray-500">{t('plan_results_placeholder')}</div>
         ) : (
           <Droppable droppableId="all-cities" type="CITY_GROUP">
@@ -311,7 +387,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                             <Button 
                               variant="ghost" 
                               size="icon" 
-                              onClick={() => onRemoveItem(group.cityItem.data.id, group.cityItem.type)} 
+                              onClick={() => isPreview ? onRemovePreviewItem(group.cityItem.data as Place | Event) : onRemoveItem(group.cityItem.data.id, group.cityItem.type)} 
                               className="text-red-500 hover:text-red-700 h-8 w-8"
                               title={t('remove_item_tooltip', {defaultValue: 'Remove city from plan'})}
                             >
@@ -321,7 +397,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                         </div>
 
                         {!collapsedCities.has(group.cityItem.data.id) && (
-                          <Droppable droppableId={group.cityItem.data.id} type="ITEM_IN_CITY">
+                          <Droppable droppableId={`city-droppable-${group.cityItem.data.id}`} type="ITEM_IN_CITY">
                             {(providedInner: DroppableProvided) => (
                               <div ref={providedInner.innerRef} {...providedInner.droppableProps} className="p-2 bg-white rounded-b-md min-h-[30px]">
                                 {group.childItems.length > 0 ? group.childItems.map((item, itemIndex) => {
@@ -354,8 +430,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                                     default: return "text-indigo-600 hover:text-indigo-800";
                                                   }
                                                 })() :
-                                                item.type === 'route' ? "text-green-600 hover:text-green-800" :
-                                                "text-purple-600 hover:text-purple-800"
+                                                item.type === 'route' ? "text-green-600 hover:text-green-800" :"text-purple-600 hover:text-purple-800"
                                               )}
                                             >
                                               {getLocalizedText((item.data as Place | Route | Event).name, language)}
@@ -380,7 +455,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                           <Button 
                                             variant="ghost" 
                                             size="icon" 
-                                            onClick={() => onRemoveItem(item.data.id, item.type)} 
+                                            onClick={() => isPreview ? onRemovePreviewItem(item.data as Place | Event) : onRemoveItem(item.data.id, item.type)} 
                                             className="ml-1 text-red-400 hover:text-red-600 h-7 w-7"
                                             title={t('remove_item_tooltip', {defaultValue: 'Remove item'})}
                                           >
