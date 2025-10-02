@@ -1,0 +1,6 @@
+{
+  "public": "dist",
+  "redirects": [
+    { "source": "/(.*)", "destination": "/index.html" }
+  ]
+}
