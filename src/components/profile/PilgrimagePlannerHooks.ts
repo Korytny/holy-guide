@@ -590,9 +590,15 @@ export const usePilgrimagePlannerHandlers = ({
   }, [stagedForPlanningCities, plannedItems, setPlannedItems, setStagedForPlanningCities, setShowSearchResults]);
 
   const handleRemovePlannedItem = useCallback((itemId: string, itemType: string) => {
-    setPlannedItems(prev => prev.filter(item => 
-      !(item.data.id === itemId && item.type === itemType)
-    ));
+    console.log('handleRemovePlannedItem called with:', { itemId, itemType });
+    setPlannedItems(prev => {
+      console.log('Before removal:', prev.map(item => ({ id: item.data.id, type: item.type })));
+      const filtered = prev.filter(item =>
+        !(item.data.id === itemId && item.type === itemType)
+      );
+      console.log('After removal:', filtered.map(item => ({ id: item.data.id, type: item.type })));
+      return filtered;
+    });
   }, [setPlannedItems]);
 
   // Функция для перераспределения дат в существующих элементах
