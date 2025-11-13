@@ -749,9 +749,14 @@ export const usePilgrimagePlannerHandlers = ({
 
     try {
       const places = await getPlacesByRouteId(route.id);
-      // Места уже отсортированы по полю order из getPlacesByRouteId
+      // Дополнительная сортировка мест по полю order для гарантии правильного порядка
+      const sortedPlaces = (places || []).sort((a, b) => {
+        const orderA = a.order ?? Infinity;
+        const orderB = b.order ?? Infinity;
+        return orderA - orderB;
+      });
       setSelectedRoute(route);
-      setSelectedRoutePlaces(places);
+      setSelectedRoutePlaces(sortedPlaces);
       setShowSearchResults(true);
 
       // Добавляем маршрут и его места в plannedItems для сохранения
@@ -783,7 +788,7 @@ export const usePilgrimagePlannerHandlers = ({
       });
 
       // Добавляем места маршрута
-      routePlannedItems.push(...places.map((place, index) => ({
+      routePlannedItems.push(...sortedPlaces.map((place, index) => ({
         type: 'place',
         data: place,
         city_id_for_grouping: routeCityId,
