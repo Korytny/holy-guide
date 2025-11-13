@@ -4,7 +4,7 @@ import { type LanguageContextType } from "@/context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem } from "@/types";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '@/services/api';
-import { getPlacesByCityId, getPlacesByRouteId, getPlacesByRouteIdWithoutOrder } from '@/services/placesApi';
+import { getPlacesByCityId, getPlacesByRouteId } from '@/services/placesApi';
 import { supabase } from '@/integrations/supabase/client';
 import { getLocalizedText } from '@/utils/languageUtils';
 
