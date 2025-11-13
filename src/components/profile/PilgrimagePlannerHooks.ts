@@ -4,7 +4,7 @@ import { type LanguageContextType } from "@/context/LanguageContext";
 import { City, Place, Route, Event, Language, PlannedItem } from "@/types";
 import { format, addDays, eachDayOfInterval } from "date-fns";
 import { getCitiesByIds, fetchPlaceData, getRoutesByIds, getEventsByIds } from '@/services/api';
-import { getPlacesByCityId, getPlacesByRouteId, getPlacesByRouteIdWithoutOrder } from '@/services/placesApi';
+import { getPlacesByCityId, getPlacesByRouteId } from '@/services/placesApi';
 import { supabase } from '@/integrations/supabase/client';
 import { getLocalizedText } from '@/utils/languageUtils';
 
@@ -748,15 +748,10 @@ export const usePilgrimagePlannerHandlers = ({
     setFilteredRoutes([]);
 
     try {
-      const places = await getPlacesByRouteIdWithoutOrder(route.id);
-      // Сортируем места по полю order из spot_route
-      const sortedPlaces = (places || []).sort((a, b) => {
-        const orderA = a.order ?? Infinity;
-        const orderB = b.order ?? Infinity;
-        return orderA - orderB;
-      });
+      const places = await getPlacesByRouteId(route.id);
+      // Места уже отсортированы по полю order из getPlacesByRouteId
       setSelectedRoute(route);
-      setSelectedRoutePlaces(sortedPlaces);
+      setSelectedRoutePlaces(places);
       setShowSearchResults(true);
 
       // Добавляем маршрут и его места в plannedItems для сохранения
@@ -788,7 +783,7 @@ export const usePilgrimagePlannerHandlers = ({
       });
 
       // Добавляем места маршрута
-      routePlannedItems.push(...sortedPlaces.map((place, index) => ({
+      routePlannedItems.push(...places.map((place, index) => ({
         type: 'place',
         data: place,
         city_id_for_grouping: routeCityId,
