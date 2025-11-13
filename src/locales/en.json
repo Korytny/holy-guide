@@ -294,5 +294,7 @@
   "route_added_to_plan": "Route '{{routeName}}' added to plan.",
   "error_adding_route_to_plan": "Error adding route to plan.",
   "route_loaded_to_plan": "Route '{{routeName}}' with {{placesCount}} places loaded to plan.",
-  "no_places_in_route": "No places found in this route."
+  "no_places_in_route": "No places found in this route.",
+  "search_button": "Search",
+    "dates_auto_distributed": "Dates have been automatically distributed for existing items."
 }

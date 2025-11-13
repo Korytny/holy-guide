@@ -15,9 +15,9 @@ interface SimpleDateSelectorProps {
 }
 
 const DURATION_OPTIONS = [
-  { labelKey: 'duration_1_day', value: 'day', fn: (date: Date) => addDays(date, 1) },
-  { labelKey: 'duration_1_week', value: 'week', fn: (date: Date) => addWeeks(date, 1) },
-  { labelKey: 'duration_1_month', value: 'month', fn: (date: Date) => addMonths(date, 1) },
+  { labelKey: 'duration_1_day', value: 'day', fn: (date: Date) => addDays(date, 0) }, // 1 день = тот же день (start = end)
+  { labelKey: 'duration_1_week', value: 'week', fn: (date: Date) => addDays(date, 6) }, // 1 неделя = 7 дней (start + 6)
+  { labelKey: 'duration_1_month', value: 'month', fn: (date: Date) => addMonths(date, 1) }, // 1 месяц
 ];
 
 export function SimpleDateSelector({
@@ -48,13 +48,20 @@ export function SimpleDateSelector({
   };
 
   const handleDurationClick = (duration: string) => {
-    if (selectedDateRange?.from) {
-      const durationOption = DURATION_OPTIONS.find(opt => opt.value === duration);
-      if (durationOption) {
-        const endDate = durationOption.fn(selectedDateRange.from);
-        onDateRangeChange({ ...selectedDateRange, to: endDate });
-      }
+    if (!selectedDateRange?.from) {
+      return;
     }
+
+    const durationOption = DURATION_OPTIONS.find(opt => opt.value === duration);
+    if (!durationOption) {
+      return;
+    }
+
+    const endDate = durationOption.fn(selectedDateRange.from);
+    const newRange = { from: selectedDateRange.from, to: endDate };
+
+    // Просто вызываем onDateRangeChange - остальная логика будет в хуках
+    onDateRangeChange(newRange);
   };
 
   const clearDates = () => {

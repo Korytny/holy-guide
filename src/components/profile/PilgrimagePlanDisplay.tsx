@@ -20,8 +20,10 @@ interface PilgrimagePlanDisplayProps {
   onAddPlacesForCity?: (cityId: string) => void;
   onSearchAndAddPlace?: (cityId: string, searchTerm: string) => Promise<Place[]>;
   onAddSpecificPlace?: (place: Place, cityId: string) => void;
-  onReorderItems: (reorderedItems: PlannedItem[]) => void; 
+  onReorderItems: (reorderedItems: PlannedItem[]) => void;
+  onReorderRoutePlaces?: (routeId: string, reorderedPlaces: Place[]) => void; // Новый обработчик для маршрута
   isPreview: boolean;
+  isSearchMode: boolean;
 }
 
 interface PlanGroup {
@@ -42,7 +44,9 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   onSearchAndAddPlace,
   onAddSpecificPlace,
   onReorderItems,
+  onReorderRoutePlaces,
   isPreview,
+  isSearchMode,
 }) => {
   const searchTimeout = useRef<NodeJS.Timeout>();
   const [searchResultsForCity, setSearchResultsForCity] = useState<Record<string, Place[]>>({});
@@ -50,77 +54,9 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
 
   // Унифицируем данные для отображения в PlannedItem[]
   const displayItems = useMemo(() => {
-    // Режим предпросмотра маршрута
-    if (routePreview) {
-      const primaryCityId = routePreview.city_id && routePreview.city_id[0];
-      if (!primaryCityId) return []; // Не можем отобразить маршрут без основного города
-
-      // В режиме предпросмотра маршрута создаем синтетический город
-      const cityDataFromRoute = {
-        ...routePreview, // Копируем все свойства из routePreview
-        id: primaryCityId, // Явно устанавливаем id города
-        name: routePreview.name // Явно устанавливаем имя
-      };
-
-      const cityItem: PlannedItem = {
-        type: 'city',
-        data: cityDataFromRoute,
-        city_id_for_grouping: primaryCityId,
-        time: '',
-        orderIndex: -1,
-      };
-      const placeItems: PlannedItem[] = (itemsToShow as Place[]).map((place, index) => ({
-        type: 'place',
-        data: place,
-        city_id_for_grouping: place.cityId, // У мест есть свое поле cityId
-        time: '',
-        orderIndex: index,
-        date: '',
-      }));
-      return [cityItem, ...placeItems];
-    }
-
-    // Режим результатов поиска (массив Place[] или Event[])
-    if (itemsToShow.length > 0 && (!('orderIndex' in itemsToShow[0]))) {
-        const items = itemsToShow as (Place[] | Event[]);
-        const cityGroups: { [cityId: string]: (Place | Event)[] } = {};
-
-        items.forEach(item => {
-            if (!cityGroups[item.cityId]) {
-                cityGroups[item.cityId] = [];
-            }
-            cityGroups[item.cityId].push(item);
-        });
-
-        const plannedItems: PlannedItem[] = [];
-        Object.keys(cityGroups).forEach((cityId, cityIndex) => {
-            const cityData = availableCities.find(c => c.id === cityId);
-            if (cityData) {
-                plannedItems.push({
-                    type: 'city',
-                    data: cityData,
-                    city_id_for_grouping: cityId,
-                    time: '',
-                    orderIndex: cityIndex * 1000,
-                });
-            }
-            cityGroups[cityId].forEach((item, itemIndex) => {
-                plannedItems.push({
-                    type: (item as Event).eventTypeField ? 'event' : 'place',
-                    data: item,
-                    city_id_for_grouping: cityId,
-                    time: '',
-                    orderIndex: cityIndex * 1000 + itemIndex + 1,
-                    date: '',
-                });
-            });
-        });
-        return plannedItems;
-    }
-
-    // Режим обычного плана (уже PlannedItem[])
-    return itemsToShow as PlannedItem[];
-  }, [itemsToShow, routePreview]);
+    const items = itemsToShow as PlannedItem[];
+    return items;
+  }, [itemsToShow]);
 
   const toggleCityCollapse = (cityId: string) => {
     setCollapsedCities(prev => {
@@ -150,21 +86,133 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   }, []);
 
   const handleOnDragEnd = (result: DropResult) => {
-    if (routePreview) return; // Отключаем D&D в режиме предпросмотра
-
     const { source, destination, type } = result;
     if (!destination) return;
 
+    // В режиме предпросмотра маршрута разрешаем D&D только для элементов внутри города
+    if (routePreview && result.type !== 'ITEM_IN_CITY') return;
+
+    // В режиме поиска разрешаем переупорядочивание элементов
+    if (isSearchMode) {
+      // Перетаскивание городов в режиме поиска
+      if (type === 'CITY_GROUP') {
+        // Реализация аналогична обычному режиму для изменения порядка городов
+        if (source.index === destination.index) return;
+
+        const draggedCityGroup = groupedItems[source.index];
+        if (!draggedCityGroup || !draggedCityGroup.cityItem) return;
+
+        // В режиме поиска displayItems уже содержит города с дочерними элементами в правильном порядке
+        const newDisplayItems = Array.from(displayItems as PlannedItem[]);
+
+        // Находим все элементы (город + дочерние) для перемещаемой группы
+        const cityItemIndex = newDisplayItems.findIndex(item =>
+          item.type === 'city' && item.data.id === draggedCityGroup.cityItem.data.id
+        );
+
+        if (cityItemIndex === -1) return;
+
+        // Находим конец группы (следующий город или конец массива)
+        let groupEndIndex = cityItemIndex + 1;
+        while (groupEndIndex < newDisplayItems.length &&
+               newDisplayItems[groupEndIndex].type !== 'city') {
+          groupEndIndex++;
+        }
+
+        // Извлекаем всю группу
+        const movedGroup = newDisplayItems.splice(cityItemIndex, groupEndIndex - cityItemIndex);
+
+        // Вычисляем новую позицию для вставки
+        let insertAtIndex = 0;
+        for (let i = 0; i < destination.index; i++) {
+          const group = groupedItems[i];
+          if (group.cityItem.data.id === draggedCityGroup.cityItem.data.id) continue;
+          // Находим индекс города в displayItems
+          const cityIndex = newDisplayItems.findIndex(item =>
+            item.type === 'city' && item.data.id === group.cityItem.data.id
+          );
+          if (cityIndex !== -1) {
+            // Находим конец этой группы
+            let groupEnd = cityIndex + 1;
+            while (groupEnd < newDisplayItems.length &&
+                   newDisplayItems[groupEnd].type !== 'city') {
+              groupEnd++;
+            }
+            insertAtIndex += (groupEnd - cityIndex);
+          }
+        }
+
+        // Вставляем группу на новую позицию
+        newDisplayItems.splice(insertAtIndex, 0, ...movedGroup);
+
+        // Обновляем orderIndex для всех элементов
+        const updatedItems = newDisplayItems.map((item, index) => ({
+          ...item,
+          orderIndex: index
+        }));
+
+        onReorderItems(updatedItems);
+        return;
+      }
+
+      // Если перетаскиваем элементы внутри группы поиска
+      if (type === 'ITEM_IN_CITY') {
+        // В режиме поиска работаем с группами как в обычном режиме
+        const sourceCityId = source.droppableId.replace('city-droppable-', '');
+        const destinationCityId = destination.droppableId.replace('city-droppable-', '');
+
+        if (sourceCityId !== destinationCityId) {
+          return;
+        }
+
+        const cityGroup = groupedItems.find(g => g.cityItem.data.id === sourceCityId);
+        if (!cityGroup) return;
+
+        // Создаем новый массив displayItems с измененным порядком
+        const newDisplayItems = Array.from(displayItems as PlannedItem[]);
+
+        // Находим позиции дочерних элементов в displayItems
+        const childItemPositions: number[] = [];
+        newDisplayItems.forEach((item, index) => {
+          if (item.type !== 'city' && item.city_id_for_grouping === sourceCityId) {
+            childItemPositions.push(index);
+          }
+        });
+
+        // Обмениваем элементы
+        const sourcePos = childItemPositions[source.index];
+        const destPos = childItemPositions[destination.index];
+
+        if (sourcePos !== undefined && destPos !== undefined) {
+          const [movedItem] = newDisplayItems.splice(sourcePos, 1);
+          newDisplayItems.splice(destPos, 0, movedItem);
+
+          // Обновляем orderIndex для всех элементов
+          const updatedItems = newDisplayItems.map((item, index) => ({
+            ...item,
+            orderIndex: index
+          }));
+
+
+          // Сохраняем новый порядок
+          onReorderItems(updatedItems);
+        }
+        return;
+      }
+    }
+
     let newOrderedItems = Array.from(displayItems as PlannedItem[]);
+    let reorderedPlacesForRoute: PlannedItem[] = [];
 
     if (type === 'CITY_GROUP') {
       if (source.index === destination.index) return; // No change if dropped in the same place
       const draggedCityGroup = groupedItems[source.index];
       if (!draggedCityGroup || !draggedCityGroup.cityItem) return; // Safety check
 
+      
       const itemsToMove = [draggedCityGroup.cityItem, ...draggedCityGroup.childItems];
       const otherItems = newOrderedItems.filter(item => !itemsToMove.find(itm => itm.data.id === item.data.id && itm.type === item.type));
-      
+
       let insertAtIndex = 0;
       for (let i = 0; i < destination.index; i++) {
         const group = groupedItems[i];
@@ -174,59 +222,118 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
       }
       newOrderedItems = [...otherItems.slice(0, insertAtIndex), ...itemsToMove, ...otherItems.slice(insertAtIndex)];
 
+      
     } else if (type === 'ITEM_IN_CITY') {
       const sourceCityId = source.droppableId.replace('city-droppable-', '');
       const destinationCityId = destination.droppableId.replace('city-droppable-', '');
 
       if (sourceCityId !== destinationCityId) {
-        console.warn("Moving items between different cities via D&D is not supported.");
         return;
       }
       const cityGroup = groupedItems.find(g => g.cityItem.data.id === sourceCityId);
       if (!cityGroup) return;
 
+      
       const childItemsCopy = Array.from(cityGroup.childItems);
       const [movedItem] = childItemsCopy.splice(source.index, 1);
       childItemsCopy.splice(destination.index, 0, movedItem);
 
-      newOrderedItems = [];
-      groupedItems.forEach(group => {
-        newOrderedItems.push(group.cityItem);
-        if (group.cityItem.data.id === sourceCityId) {
-          newOrderedItems.push(...childItemsCopy);
-        } else {
-          newOrderedItems.push(...group.childItems);
-        }
-      });
+      if (routePreview) {
+        // В режиме предпросмотра маршрута обновляем порядок мест
+        reorderedPlacesForRoute = childItemsCopy.map((item, index) => {
+          // Обновляем orderIndex для правильного отображения
+          const updatedItem = { ...item, orderIndex: index };
+          return updatedItem;
+        });
+
+        newOrderedItems = [];
+        groupedItems.forEach(group => {
+          newOrderedItems.push(group.cityItem);
+          if (group.cityItem.data.id === sourceCityId) {
+            newOrderedItems.push(...reorderedPlacesForRoute);
+          } else {
+            newOrderedItems.push(...group.childItems);
+          }
+        });
+
+              } else {
+        // В обычном режиме собираем полный список в правильном порядке
+        newOrderedItems = [];
+        groupedItems.forEach(group => {
+          newOrderedItems.push(group.cityItem);
+          if (group.cityItem.data.id === sourceCityId) {
+            newOrderedItems.push(...childItemsCopy);
+          } else {
+            newOrderedItems.push(...group.childItems);
+          }
+        });
+
+              }
     }
-    onReorderItems(newOrderedItems);
+
+    // Обновляем orderIndex для всех элементов в финальном массиве
+    const finalUpdatedItems = newOrderedItems.map((item, index) => ({
+      ...item,
+      orderIndex: index
+    }));
+
+    // В режиме предпросмотра маршрута используем специальный обработчик
+    if (!routePreview) {
+      if (onReorderItems) {
+        onReorderItems(finalUpdatedItems);
+      }
+    } else if (onReorderRoutePlaces && routePreview?.id && type === 'ITEM_IN_CITY') {
+      // В режиме предпросмотра обновляем порядок мест в маршруте
+      const reorderedPlaces = reorderedPlacesForRoute.map(item => item.data as Place);
+      onReorderRoutePlaces(routePreview.id, reorderedPlaces);
+    }
   };
 
   const groupedItems = useMemo(() => {
-    const groups: PlanGroup[] = [];
-    const itemMap = new Map<string, PlannedItem[]>();
+    if (!displayItems || displayItems.length === 0) {
+      return [];
+    }
 
+    const cityGroups = new Map<string, PlanGroup>();
+
+    // Первый проход: создаем группы для каждого города
     displayItems.forEach(item => {
       if (item.type === 'city') {
-        if (item.data) {
-          groups.push({ cityItem: item, childItems: [] });
-        } else {
-          console.warn("City item without data found, skipping:", item);
-        }
-      } else if (item.city_id_for_grouping) {
-        if (!itemMap.has(item.city_id_for_grouping)) {
-          itemMap.set(item.city_id_for_grouping, []);
-        }
-        itemMap.get(item.city_id_for_grouping)!.push(item);
+        cityGroups.set(item.data.id, { cityItem: item, childItems: [] });
       }
     });
 
-    const result = groups.map(group => ({
-      ...group,
-      childItems: (itemMap.get(group.cityItem.data.id) || []).sort((a,b) => a.orderIndex - b.orderIndex)
-    })).filter(group => group.cityItem && group.cityItem.data); // Ensure cityItem and its data exist
+    // Второй проход: распределяем дочерние элементы по группам
+    displayItems.forEach(item => {
+      if (item.type !== 'city' && item.city_id_for_grouping) {
+        const group = cityGroups.get(item.city_id_for_grouping);
+        if (group) {
+          group.childItems.push(item);
+        }
+      }
+    });
 
-    return result;
+    // Сортируем дочерние элементы по orderIndex внутри каждой группы
+    cityGroups.forEach(group => {
+      group.childItems.sort((a, b) => {
+        const orderA = a.orderIndex ?? Infinity;
+        const orderB = b.orderIndex ?? Infinity;
+        return orderA - orderB;
+      });
+    });
+
+    // Финальный проход: собираем группы в том порядке, в котором города идут в displayItems
+    const orderedGroups: PlanGroup[] = [];
+    displayItems.forEach(item => {
+      if (item.type === 'city') {
+        const group = cityGroups.get(item.data.id);
+        if (group) {
+          orderedGroups.push(group);
+        }
+      }
+    });
+
+    return orderedGroups;
   }, [displayItems]);
 
   return (
@@ -414,27 +521,38 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                             <GripVertical size={16} className="text-gray-400" />
                                           </div>
                                           <div className="flex-grow pl-1">
-                                            <Link 
-                                              to={`/${item.type === 'place' ? 'places' : item.type === 'route' ? 'routes' : 'events'}/${item.data.id}`}
-                                              target="_blank"
-                                              className={cn(
-                                                "text-sm hover:underline",
-                                                item.type === 'place' ? (() => {
-                                                  const place = item.data as Place;
-                                                  if (!place.type) return "text-gray-600 hover:text-gray-800";
-                                                  switch(place.type) {
-                                                    case 1: return "text-blue-600 hover:text-blue-800"; // temple
-                                                    case 2: return "text-red-600 hover:text-red-800"; // samadhi
-                                                    case 3: return "text-green-600 hover:text-green-800"; // kunda
-                                                    case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
-                                                    default: return "text-indigo-600 hover:text-indigo-800";
-                                                  }
-                                                })() :
-                                                item.type === 'route' ? "text-green-600 hover:text-green-800" :"text-purple-600 hover:text-purple-800"
-                                              )}
-                                            >
-                                              {getLocalizedText((item.data as Place | Route | Event).name, language)}
-                                            </Link>
+                                            {/* Определяем реальный тип объекта для правильной ссылки */}
+                                            {(() => {
+                                              // Если это событие по полям данных, но type === 'place'
+                                              const data = item.data as any;
+                                              const isEventByData = data.eventTypeField || data.cultureField || data.hasOnlineStream !== undefined;
+                                              const actualType = isEventByData ? 'event' : item.type;
+
+                                              return (
+                                                <Link
+                                                  to={`/${actualType === 'city' ? 'cities' : actualType === 'place' ? 'places' : actualType === 'route' ? 'routes' : 'events'}/${item.data.id}`}
+                                                  target="_blank"
+                                                  className={cn(
+                                                    "text-sm hover:underline",
+                                                    actualType === 'place' ? (() => {
+                                                      const place = item.data as Place;
+                                                      if (!place.type) return "text-gray-600 hover:text-gray-800";
+                                                      switch(place.type) {
+                                                        case 1: return "text-blue-600 hover:text-blue-800"; // temple
+                                                        case 2: return "text-red-600 hover:text-red-800"; // samadhi
+                                                        case 3: return "text-green-600 hover:text-green-800"; // kunda
+                                                        case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
+                                                        default: return "text-indigo-600 hover:text-indigo-800";
+                                                      }
+                                                    })() :
+                                                    actualType === 'route' ? "text-green-600 hover:text-green-800" :
+                                                    "text-purple-600 hover:text-purple-800" // event color
+                                                  )}
+                                                >
+                                                  {getLocalizedText((item.data as Place | Route | Event).name, language)}
+                                                </Link>
+                                              );
+                                            })()}
                                           </div>
                                           <Input 
                                             type="date" 

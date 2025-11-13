@@ -307,5 +307,7 @@
   "route_added_to_plan": "Маршрут '{{routeName}}' добавлен в план.",
   "error_adding_route_to_plan": "Ошибка добавления маршрута в план.",
   "route_loaded_to_plan": "Маршрут '{{routeName}}' с {{placesCount}} местами загружен в план.",
-  "no_places_in_route": "В этом маршруте не найдено мест."
+  "no_places_in_route": "В этом маршруте не найдено мест.",
+  "search_button": "Найти",
+    "dates_auto_distributed": "Даты были автоматически распределены для существующих объектов."
 }
