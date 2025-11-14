@@ -24,6 +24,7 @@ interface PilgrimageMapViewProps {
   zoom?: number;
   maintainZoom?: boolean;
   polylinePoints?: LatLngExpression[];
+  isRoutePreview?: boolean;
 }
 
 // Wrapper to use hook
@@ -42,6 +43,7 @@ const PilgrimageMapView: React.FC<PilgrimageMapViewInternalProps> = memo(({
   zoom = 13,
   maintainZoom = false,
   polylinePoints,
+  isRoutePreview = false,
   navigate
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
@@ -58,46 +60,35 @@ const PilgrimageMapView: React.FC<PilgrimageMapViewInternalProps> = memo(({
 
   // Initialize map
   useEffect(() => {
-    console.log('🗺️ PilgrimageMapView: Initializing map...');
-    console.log('🗺️ PilgrimageMapView: Locations to display:', locations);
-    
     if (!mapContainer.current) {
-      console.error('🗺️ PilgrimageMapView: Map container is null!');
       return;
     }
-    
+
     if (mapInstance.current) {
-      console.log('🗺️ PilgrimageMapView: Map already initialized, skipping');
       return;
     }
-    
+
     const defaultCenter = center || (locations.length > 0 ?
       [locations[0].latitude, locations[0].longitude] :
       [0, 0]);
 
-    console.log('🗺️ PilgrimageMapView: Creating map with center:', defaultCenter, 'zoom:', zoom);
-    
     try {
       mapInstance.current = L.map(mapContainer.current, {
         center: defaultCenter,
         zoom,
         preferCanvas: true
       });
-      
-      console.log('🗺️ PilgrimageMapView: Map created successfully');
-      
+
       L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
         attribution: '&copy; OpenStreetMap contributors'
       }).addTo(mapInstance.current);
-      
-      console.log('🗺️ PilgrimageMapView: Tile layer added');
+
       setIsMapReady(true);
     } catch (error) {
       console.error('🗺️ PilgrimageMapView: Error creating map:', error);
     }
-    
+
     return () => {
-      console.log('🗺️ PilgrimageMapView: Cleaning up map...');
       if (mapInstance.current) {
         mapInstance.current.remove();
         mapInstance.current = null;
@@ -110,9 +101,7 @@ const PilgrimageMapView: React.FC<PilgrimageMapViewInternalProps> = memo(({
     if (!mapInstance.current || !isMapReady) return;
 
     const map = mapInstance.current;
-    console.log('🗺️ PilgrimageMapView: Received locations:', locations);
     const validLocations = locations.filter(loc => loc.latitude && loc.longitude);
-    console.log('🗺️ PilgrimageMapView: Valid locations for map:', validLocations);
 
     // Clear previous layers
     map.eachLayer(layer => {
@@ -171,7 +160,26 @@ const PilgrimageMapView: React.FC<PilgrimageMapViewInternalProps> = memo(({
         // Fit Bounds
         if (bounds.isValid() && !maintainZoom) {
           try {
-              map.fitBounds(bounds, { padding: [40, 40], maxZoom: 16 });
+            // Для режима предпросмотра маршрута используем более агрессивное приближение
+            if (isRoutePreview) {
+              // Если всего 1-2 точки или точки очень близко, устанавливаем крупный масштаб
+              if (validLocations.length <= 2) {
+                map.fitBounds(bounds, {
+                  padding: [80, 80],
+                  maxZoom: 18
+                });
+              } else {
+                map.fitBounds(bounds, {
+                  padding: [60, 60], // Больше отступов для лучшего вида
+                  maxZoom: 18 // Разрешаем большее приближение для маршрута
+                });
+              }
+            } else {
+              map.fitBounds(bounds, {
+                padding: [40, 40],
+                maxZoom: 16
+              });
+            }
           } catch (e) {
               console.error("Error fitting map bounds:", e);
           }
@@ -180,7 +188,7 @@ const PilgrimageMapView: React.FC<PilgrimageMapViewInternalProps> = memo(({
       if (center) map.setView(center, zoom);
     }
 
-  }, [locations, polylinePoints, language, isMapReady, maintainZoom, navigate, center, zoom]);
+  }, [locations, polylinePoints, language, isMapReady, maintainZoom, navigate, center, zoom, isRoutePreview]);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden relative">

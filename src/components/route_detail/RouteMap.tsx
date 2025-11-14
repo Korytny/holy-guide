@@ -1,19 +1,45 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import CityMapView from '../CityMapView'; // Adjust path as needed
 import { Place } from '../../types'; // Adjust path as needed
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path as needed
 import { useFont } from '../../context/FontContext';
 import { cn } from "@/lib/utils";
 import { MapPin } from 'lucide-react';
+import { routeTrackApi } from '../../services/routeTrackApi';
+import RouteStats from '../RouteStats';
 
 interface RouteMapProps {
   places: Place[];
   maintainZoom?: boolean; // Added maintainZoom prop
+  routeId?: string; // Add routeId prop for GPS track loading
 }
 
-const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => { // Added prop and default value
+const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false, routeId }) => {
     const { t } = useLanguage();
     const { fonts } = useFont();
+    const [gpsTrackCoordinates, setGpsTrackCoordinates] = useState<[number, number][]>([]);
+
+    // Load GPS track data when routeId changes
+    useEffect(() => {
+        const loadGpsTrack = async () => {
+            if (!routeId) {
+                setGpsTrackCoordinates([]);
+                return;
+            }
+
+            try {
+                console.log('🛣️ Loading GPS track for route:', routeId);
+                const coordinates = await routeTrackApi.getGpsCoordinatesForMap(routeId);
+                console.log('🛣️ GPS track loaded:', coordinates.length, 'points');
+                setGpsTrackCoordinates(coordinates);
+            } catch (error) {
+                console.error('Error loading GPS track:', error);
+                setGpsTrackCoordinates([]);
+            }
+        };
+
+        loadGpsTrack();
+    }, [routeId]);
 
 
     const validPlaces = places.filter(place => place.location?.latitude && place.location?.longitude);
@@ -55,6 +81,15 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false }) => 
                     locations={mapLocations}
                     polylinePoints={polylinePoints}
                     maintainZoom={maintainZoom}
+                    gpsTrackCoordinates={gpsTrackCoordinates}
+                />
+            </div>
+
+            {/* Route Statistics */}
+            <div className="p-4 border-t border-gray-200">
+                <RouteStats
+                    places={places}
+                    gpsCoordinates={gpsTrackCoordinates}
                 />
             </div>
         </div>

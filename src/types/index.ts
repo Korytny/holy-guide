@@ -39,8 +39,8 @@ export interface Place {
   imageUrl: string;
   cityId: string;
   location: Location; // Use defined Location type
-  order?: number; 
-  rating?: number; 
+  order?: number;
+  rating?: number;
   routesCount?: number;
   eventsCount?: number;
   city?: string;
@@ -52,6 +52,7 @@ export interface Place {
   created_at?: string;
   events?: string[];
   routes?: string[];
+  date?: string; // Дата для планирования
 }
 
 export interface MapLocation extends Partial<Place> {
@@ -83,6 +84,7 @@ export interface Route {
   images?: any;
   places?: Place[];
   events?: Event[];
+  spots?: Place[]; // Ordered spots from spot_route table
 }
 
 // Types for GuruPlanner filters

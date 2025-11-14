@@ -22,6 +22,7 @@ interface CityTabsContentProps {
   activeTab: string;
   onTabChange: (value: string) => void;
   onSearch: (term: string) => void;
+  onRouteClick?: (route: Route) => void;
 }
 
 const CityTabsContent: React.FC<CityTabsContentProps> = ({
@@ -30,7 +31,8 @@ const CityTabsContent: React.FC<CityTabsContentProps> = ({
     events,
     activeTab,
     onTabChange,
-    onSearch
+    onSearch,
+    onRouteClick
 }) => {
     const { t } = useLanguage();
     const { fonts } = useFont();
@@ -99,7 +101,11 @@ const CityTabsContent: React.FC<CityTabsContentProps> = ({
                 ) : (
                     <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2 md:grid-cols-3'}`}>
                         {routes.map(route => (
-                            <RouteCardComponent key={route.id} route={route} />
+                            <RouteCardComponent 
+                                key={route.id} 
+                                route={route} 
+                                onRouteClick={onRouteClick}
+                            />
                         ))}
                     </div>
                 )}

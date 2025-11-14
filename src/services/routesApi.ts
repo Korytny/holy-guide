@@ -1,6 +1,6 @@
 import { supabase } from '../integrations/supabase/client';
-import { transformRoute } from '@/services/apiUtils';
-import { Route } from '@/types';
+import { transformRoute, transformPlace } from '@/services/apiUtils';
+import { Route, Place } from '@/types';
 
 export const getAllRoutes = async (): Promise<Route[]> => {
   if (!supabase) {
@@ -85,18 +85,57 @@ export const getRouteById = async (id: string): Promise<Route | null> => {
     return null;
   }
   try {
-    const { data, error } = await supabase
+    // Get route data
+    const { data: routeData, error: routeError } = await supabase
       .from('routes')
       .select('*')
       .eq('id', id)
       .single();
     
-    if (error) {
-      console.error('Error fetching route:', error);
+    if (routeError) {
+      console.error('Error fetching route:', routeError);
       return null;
     }
     
-    return data ? transformRoute(data) : null;
+    if (!routeData) return null;
+    
+    // Get spots for this route with order from spot_route table
+    const { data: spotRouteData, error: spotRouteError } = await supabase
+      .from('spot_route')
+      .select(`
+        spot_id,
+        order,
+        spots (*)
+      `)
+      .eq('route_id', id)
+      .order('order');
+    
+    if (spotRouteError) {
+      console.error('Error fetching route spots:', spotRouteError);
+      return transformRoute(routeData);
+    }
+    
+    // Transform route and add ordered spots
+    const route = transformRoute(routeData);
+    
+    if (spotRouteData && spotRouteData.length > 0) {
+      // Extract spots with their order and transform them properly
+      const orderedSpots = spotRouteData
+        .filter(item => item.spots) // Filter out null spots
+        .map(item => {
+          const transformedSpot = transformPlace(item.spots);
+          // Add order property to the transformed spot
+          return {
+            ...transformedSpot,
+            order: item.order
+          };
+        });
+      
+      // Add ordered spots to route
+      route.spots = orderedSpots;
+    }
+    
+    return route;
   } catch (error) {
     console.error('Error in getRouteById:', error);
     return null;

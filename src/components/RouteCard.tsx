@@ -1,6 +1,5 @@
-
 import React from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Route } from '../types';
 import { useFont } from '../context/FontContext';
 import { useLanguage } from '../context/LanguageContext';
@@ -13,21 +12,23 @@ import { Badge } from '@/components/ui/badge';
 
 interface RouteCardProps {
   route: Route;
-  className?: string; 
+  className?: string;
   onAddToPlan?: (route: Route) => void;
+  onRouteClick?: (route: Route) => void;
 }
 
-const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan }) => {
+const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan, onRouteClick }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const { fonts } = useFont();
-  
+  const navigate = useNavigate();
+
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = getLocalizedText(route.description, language);
   const isRouteFavorite = auth.isAuthenticated && auth.user ? isFavorite('route', route.id) : false;
 
   const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
     // toggleFavorite handles the auth check
     if (route.id) {
@@ -36,43 +37,56 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan }) 
   };
 
   const handleAddToPlan = (e: React.MouseEvent) => {
-    e.preventDefault(); 
+    e.preventDefault();
     e.stopPropagation();
     if (onAddToPlan && route.id) {
         onAddToPlan(route);
     }
   };
 
+  const handleCardClick = () => {
+    // Если передан onRouteClick, используем его
+    if (onRouteClick && route.id) {
+        onRouteClick(route);
+    } else {
+      // Иначе переходим по прямому маршруту
+      if (route.id) {
+        navigate(`/routes/${route.id}`);
+      }
+    }
+  };
+
   return (
-    <div 
+    <div
+      onClick={handleCardClick}
       className={cn(
-        "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+        "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col cursor-pointer",
         className
       )}
     >
       <div className="relative">
-        <img 
-          src={route.imageUrl || '/placeholder.svg'} 
+        <img
+          src={route.imageUrl || '/placeholder.svg'}
           alt={routeName}
           className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
         />
-         {/* Favorite Button - Always visible */} 
+         {/* Favorite Button - Always visible */}
          {route.id && (
-            <Button 
-              variant="ghost" 
+            <Button
+              variant="ghost"
               size="icon"
               className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 h-8 w-8"
               onClick={handleFavoriteClick}
               aria-label={isRouteFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
             >
-              <Heart 
+              <Heart
                 size={16}
                 className={cn("transition-colors", isRouteFavorite ? "fill-red-500 text-red-500" : "text-white")}
                />
             </Button>
           )}
       </div>
-      <div className="p-3 flex-grow flex flex-col justify-between"> 
+      <div className="p-3 flex-grow flex flex-col justify-between">
           <div>
              <h3
                 className={cn(
@@ -96,8 +110,8 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan }) 
                       <span>{t('spiritual_route')}</span>
                   </Badge>
                   {onAddToPlan && (
-                    <Button 
-                      variant="default" 
+                    <Button
+                      variant="default"
                       size="sm"
                       onClick={handleAddToPlan}
                       className="text-xs px-2 py-1"
@@ -105,7 +119,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan }) 
                       {t('add_to_plan')}
                     </Button>
                   )}
-              </div>
+                  </div>
       </div>
     </div>
   );

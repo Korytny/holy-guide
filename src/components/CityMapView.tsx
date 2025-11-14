@@ -7,6 +7,7 @@ import { useNavigate } from 'react-router-dom';
 import { useLanguage } from '../context/LanguageContext';
 import { getLocalizedText } from '../utils/languageUtils';
 import MapPopup from './MapPopup';
+import MapLegend from './MapLegend';
 
 interface Location {
   id: string;
@@ -25,6 +26,7 @@ interface CityMapViewProps {
   zoom?: number;
   maintainZoom?: boolean;
   polylinePoints?: LatLngExpression[]; // Add prop for polyline points
+  gpsTrackCoordinates?: LatLngExpression[]; // Add prop for GPS track coordinates
 }
 
 // Wrapper to use hook
@@ -43,11 +45,13 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
   zoom = 13,
   maintainZoom = false,
   polylinePoints, // Receive polyline points
+  gpsTrackCoordinates, // Receive GPS track coordinates
   navigate
 }) => {
   const mapContainer = useRef<HTMLDivElement>(null);
   const mapInstance = useRef<L.Map | null>(null);
   const polylineRef = useRef<L.Polyline | null>(null); // Ref to manage existing polyline
+  const gpsTrackRef = useRef<L.Polyline | null>(null); // Ref to manage GPS track polyline
   const { language } = useLanguage();
   const [isMapReady, setIsMapReady] = React.useState(false);
 
@@ -118,14 +122,15 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
     console.log('🗺️ Map instance exists:', !!mapInstance.current);
     console.log('🗺️ Map container exists:', !!mapContainer.current);
 
-    // --- Clear previous layers --- 
+    // --- Clear previous layers ---
     map.eachLayer(layer => {
-      // Keep the tile layer, remove markers and existing polyline
-      if (layer instanceof L.Marker || layer === polylineRef.current) {
+      // Keep the tile layer, remove markers and existing polylines
+      if (layer instanceof L.Marker || layer === polylineRef.current || layer === gpsTrackRef.current) {
         map.removeLayer(layer);
       }
     });
     polylineRef.current = null; // Reset polyline ref
+    gpsTrackRef.current = null; // Reset GPS track ref
 
     // --- Add Markers --- 
     if (validLocations.length > 0) {
@@ -163,16 +168,28 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
           } catch (error) { console.error('Popup render error:', error); }
         });
 
-        // --- Add Polyline --- 
+        // --- Add Route Polyline (red dashed) ---
         if (polylinePoints && polylinePoints.length > 1) {
-          polylineRef.current = L.polyline(polylinePoints, { 
+          polylineRef.current = L.polyline(polylinePoints, {
               color: '#ff0000', // Red color
-              weight: 3, 
+              weight: 3,
               opacity: 0.7,
               dashArray: '5, 5' // Dashed line
           }).addTo(map);
           // Optionally fit bounds to the polyline as well
           // bounds.extend(polylineRef.current.getBounds());
+        }
+
+        // --- Add GPS Track Polyline (blue solid) ---
+        if (gpsTrackCoordinates && gpsTrackCoordinates.length > 1) {
+          console.log('🛣️ Adding GPS track to map:', gpsTrackCoordinates.length, 'points');
+          gpsTrackRef.current = L.polyline(gpsTrackCoordinates, {
+              color: '#3b82f6', // Blue color
+              weight: 5,
+              opacity: 0.8
+              // Solid line (no dashArray)
+          }).addTo(map);
+          console.log('🛣️ GPS track added successfully');
         }
 
         // --- Fit Bounds --- 
@@ -188,11 +205,18 @@ const CityMapView: React.FC<CityMapViewInternalProps> = memo(({
       if (center) map.setView(center, zoom);
     }
 
-  }, [locations, polylinePoints, language, isMapReady, maintainZoom, navigate, center, zoom]);
+  }, [locations, polylinePoints, gpsTrackCoordinates, language, isMapReady, maintainZoom, navigate, center, zoom]);
 
   return (
     <div className="h-full w-full rounded-lg overflow-hidden relative"> {/* Changed h-[400px] to h-full */}
       <div ref={mapContainer} className="h-full w-full min-h-[400px]" />
+
+      {/* Map Legend */}
+      <MapLegend
+        showGpsTrack={gpsTrackCoordinates && gpsTrackCoordinates.length > 1}
+        showRoute={polylinePoints && polylinePoints.length > 1}
+      />
+
       {!isMapReady && (
         <div className="absolute inset-0 flex items-center justify-center bg-gray-100"><p>Loading map...</p></div>
       )}

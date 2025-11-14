@@ -119,6 +119,10 @@ const CityDetail: React.FC = (): JSX.Element => {
     }, 50);
   }, []);
 
+  const handleRouteClick = (route: Route) => {
+    navigate(`/routes/${route.id}`);
+  };
+
   // console.log('CityDetail: Before render checks', { loading, city: !!city }); // Removed log
 
   if (loading) {
@@ -210,6 +214,7 @@ const CityDetail: React.FC = (): JSX.Element => {
             activeTab={activeTab}
             onTabChange={setActiveTab}
             onSearch={handleSearchPlaces}
+            onRouteClick={handleRouteClick}
           />
         </div>
 

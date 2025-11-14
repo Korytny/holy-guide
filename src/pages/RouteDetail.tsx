@@ -114,8 +114,8 @@ const RouteDetail = () => {
       <div className="app-container py-6">
          {/* Back Button */}
           <div className="flex justify-between items-center mb-6">
-            <button 
-            onClick={() => navigate(route.cityId ? `/cities/${route.cityId}` : '/')} 
+            <button
+            onClick={() => navigate(route.city_id && route.city_id.length > 0 ? `/cities/${route.city_id[0]}` : '/')}
             className="inline-flex items-center text-gray-600 hover:text-gray-900"
           >
             <ArrowLeft size={18} className="mr-2" />
@@ -146,7 +146,7 @@ const RouteDetail = () => {
                 </div>
 
         {/* Route Map */}
-        <RouteMap places={places} />
+        <RouteMap places={places} routeId={id} />
         
         {/* Comments Section */} 
         {id && (

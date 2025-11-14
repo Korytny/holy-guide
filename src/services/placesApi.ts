@@ -79,7 +79,7 @@ export const getPlacesByRouteId = async (routeId: string): Promise<Place[]> => {
     }
 
     // Transform the data, including the order
-    return spotsData ? spotsData.map(spot => {
+    const transformedPlaces = spotsData ? spotsData.map(spot => {
       const transformed = transformPlace(spot);
       // Extract the order from the nested structure
       const orderData = Array.isArray(spot.spot_route) ? spot.spot_route[0] : spot.spot_route;
@@ -89,8 +89,47 @@ export const getPlacesByRouteId = async (routeId: string): Promise<Place[]> => {
       return transformed;
     }) : [];
 
+
+    return transformedPlaces;
+
   } catch (error) {
     console.error('Error in getPlacesByRouteId:', error);
+    return [];
+  }
+};
+
+export const getPlacesByRouteIdWithoutOrder = async (routeId: string): Promise<Place[]> => {
+  try {
+    // Fetch spots data for route without sorting by order
+    const { data: spotsData, error: spotsError } = await supabase
+      .from('spots')
+      .select(`
+        *,
+        spot_route!inner (order)
+      `)
+      .eq('spot_route.route_id', routeId);
+
+    if (spotsError) {
+      console.error('Error fetching spots for route:', spotsError);
+      return [];
+    }
+
+    // Transform the data, including the order (for user modifications)
+    const transformedPlaces = spotsData ? spotsData.map(spot => {
+      const transformed = transformPlace(spot);
+      // Extract the order from the nested structure
+      const orderData = Array.isArray(spot.spot_route) ? spot.spot_route[0] : spot.spot_route;
+      if (orderData && typeof orderData.order === 'number') {
+        transformed.order = orderData.order;
+      }
+      return transformed;
+    }) : [];
+
+
+    return transformedPlaces;
+
+  } catch (error) {
+    console.error('Error in getPlacesByRouteIdWithoutOrder:', error);
     return [];
   }
 };

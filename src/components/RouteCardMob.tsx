@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Route } from '../types'; // Assume Route might have rating or other stats
 import { useLanguage } from '../context/LanguageContext';
 import { useAuth } from '../context/AuthContext';
@@ -18,25 +19,42 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className, onRouteCl
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const { fonts } = useFont();
+  const navigate = useNavigate();
 
   const routeName = getLocalizedText(route.name, language);
   const routeDescription = getLocalizedText(route.description, language);
   const isRouteFavorite = auth.isAuthenticated && auth.user ? isFavorite('route', route.id) : false;
 
   const handleCardClick = () => {
+    // Если передан onRouteClick, используем его
     if (onRouteClick && route.id) {
         onRouteClick(route);
+    } else {
+        // Иначе переходим по прямому маршруту
+        if (route.id) {
+            navigate(`/routes/${route.id}`);
+        }
+    }
+  };
+
+  const handleRouteIconClick = (event: React.MouseEvent) => {
+    event.preventDefault();
+    event.stopPropagation();
+    // Для иконки всегда переходим по прямому маршруту
+    if (route.id) {
+        navigate(`/routes/${route.id}`);
     }
   };
 
   return (
     <div
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200",
+            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer",
             className
         )}
+        onClick={handleCardClick}
     >
-      <div className="flex p-3 gap-3 items-start cursor-pointer" onClick={handleCardClick}>
+      <div className="flex p-3 gap-3 items-start">
         {/* Image Section */}
         <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
@@ -60,7 +78,12 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className, onRouteCl
              {/* Stats and Rating Container */}
              <div className="flex items-center flex-shrink-0 gap-1.5">
                  {/* Route Icon Badge */}
-                 <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]" title={t('spiritual_route')}>
+                 <Badge 
+                   variant="outline" 
+                   className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A] cursor-pointer hover:bg-[#09332A] hover:text-white transition-colors" 
+                   title={t('spiritual_route')}
+                   onClick={handleRouteIconClick}
+                 >
                      <RouteIcon size={12} className="flex-shrink-0" />
                  </Badge>
              </div>

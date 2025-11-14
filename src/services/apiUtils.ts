@@ -95,6 +95,8 @@ export function transformPlace(dbPlace: any): Place {
     // if its sole purpose was the description.
     images: images,
     type: dbPlace.type,
+    // Preserve order field if it exists (for route places)
+    order: dbPlace.order,
     // Other raw fields like city, coordinates, point, created_at are omitted 
     // unless explicitly needed in the Place type for frontend logic.
   };
@@ -137,6 +139,6 @@ export function transformEvent(dbEvent: any): Omit<Event, 'places' | 'routes'> {
     time: dbEvent.time,
     // Omit raw info field
     images: images,
-    type: dbEvent.type
+    eventTypeField: dbEvent.type
   };
 }

@@ -50,13 +50,14 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
 
 
   return (
-    <div
+    <Link
+        to={`/cities/${city.id}`}
         className={cn(
             "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200",
             className
         )}
     >
-      <Link to={`/cities/${city.id}`} className="flex p-3 gap-3 items-start">
+      <div className="flex p-3 gap-3 items-start">
         {/* Image Section */}
         <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
@@ -114,8 +115,8 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
             {infoDescription || t('no_description_available')}
           </p>
         </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };
 

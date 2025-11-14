@@ -34,7 +34,8 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
   const infoDescription = getLocalizedText(city.info, language) || t('no_description_available');
 
   return (
-    <div
+    <Link
+        to={`/cities/${city.id}`}
         className={cn(
             "block group bg-white rounded-lg shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col", // Changed to rounded-lg, shadow-lg, removed hover:shadow-lg
             className
@@ -42,7 +43,6 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
     >
       {/* Image Section */}
       <div className="relative">
-        <Link to={`/cities/${city.id}`} className="absolute inset-0 z-0"></Link>
         <img
           src={city.imageUrl || '/placeholder.svg'}
           alt={cityName}
@@ -63,8 +63,8 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         )}
       </div>
 
-      {/* Content Section - Now wrapped by Link */}
-      <Link to={`/cities/${city.id}`} className="p-4 flex-grow flex flex-col justify-between">
+      {/* Content Section */}
+      <div className="p-4 flex-grow flex flex-col justify-between">
         <div>
           <h3
              className={cn(
@@ -127,8 +127,8 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
                 {t('details_button')}
             </Button>
         </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };
 
