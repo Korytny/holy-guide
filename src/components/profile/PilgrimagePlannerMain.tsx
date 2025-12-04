@@ -576,10 +576,10 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
 
   
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-screen overflow-hidden">
       {/* Основной контент с трехколоночной структурой */}
       {!isLoadingCities && !isLoadingPlacesAndEvents && (
-        <div className="grid grid-cols-1 xl:grid-cols-10 gap-0 flex-1">
+        <div className="grid grid-cols-1 xl:grid-cols-10 gap-0 flex-1 overflow-hidden">
           {/* Левая колонка - Фильтры (30%) */}
           <div className="xl:col-span-3 order-1 h-full flex flex-col min-h-0">
           <PilgrimagePlannerControls
@@ -612,7 +612,7 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
           </div>
 
           {/* Средняя колонка - Список городов и мест (30%) */}
-          <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full flex flex-col">
+          <div className="xl:col-span-3 order-2 border-l border-gray-200 h-full flex flex-col min-h-0">
             {isPreview || plannedItems.length > 0 ? (
               <PilgrimagePlanDisplay
                 itemsToShow={listItems}
@@ -632,35 +632,37 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
                 isSearchMode={isSearchMode}
               />
             ) : (
-              <div className="h-full overflow-y-auto p-4">
-                <div className="space-y-4">
-                  <h3 className={`text-lg font-semibold ${fonts.subheading.className} mb-4`}>{t('designed_routes', { defaultValue: 'Designed Routes' })}</h3>
-                  {availableRoutes.length > 0 ? (
-                    <div className="space-y-4">
-                      {availableRoutes
-                        .slice()
-                        .sort((a, b) => {
-                          const nameA = getLocalizedText(a.name, language);
-                          const nameB = getLocalizedText(b.name, language);
-                          return nameA.localeCompare(nameB, language);
-                        })
-                        .map(route => (
-                          <RoutePlannerCard
-                            key={route.id}
-                            route={route}
-                            onRouteClick={handleRouteClick}
-                          />
-                        ))
-                      }
-                    </div>
-                  ) : (
-                    <div className="text-center text-gray-500 py-8">
-                      <div className="text-2xl mb-2">🛣️</div>
-                      <p className="text-sm">
-                        {t('no_routes_available', { defaultValue: 'No routes available' })}
-                      </p>
-                    </div>
-                  )}
+              <div className="flex flex-col flex-grow min-h-0" style={{ height: '100%', maxHeight: '100%', overflow: 'hidden' }}>
+                <div className="p-4 flex flex-col flex-grow min-h-0" style={{ height: '100%', maxHeight: '100%', overflow: 'hidden' }}>
+                  <h3 className={`text-lg font-semibold ${fonts.subheading.className} mb-4`} style={{ flexShrink: 0 }}>{t('designed_routes', { defaultValue: 'Designed Routes' })}</h3>
+                  <div className="flex-grow overflow-y-auto" style={{ minHeight: 0, maxHeight: 'calc(100% - 3rem)' }}>
+                    {availableRoutes.length > 0 ? (
+                      <div className="space-y-4">
+                        {availableRoutes
+                          .slice()
+                          .sort((a, b) => {
+                            const nameA = getLocalizedText(a.name, language);
+                            const nameB = getLocalizedText(b.name, language);
+                            return nameA.localeCompare(nameB, language);
+                          })
+                          .map(route => (
+                            <RoutePlannerCard
+                              key={route.id}
+                              route={route}
+                              onRouteClick={handleRouteClick}
+                            />
+                          ))
+                        }
+                      </div>
+                    ) : (
+                      <div className="text-center text-gray-500 py-8">
+                        <div className="text-2xl mb-2">🛣️</div>
+                        <p className="text-sm">
+                          {t('no_routes_available', { defaultValue: 'No routes available' })}
+                        </p>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

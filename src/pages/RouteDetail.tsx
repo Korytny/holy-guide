@@ -123,30 +123,30 @@ const RouteDetail = () => {
           </button>
         </div>
 
-        {/* Route Header & About (combined in a grid) */} 
+        {/* Route Header & About (combined in a grid) */}
         <div className="grid md:grid-cols-2 gap-8 mb-10">
-            <RouteHeader 
-                route={route} 
-                places={places} 
-                events={events} 
-                id={id!} 
-                onTabSelect={scrollToTab} 
+            <RouteHeader
+                route={route}
+                places={places}
+                events={events}
+                id={id!}
+                onTabSelect={scrollToTab}
              />
             <RouteAbout route={route} />
         </div>
 
-                {/* Related Content Tabs - Added spacing */}
-                <div className="mt-8 mb-8">
-                  <RelatedContentTabs 
-                    places={places} 
-                    events={events} 
-                    activeTab={activeTab} 
-                    onTabChange={setActiveTab} 
-                  />
-                </div>
-
         {/* Route Map */}
         <RouteMap places={places} routeId={id} />
+
+                {/* Related Content Tabs - Added spacing */}
+                <div className="mt-8 mb-8">
+                  <RelatedContentTabs
+                    places={places}
+                    events={events}
+                    activeTab={activeTab}
+                    onTabChange={setActiveTab}
+                  />
+                </div>
         
         {/* Comments Section */} 
         {id && (

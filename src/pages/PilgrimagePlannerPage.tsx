@@ -27,7 +27,7 @@ const PilgrimagePlannerPage = () => {
 
   return (
     <FontProvider>
-      <div className="h-screen bg-orange-50 overflow-hidden">
+      <div className="h-screen bg-orange-50">
         <div className="w-full h-full">
           <PilgrimagePlanner
             auth={authContext}
