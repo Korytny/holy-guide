@@ -138,20 +138,22 @@ const CitiesPage = () => {
         </div>
       </div>
 
-      {/* PilgrimagePlanner Section - Full Width */}
-      <div className="w-full">
-        <div className="text-center mb-20 pt-20">
-          <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
-            {t('plan_your_pilgrimage', { defaultValue: 'Запланируй свое поломничество' })}
-          </h2>
+      {/* PilgrimagePlanner Section - Full Width - Desktop Only */}
+      {!isSmallScreen && (
+        <div className="w-full">
+          <div className="text-center mb-20 pt-20">
+            <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
+              {t('plan_your_pilgrimage', { defaultValue: 'Запланируй свое поломничество' })}
+            </h2>
+          </div>
+
+          <PilgrimagePlanner
+            auth={authContext}
+            language={language}
+            t={t}
+          />
         </div>
-        
-        <PilgrimagePlanner
-          auth={authContext}
-          language={language}
-          t={t}
-        />
-      </div>
+      )}
 
         </>
   );
