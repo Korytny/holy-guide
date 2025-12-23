@@ -20,7 +20,6 @@ import { enUS, ru, hi, type Locale as DateFnsLocale } from "date-fns/locale";
 import { DateFieldComponent } from '@/components/ui/date-field';
 import {
   parseDate,
-  getLocalTimeZone,
 } from '@internationalized/date';
 import type { DateValue } from '@internationalized/date';
 import { Checkbox } from "@/components/ui/checkbox";
@@ -143,14 +142,21 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
 
   const convertToDateValue = (date: Date | undefined | null): DateValue | null => {
     if (!date) return null;
-    try { return parseDate(format(date, 'yyyy-MM-dd')); } 
+    try { return parseDate(format(date, 'yyyy-MM-dd')); }
     catch (e) { console.error("Error parsing date for DateValue:", e); return null; }
   };
 
   const convertToJSDate = (dateValue: DateValue | null): Date | undefined => {
     if (!dateValue) return undefined;
-    try { return dateValue.toDate(getLocalTimeZone()); }
-    catch (e) { console.error("Error converting DateValue to JS Date:", e); return undefined; }
+    try {
+      // Use toDate() without timezone parameter - it will use system default
+      // This avoids the "Invalid time zone specified: null" error
+      return dateValue.toDate();
+    }
+    catch (e) {
+      console.error("Error converting DateValue to JS Date:", e);
+      return undefined;
+    }
   };
 
   const handleDateFieldChange = (dateValue: DateValue | null, field: 'from' | 'to') => {

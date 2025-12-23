@@ -46,7 +46,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ favoriteCounts }) => {
 
     // Helper to render count item
     const renderCountItem = (count: number | undefined, labelKey: string) => (
-      <div className="flex flex-col items-center p-3">
+      <div className="flex flex-col items-center p-3 min-w-[80px]">
         <span className="text-xl font-bold text-gray-900">{count ?? 0}</span>
         <span className="text-sm text-gray-500">{t(labelKey)}</span>
       </div>
@@ -66,14 +66,29 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ favoriteCounts }) => {
                     {auth.user.fullName || t('welcome')}
                 </h2>
 
-                {/* Display Counts */}
-                <div className="w-full flex justify-around text-center py-4 border-y border-gray-100 mb-8">
-                    {renderCountItem(favoriteCounts?.favoriteCitiesCount, 'favorite_cities_count')}
-                    {renderCountItem(favoriteCounts?.favoritePlacesCount, 'favorite_places_count')}
-                    {renderCountItem(favoriteCounts?.favoriteRoutesCount, 'favorite_routes_count')}
-                    {renderCountItem(favoriteCounts?.favoriteEventsCount, 'favorite_events_count')}
-                    {renderCountItem(favoriteCounts?.commentsCount, 'comments_count')}
-                    {renderCountItem(favoriteCounts?.photosCount, 'photos_count')}
+                {/* Display Counts - mobile: 2 rows, desktop: 1 row */}
+                <div className="w-full py-4 border-y border-gray-100 mb-8">
+                    {/* First row: cities, places, routes */}
+                    <div className="flex justify-around text-center mb-4 md:mb-0 md:hidden">
+                        {renderCountItem(favoriteCounts?.favoriteCitiesCount, 'cities')}
+                        {renderCountItem(favoriteCounts?.favoritePlacesCount, 'places')}
+                        {renderCountItem(favoriteCounts?.favoriteRoutesCount, 'routes')}
+                    </div>
+                    {/* Second row (mobile only): events, comments, photos */}
+                    <div className="flex justify-around text-center md:hidden">
+                        {renderCountItem(favoriteCounts?.favoriteEventsCount, 'events')}
+                        {renderCountItem(favoriteCounts?.commentsCount, 'comments')}
+                        {renderCountItem(favoriteCounts?.photosCount, 'photos')}
+                    </div>
+                    {/* Desktop: all in one row */}
+                    <div className="hidden md:flex justify-around text-center">
+                        {renderCountItem(favoriteCounts?.favoriteCitiesCount, 'cities')}
+                        {renderCountItem(favoriteCounts?.favoritePlacesCount, 'places')}
+                        {renderCountItem(favoriteCounts?.favoriteRoutesCount, 'routes')}
+                        {renderCountItem(favoriteCounts?.favoriteEventsCount, 'events')}
+                        {renderCountItem(favoriteCounts?.commentsCount, 'comments')}
+                        {renderCountItem(favoriteCounts?.photosCount, 'photos')}
+                    </div>
                 </div>
 
                 <div className="mt-auto w-full flex justify-center">

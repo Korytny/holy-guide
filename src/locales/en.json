@@ -88,6 +88,7 @@
     "removed_from_favorites_description": "was removed from your favorites",
     "error_updating_favorites": "Error updating favorites",
     "comments": "Comments",
+    "photos": "Photos",
     "loading_comments": "Loading comments...",
     "failed_to_load_comments": "Failed to load comments.",
     "no_comments_yet": "No comments yet.",

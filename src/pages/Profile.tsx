@@ -79,19 +79,11 @@ const Profile = () => {
       <div className="p-4 md:p-8">
         <div className="max-w-6xl mx-auto">
           <ProfileHeader favoriteCounts={allCounts} />
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-4">{t('guru_planner_main_title')}</h2>
-            <GuruPlanner
-              auth={authContextValue}
-              language={language}
-              t={t}
-            />
-          </div>
           <div className="mt-10"> {/* Added wrapper with margin-top */}
             <FavoritesSection onFavoriteCountsLoaded={handleFavoriteCountsLoaded} />
           </div>
           <UserCommentsSection onCommentsAndPhotosCountLoaded={handleCommentsAndPhotosCountLoaded} />
-          
+
           <div className="mt-8 text-center">
             <Button
               variant="ghost"
@@ -103,7 +95,7 @@ const Profile = () => {
           </div>
         </div>
       </div>
-      
+
       {/* PilgrimagePlanner Section - Full Width at bottom, outside container */}
       <div className="w-full bg-gradient-to-b from-orange-50 to-purple-50">
         <div className="text-center mb-20 pt-20">
@@ -111,13 +103,27 @@ const Profile = () => {
             Запланируй свое поломничество
           </h2>
         </div>
-        
+
         <PilgrimagePlanner
           auth={authContextValue}
           language={language}
           t={t}
           // onItemsChange is no longer needed
         />
+      </div>
+
+      {/* GuruPlanner - at the very bottom (WIP) */}
+      <div className="w-full bg-gradient-to-b from-orange-50 to-purple-50">
+        <div className="p-4 md:p-8">
+          <div className="max-w-6xl mx-auto">
+            <h2 className="text-xl font-semibold mb-4">{t('guru_planner_main_title')}</h2>
+            <GuruPlanner
+              auth={authContextValue}
+              language={language}
+              t={t}
+            />
+          </div>
+        </div>
       </div>
     </div>
   );

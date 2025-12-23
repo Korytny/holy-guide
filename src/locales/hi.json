@@ -87,6 +87,7 @@
     "removed_from_favorites_description": " आपके पसंदीदा से हटाया गया",
     "error_updating_favorites": "पसंदीदा अपडेट करने में त्रुटि",
     "comments": "टिप्पणियाँ",
+    "photos": "फ़ोटो",
     "loading_comments": "टिप्पणियाँ लोड हो रही हैं...",
     "failed_to_load_comments": "टिप्पणियाँ लोड करने में विफल।",
     "no_comments_yet": "अभी तक कोई टिप्पणी नहीं।",
