@@ -32,18 +32,19 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
   };
 
   const infoDescription = city.info?.[language] || city.info?.en || '' ;
-  const displayRating = 4.9; // Use a local variable for the example rating
 
   // Helper to create minimal stat badges
-  const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | undefined }) => {
-      if (count === undefined || count === null || count <= 0) return null; // Also check for null
+  const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | string | undefined }) => {
+      let numCount = typeof count === 'string' ? parseInt(count, 10) : count;
+      if (numCount === undefined || numCount === null) numCount = 0;
+      if (numCount <= 0) return null;
       return (
           <Badge variant="outline" className={cn(
               "text-xs px-2 py-0.5 flex items-center gap-2 border-[#09332A] text-[#09332A]",
               fonts.subheading.className
           )}>
               <Icon size={12} className="flex-shrink-0" />
-              <span className="text-xs">{count}</span>
+              <span className="text-xs">{numCount}</span>
           </Badge>
       );
   };
@@ -79,41 +80,41 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
         </div>
 
         {/* Content Section */}
-        <div className="flex-grow flex flex-col min-w-0"> {/* min-w-0 is important for flex children truncation */}
-          {/* Top Row: Title and Stats */}
-          <div className="flex justify-between items-start gap-2 mb-1">
-             {/* Title */}
-             <h3
-                className={cn(
-                   "text-base font-semibold line-clamp-2 flex-grow text-[#09332A]",
-                   fonts.heading.className
-                )}
-                title={cityName}
-             >
-                {cityName}
-             </h3>
-             {/* Stats and Rating Container */}
-             <div className="flex items-center flex-shrink-0 gap-1.5"> {/* Removed px-[108px] */}
-                 {/* Stats Badges - Now first */}
-                 <StatBadge icon={MapPin} count={city.spotsCount} />
-                 <StatBadge icon={RouteIcon} count={city.routesCount} />
-                 <StatBadge icon={CalendarDays} count={city.eventsCount} />
-                 {/* Rating Badge - Use displayRating */}
-                {displayRating && (
-                    <Badge variant="default" className="bg-orange-500 text-white text-xs px-1.5 py-0.5 flex-shrink-0">
-                        {displayRating.toFixed(1)}
-                    </Badge>
-                )}
-             </div>
+        <div className="flex-grow flex flex-col min-w-0">
+          {/* Title with Favorites Badge */}
+          <div className="flex justify-between items-start gap-2">
+            <h3
+              className={cn(
+                 "text-base font-semibold text-[#09332A]",
+                 fonts.heading.className
+              )}
+              title={cityName}
+            >
+              {cityName}
+            </h3>
+            {/* Orange Favorites Badge */}
+            {city.favoritesCount !== undefined && city.favoritesCount > 0 && (
+              <Badge variant="default" className="bg-orange-500 text-white text-xs px-1.5 py-0.5 flex-shrink-0 flex items-center gap-1">
+                <Heart size={10} fill="currentColor" />
+                <span>{city.favoritesCount}</span>
+              </Badge>
+            )}
           </div>
 
-          {/* Description */}
+          {/* Description - 2 lines */}
           <p className={cn(
-              "text-sm text-gray-600 line-clamp-3 overflow-hidden mt-1",
+              "text-sm text-gray-600 line-clamp-2 overflow-hidden my-2",
               fonts.body.className
           )}>
             {infoDescription || t('no_description_available')}
           </p>
+
+          {/* Stats Badges - at bottom */}
+          <div className="flex flex-wrap items-center gap-1.5 mt-auto">
+            <StatBadge icon={MapPin} count={city.spotsCount} />
+            <StatBadge icon={RouteIcon} count={city.routesCount} />
+            <StatBadge icon={CalendarDays} count={city.eventsCount} />
+          </div>
         </div>
       </div>
     </Link>

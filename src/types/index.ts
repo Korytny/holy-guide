@@ -12,6 +12,7 @@ export interface CityFromDB {
   events_count?: number;
   routes_count?: number;
   spots_count?: number;
+  favorites_count?: number;
   info?: Json;
   images?: Json;
   created_at?: string;
@@ -26,6 +27,7 @@ export interface City {
   eventsCount?: number;
   routesCount?: number;
   spotsCount?: number;
+  favoritesCount?: number;
   info?: Record<string, any>;
   images?: any;
   createdAt: Date;

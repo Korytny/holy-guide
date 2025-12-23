@@ -41,6 +41,7 @@ const transformCity = (dbCity: CityFromDB): City => {
     eventsCount: dbCity.events_count || 0,
     routesCount: dbCity.routes_count || 0,
     spotsCount: dbCity.spots_count || 0,
+    favoritesCount: dbCity.favorites_count || 0,
     info: parseInfo(dbCity.info),
     images: hasValidImages ? dbCity.images : [fallbackImage],
     createdAt: dbCity.created_at ? new Date(dbCity.created_at) : new Date(),
@@ -56,7 +57,7 @@ export const getCities = async (): Promise<City[]> => {
   const { data, error } = await supabase
     .from('cities')
     .select('*')
-    .order('name', { ascending: true });
+    .order('spots_count', { ascending: false });
 
   if (error) {
     console.error('Error fetching cities:', error);
