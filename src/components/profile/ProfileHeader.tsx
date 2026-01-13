@@ -53,7 +53,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ favoriteCounts }) => {
     );
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl overflow-hidden mb-10">
+        <div className="bg-[#FFF8E7] rounded-2xl shadow-xl overflow-hidden mb-10">
             <div className="p-8 text-center border-b border-gray-100">
                 <h1 className="text-3xl font-bold text-gray-900">{t('your_profile')}</h1>
             </div>

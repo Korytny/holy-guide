@@ -37,92 +37,104 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
     <Link
         to={`/cities/${city.id}`}
         className={cn(
-            "block group bg-white rounded-lg shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col", // Changed to rounded-lg, shadow-lg, removed hover:shadow-lg
+            "block group rounded-xl shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col",
+            "bg-[#FFF8E7]", // Cream background from design
             className
         )}
+        style={{ maxWidth: '400px', width: '100%' }}
     >
-      {/* Image Section */}
-      <div className="relative">
+      {/* Image Section with Orange Gradient */}
+      <div className="relative h-56 overflow-hidden">
+        {/* Orange gradient overlay - fades out on hover */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF5722] to-[#FF9800] opacity-20 z-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-0" />
         <img
           src={city.imageUrl || '/placeholder.svg'}
           alt={cityName}
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
 
-        {/* Favorite Button */}
+        {/* Favorite Button - Red circle with white heart */}
         {city.id && (
-            <Button
-              variant="ghost"
-              size="icon"
-              className="absolute top-2 right-2 h-8 w-8 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 group-hover:opacity-100 opacity-75 transition-opacity"
+            <button
+              className={cn(
+                "absolute top-3 right-3 h-10 w-10 rounded-full z-10 flex items-center justify-center transition-all",
+                cityIsFavorite
+                  ? "bg-[#FF3B30] text-white"
+                  : "bg-white/80 hover:bg-white text-[#FF3B30]"
+              )}
               onClick={handleFavoriteClick}
               aria-label={cityIsFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
             >
-              <Heart size={16} className={cn("transition-colors", cityIsFavorite ? "fill-red-500 text-red-500" : "text-white/80")} />
-            </Button>
+              <Heart
+                size={18}
+                className={cn(
+                  "transition-colors",
+                  cityIsFavorite ? "fill-white text-white" : ""
+                )}
+              />
+            </button>
         )}
       </div>
 
       {/* Content Section */}
-      <div className="p-4 flex-grow flex flex-col justify-between">
-        <div>
-          <h3
-             className={cn(
-                 "text-lg font-semibold mb-1 truncate text-[#09332A]",
-                 fonts.heading.className
-             )}
-             title={cityName}
-          >
-             {cityName}
-          </h3>
-          {/* Added description back */}
-          <p className={cn(
-              "text-sm text-black line-clamp-3 mb-3",
-              fonts.body.className
-          )}>
-             {infoDescription}
-          </p>
+      <div className="p-5 flex-grow flex flex-col">
+        {/* Title */}
+        <h3
+           className={cn(
+               "text-2xl font-bold mb-2 text-[#333333]",
+               fonts.heading.className
+           )}
+           title={cityName}
+        >
+           {cityName}
+        </h3>
 
-          {/* Vertical Stats Section */}
-          <div className="space-y-3 mb-4 px-10 py-3 bg-gray-100/50 rounded-lg">
-              {city.spotsCount !== undefined && city.spotsCount > 0 && (
-                   <div className={cn(
-                       "flex items-center text-sm font-medium text-gray-700 px-10",
-                       fonts.subheading.className
-                   )}>
-                       <MapPin size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('spots_label')}:</span>
-                       <span className="font-medium ml-auto">{city.spotsCount}</span>
-                   </div>
-              )}
-              {city.routesCount !== undefined && city.routesCount > 0 && (
-                   <div className={cn(
-                       "flex items-center text-sm font-medium text-gray-700 px-10",
-                       fonts.subheading.className
-                   )}>
-                       <RouteIcon size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('routes_label')}:</span>
-                       <span className="font-medium ml-auto">{city.routesCount}</span>
-                   </div>
-              )}
-              {city.eventsCount !== undefined && city.eventsCount > 0 && (
-                   <div className={cn(
-                       "flex items-center text-sm font-medium text-gray-700 px-10",
-                       fonts.subheading.className
-                   )}>
-                       <CalendarDays size={16} className="mr-2 text-gray-500"/>
-                       <span>{t('events_label')}:</span>
-                       <span className="font-medium ml-auto">{city.eventsCount}</span>
-                   </div>
-              )}
-          </div>
+        {/* Description */}
+        <p className={cn(
+            "text-sm text-[#666666] line-clamp-3 mb-4 leading-relaxed",
+            fonts.body.className
+        )}>
+           {infoDescription}
+        </p>
+
+        {/* Horizontal Stats Section */}
+        <div className="flex justify-between items-stretch gap-3 mb-5">
+            {city.spotsCount !== undefined && city.spotsCount > 0 && (
+                 <div className="flex-1 flex flex-col items-center justify-center py-2">
+                     <MapPin size={20} className="text-[#FF9800] mb-1"/>
+                     <span className="text-xs text-[#FF9800] font-medium">{t('spots_label')}</span>
+                     <span className={cn(
+                         "text-base font-bold text-black",
+                         fonts.subheading.className
+                     )}>{city.spotsCount}</span>
+                 </div>
+            )}
+            {city.routesCount !== undefined && city.routesCount > 0 && (
+                 <div className="flex-1 flex flex-col items-center justify-center py-2">
+                     <RouteIcon size={20} className="text-[#FF9800] mb-1"/>
+                     <span className="text-xs text-[#FF9800] font-medium">{t('routes_label')}</span>
+                     <span className={cn(
+                         "text-base font-bold text-black",
+                         fonts.subheading.className
+                     )}>{city.routesCount}</span>
+                 </div>
+            )}
+            {city.eventsCount !== undefined && city.eventsCount > 0 && (
+                 <div className="flex-1 flex flex-col items-center justify-center py-2">
+                     <CalendarDays size={20} className="text-[#FF9800] mb-1"/>
+                     <span className="text-xs text-[#FF9800] font-medium">{t('events_label')}</span>
+                     <span className={cn(
+                         "text-base font-bold text-black",
+                         fonts.subheading.className
+                     )}>{city.eventsCount}</span>
+                 </div>
+            )}
         </div>
 
         {/* Details Button */}
-         <div className="mt-auto pt-3">
+         <div className="mt-auto">
             <Button
-                variant="default"
-                className="w-full"
+                className="w-full h-12 rounded-lg bg-[#FF9800] hover:bg-[#F57C00] text-white font-semibold text-base transition-colors"
             >
                 {t('details_button')}
             </Button>

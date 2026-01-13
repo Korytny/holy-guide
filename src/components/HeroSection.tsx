@@ -89,24 +89,27 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         ) : textError ? (
            <p className="text-red-500 pointer-events-auto">{textError}</p>
         ) : titleData ? (
-           <div className="pointer-events-auto backdrop-blur-sm bg-white/30 dark:bg-black/30 p-6 rounded-lg">
-             <h1 className={`text-4xl font-bold sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`} 
+           <div className="pointer-events-auto backdrop-blur-md bg-white/20 p-8 rounded-2xl shadow-2xl border border-white/30">
+             <h1 className={`text-4xl font-bold sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`}
                  style={{
-                   color: 'white',
+                   color: '#FFF8E7',
                    textShadow: `
-                     -1px -1px 0 #000,
-                     1px -1px 0 #000,
-                     -1px 1px 0 #000,
-                     1px 1px 0 #000,
-                     0 0 8px rgba(0, 0, 0, 0.5)
+                     2px 2px 8px rgba(0, 0, 0, 0.8),
+                     -1px -1px 0 rgba(0, 0, 0, 0.6),
+                     1px -1px 0 rgba(0, 0, 0, 0.6),
+                     -1px 1px 0 rgba(0, 0, 0, 0.6),
+                     1px 1px 0 rgba(0, 0, 0, 0.6)
                    `,
                    animation: 'fadeIn 1s ease-out',
                    letterSpacing: '0.05em'
                  }}>
                {getLocalizedString(titleData.name)}
              </h1>
-             <p className={`mt-4 text-lg text-black dark:text-gray-300 max-w-xl mx-auto ${fonts.subheading.className}`}
-                style={{ letterSpacing: '0.025em' }}>
+             <p className={`mt-4 text-lg text-[#FFE0B2] max-w-xl mx-auto font-medium ${fonts.subheading.className}`}
+                style={{
+                  textShadow: '1px 1px 4px rgba(0, 0, 0, 0.7)',
+                  letterSpacing: '0.025em'
+                }}>
                {getLocalizedString(titleData.description)}
              </p>
            </div>

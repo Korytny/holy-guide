@@ -96,10 +96,10 @@ const CitiesPage = () => {
       </div>
       
       {/* Existing Cities List Section */}
-      <div className="bg-gradient-to-b from-orange-50 to-orange-100 py-8 px-4 sm:px-6 lg:px-8">
+      <div className="bg-gradient-to-b from-orange-50 to-orange-100 pb-8 px-4 sm:px-6 lg:px-8 pt-20">
         <div className="max-w-7xl mx-auto">
           <WordPullUp
-            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mt-20 mb-20"
+            className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white text-center mb-20"
             words={t('cities_section_title', { defaultValue: 'Cities' })}
           />
           <div className="flex justify-center mb-8">
@@ -140,7 +140,7 @@ const CitiesPage = () => {
 
       {/* PilgrimagePlanner Section - Full Width - Desktop Only */}
       {!isSmallScreen && (
-        <div className="w-full">
+        <div className="w-full bg-gradient-to-b from-orange-100 to-orange-50 px-4 sm:px-6 lg:px-8">
           <div className="text-center mb-20 pt-20">
             <h2 className="text-3xl md:text-4xl font-bold tracking-tight text-gray-900 dark:text-white">
               {t('plan_your_pilgrimage', { defaultValue: 'Запланируй свое поломничество' })}

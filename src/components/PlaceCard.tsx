@@ -29,7 +29,7 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const { fonts } = useFont();
-  
+
   const placeName = getLocalizedText(place.name, language);
   const placeDescription = getLocalizedText(place.description, language);
   const isPlaceFavorite = auth.isAuthenticated && auth.user ? isFavorite('place', place.id) : false;
@@ -45,55 +45,76 @@ const PlaceCard: React.FC<PlaceCardProps> = ({ place, className }) => {
   };
 
   return (
-    <div 
+    <Link
+        to={`/places/${place.id}`}
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+            "block group rounded-xl shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col",
+            "bg-[#FFF8E7]", // Cream background from design
             className
         )}
+        style={{ maxWidth: '400px', width: '100%' }}
     >
-      <div className="relative">
-        <Link to={`/places/${place.id}`} className="absolute inset-0 z-0"></Link> 
+      {/* Image Section with Orange Gradient */}
+      <div className="relative h-56 overflow-hidden">
+        {/* Orange gradient overlay - fades out on hover */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF5722] to-[#FF9800] opacity-20 z-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-0" />
         <img
-          src={place.imageUrl || '/placeholder.svg'} 
+          src={place.imageUrl || '/placeholder.svg'}
           alt={placeName}
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
-        {/* Favorite Button - Always visible */} 
+
+        {/* Favorite Button - Red circle with white heart */}
         {place.id && (
-            <Button 
-                variant="ghost" 
-                size="icon"
-                className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 h-8 w-8"
-                onClick={handleFavoriteClick}
-                aria-label={isPlaceFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
+            <button
+              className={cn(
+                "absolute top-3 right-3 h-10 w-10 rounded-full z-10 flex items-center justify-center transition-all",
+                isPlaceFavorite
+                  ? "bg-[#FF3B30] text-white"
+                  : "bg-white/80 hover:bg-white text-[#FF3B30]"
+              )}
+              onClick={handleFavoriteClick}
+              aria-label={isPlaceFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
             >
-                <Heart 
-                    size={16} 
-                    className={cn("transition-colors", isPlaceFavorite ? "fill-red-500 text-red-500" : "text-white")}
-                />
-            </Button>
+              <Heart
+                size={18}
+                className={cn(
+                  "transition-colors",
+                  isPlaceFavorite ? "fill-white text-white" : ""
+                )}
+              />
+            </button>
         )}
       </div>
-      
-      <Link to={`/places/${place.id}`} className="p-3 flex-grow flex flex-col justify-between">
-          <div>
-            <h3 className={cn(
-              "text-base font-bold mb-1 truncate text-[#09332A]",
-              fonts.heading.className
-            )} title={placeName}>{placeName}</h3>
-            <p className={cn(
-              "text-sm text-black line-clamp-3 mb-3",
-              fonts.body.className
-            )}>
-                {placeDescription || t('no_description_available')}
-            </p>
+
+      {/* Content Section */}
+      <div className="p-5 flex-grow flex flex-col">
+          {/* Title */}
+          <h3 className={cn(
+            "text-2xl font-bold mb-2 text-[#333333]",
+            fonts.heading.className
+          )} title={placeName}>{placeName}</h3>
+
+          {/* Description */}
+          <p className={cn(
+            "text-sm text-[#666666] line-clamp-3 mb-4 leading-relaxed",
+            fonts.body.className
+          )}>
+              {placeDescription || t('no_description_available')}
+          </p>
+
+          {/* Place Type Badge */}
+          <div className="mt-auto pt-2">
+              <div className="flex items-center justify-center py-3 bg-[#FFE0B2] rounded-lg">
+                  <MapPin size={20} className="text-[#FF9800] mr-2"/>
+                  <span className={cn(
+                      "text-sm font-medium text-[#333333]",
+                      fonts.subheading.className
+                  )}>{t(placeTypeKey)}</span>
+              </div>
           </div>
-          <div className="flex items-center text-xs text-[#09332A] mt-1">
-              <MapPin size={14} className="mr-1" />
-              <span>{t(placeTypeKey)}</span>
-          </div>
-      </Link>
-    </div>
+      </div>
+    </Link>
   );
 };
 

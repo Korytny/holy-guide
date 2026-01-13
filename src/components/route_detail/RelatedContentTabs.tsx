@@ -19,11 +19,11 @@ interface RelatedContentTabsProps {
   onTabChange: (value: string) => void;
 }
 
-const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({ 
-    places, 
-    events, 
-    activeTab, 
-    onTabChange 
+const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
+    places,
+    events,
+    activeTab,
+    onTabChange
 }) => {
     const { t } = useLanguage();
     const { fonts } = useFont();
@@ -34,24 +34,52 @@ const RelatedContentTabs: React.FC<RelatedContentTabsProps> = ({
 
     return (
         <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-            <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center gap-2 md:gap-4">
+            <TabsList className="w-full flex mb-6 flex-wrap h-auto justify-center gap-3 md:gap-4 bg-transparent">
                 {/* Places Tab */}
-                <TabsTrigger value="places" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
-                    <MapPin size={16} className="flex-shrink-0" />
+                <TabsTrigger
+                    value="places"
+                    className={cn(
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
+                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        fonts.subheading.className
+                    )}
+                >
+                    <MapPin size={20} className={cn("flex-shrink-0", activeTab === 'places' ? "text-[#FF9800]" : "text-gray-500")} />
                     <span className={cn(
-                      "font-bold text-[#09332A] text-lg",
-                      fonts.heading.className
+                      "font-semibold text-base",
+                      activeTab === 'places' ? "text-[#FF9800]" : "text-gray-600"
                     )}>{t('places_tab_title')}</span>
-                    {places.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{places.length}</Badge>}
+                    {places.length > 0 && (
+                        <Badge className={cn(
+                            "ml-2 px-2 py-0.5 text-sm font-bold rounded-full",
+                            activeTab === 'places'
+                                ? "bg-[#FF9800] text-white"
+                                : "bg-gray-200 text-gray-600"
+                        )}>{places.length}</Badge>
+                    )}
                 </TabsTrigger>
                 {/* Events Tab */}
-                <TabsTrigger value="events" className="flex-1 flex items-center justify-center gap-2 min-w-[120px] py-2 px-3 data-[state=active]:shadow-sm data-[state=active]:bg-orange-100">
-                    <CalendarDays size={16} className="flex-shrink-0" />
+                <TabsTrigger
+                    value="events"
+                    className={cn(
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
+                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        fonts.subheading.className
+                    )}
+                >
+                    <CalendarDays size={20} className={cn("flex-shrink-0", activeTab === 'events' ? "text-[#FF9800]" : "text-gray-500")} />
                     <span className={cn(
-                      "font-bold text-[#09332A] text-lg",
-                      fonts.heading.className
+                      "font-semibold text-base",
+                      activeTab === 'events' ? "text-[#FF9800]" : "text-gray-600"
                     )}>{t('events_tab_title')}</span>
-                    {events.length > 0 && <Badge className="ml-2 px-2 py-1 text-sm font-bold bg-transparent text-[#09332A] border-[#09332A] border-2">{events.length}</Badge>}
+                    {events.length > 0 && (
+                        <Badge className={cn(
+                            "ml-2 px-2 py-0.5 text-sm font-bold rounded-full",
+                            activeTab === 'events'
+                                ? "bg-[#FF9800] text-white"
+                                : "bg-gray-200 text-gray-600"
+                        )}>{events.length}</Badge>
+                    )}
                 </TabsTrigger>
             </TabsList>
 

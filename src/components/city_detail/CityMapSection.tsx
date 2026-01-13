@@ -39,9 +39,9 @@ const CityMapSection: React.FC<CityMapSectionProps> = ({ places }) => {
     }
 
     return (
-        <div className="mb-10">
+        <div className="mb-10 bg-gradient-to-b from-orange-50 to-orange-100 rounded-xl p-6">
             <div className="flex items-center mb-4">
-                <MapIcon size={20} className="mr-2" />
+                <MapIcon size={20} className="mr-2 text-[#FF9800]" />
                 <h2 className={cn(
                   "text-xl md:text-2xl font-bold text-[#09332A]",
                   fonts.heading.className

@@ -191,7 +191,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
     <div className="grid grid-cols-1 gap-4">
       {/* Date Inputs - Only on mobile now */}
       {isMobile && (
-        <div className="bg-white p-4 rounded-lg shadow-sm">
+        <div className="bg-[#FFF8E7] p-4 rounded-lg shadow-sm">
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <DateFieldComponent
               label={t('start_date_label')}
@@ -215,7 +215,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
       <div className="grid grid-cols-1 xl:grid-cols-2 gap-4">
         {/* Calendar and Date Inputs (for non-mobile) */}
         {!isMobile && (
-          <div className="bg-white p-4 rounded-lg shadow-lg space-y-4"> {/* Changed shadow-sm to shadow-lg, removed border */}
+          <div className="bg-[#FFF8E7] p-4 rounded-lg shadow-lg space-y-4">
             <div> 
               <h3 className={`text-lg font-semibold mb-4 ${fonts.subheading.className}`}>
                 {t('select_event_dates', {defaultValue: 'Select Event Dates'})}
@@ -279,7 +279,7 @@ export const GuruControls: React.FC<GuruControlsProps> = ({
         )} 
 
         {/* Filters and Actions */}
-        <div className="rounded-lg p-4 bg-white space-y-4 flex flex-col shadow-lg"> {/* Added rounded-lg, shadow-lg, removed border and rounded-md */}
+        <div className="rounded-lg p-4 bg-[#FFF8E7] space-y-4 flex flex-col shadow-lg">
           <div className="space-y-4"> 
             <div className="flex justify-between items-center">
               <h3 className={`text-lg font-semibold ${fonts.subheading.className}`}>

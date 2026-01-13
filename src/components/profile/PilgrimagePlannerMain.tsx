@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { useEffect, useRef, useCallback } from "react";
+import { format, eachDayOfInterval } from "date-fns";
 import { type AuthContextType } from "@/context/AuthContext";
 import { type LanguageContextType } from "@/context/LanguageContext";
 import { Language } from "@/types";
@@ -38,6 +39,9 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
 }) => {
   const { toast } = useToast();
   const { fonts } = useFont();
+
+  // Ref для отслеживания ручного изменения даты (чтобы предотвратить автоперераспределение)
+  const isManualDateChangeRef = useRef(false);
 
   // Используем наши кастомные хуки
   const {
@@ -165,6 +169,13 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     setSavedGoals,
     setSearchResultsOrder
   });
+
+  // Обёртка для handleUpdatePlannedItemDateTime, которая устанавливает флаг ручного изменения
+  const handleUpdateDateTimeWithFlag = useCallback((itemId: string, itemType: string, newDate: string, newTime: string) => {
+    // Устанавливаем флаг, что это ручное изменение (не из автоперераспределения)
+    isManualDateChangeRef.current = true;
+    handleUpdatePlannedItemDateTime(itemId, itemType, newDate, newTime);
+  }, [handleUpdatePlannedItemDateTime]);
 
   // Эффект для загрузки городов
   useEffect(() => {
@@ -323,6 +334,115 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
     loadSavedGoals();
   }, [authContext.auth.user, setSavedGoals]);
 
+  // Эффект для автоматического перераспределения дат для выбранного маршрута
+  useEffect(() => {
+    console.log('Route effect triggered:', {
+      hasSelectedRoute: !!selectedRoute,
+      selectedRouteId: selectedRoute?.id,
+      selectedRoutePlacesLength: selectedRoutePlaces?.length,
+      hasDateRange: !!selectedDateRange,
+      dateRangeFrom: selectedDateRange?.from,
+      dateRangeTo: selectedDateRange?.to
+    });
+
+    // Если выбран маршрут, но даты не заданы - используем существующие даты из мест
+    if (selectedRoute && selectedRoutePlaces && selectedRoutePlaces.length > 0 && (!selectedDateRange || !selectedDateRange.from)) {
+      // Проверяем, есть ли у мест даты
+      const placesWithDates = selectedRoutePlaces.filter((p: any) => p.date);
+      console.log('Places with dates:', placesWithDates.map((p: any) => ({ id: p.id, name: p.name, date: p.date })));
+
+      if (placesWithDates.length > 0) {
+        // Устанавливаем диапазон дат на основе имеющихся дат
+        const dates = placesWithDates.map((p: any) => new Date(p.date)).sort((a, b) => a.getTime() - b.getTime());
+        console.log('Setting date range from places:', dates);
+
+        if (dates.length > 0) {
+          setSelectedDateRange({
+            from: dates[0],
+            to: dates[dates.length - 1]
+          });
+        }
+      }
+    }
+    // Перераспределяем даты когда есть выбранный маршрут и полный диапазон дат
+    else if (selectedDateRange && selectedDateRange.from && selectedDateRange.to !== undefined) {
+      // Пропускаем перераспределение если это было ручное изменение даты
+      if (isManualDateChangeRef.current) {
+        console.log('Skipping auto-redistribution after manual date change');
+        isManualDateChangeRef.current = false;
+        return;
+      }
+
+      if (selectedRoute && selectedRoutePlaces && selectedRoutePlaces.length > 0) {
+        // Проверяем, нужно ли перераспределять даты (сравниваем текущие даты с ожидаемыми)
+        const startDate = selectedDateRange.from;
+        const endDate = selectedDateRange.to || selectedDateRange.from;
+        const intervalDays = eachDayOfInterval({ start: startDate, end: endDate });
+
+        // Вычисляем, какие даты должны быть у мест
+        const expectedDates: string[] = [];
+        const itemsCount = selectedRoutePlaces.length;
+        const daysCount = intervalDays.length;
+
+        if (itemsCount <= daysCount) {
+          const step = daysCount / itemsCount;
+          for (let i = 0; i < itemsCount; i++) {
+            const dayIndex = Math.min(Math.floor(i * step), daysCount - 1);
+            expectedDates.push(format(intervalDays[dayIndex], 'yyyy-MM-dd'));
+          }
+        } else {
+          const itemsPerDay = Math.ceil(itemsCount / daysCount);
+          let currentItemIndex = 0;
+
+          for (let dayIndex = 0; dayIndex < daysCount && currentItemIndex < itemsCount; dayIndex++) {
+            const itemsForThisDay = Math.min(itemsPerDay, itemsCount - currentItemIndex);
+            const formattedDate = format(intervalDays[dayIndex], 'yyyy-MM-dd');
+
+            for (let i = 0; i < itemsForThisDay && currentItemIndex < itemsCount; i++) {
+              expectedDates.push(formattedDate);
+              currentItemIndex++;
+            }
+          }
+        }
+
+        // Проверяем, совпадают ли текущие даты с ожидаемыми
+        const currentDates = selectedRoutePlaces.map((p: any) => p.date);
+        const datesMatch = expectedDates.every((date, index) => date === currentDates[index]);
+
+        // Перераспределяем только если даты не совпадают
+        if (!datesMatch) {
+          console.log('Redistributing dates for route:', {
+            routeId: selectedRoute.id,
+            placesCount: selectedRoutePlaces.length,
+            dateRange: selectedDateRange
+          });
+
+          const updatedPlaces = selectedRoutePlaces.map((place: any, index: number) => ({
+            ...place,
+            date: expectedDates[index]
+          }));
+
+          setSelectedRoutePlaces(updatedPlaces);
+
+          // Также обновляем plannedItems для синхронизации
+          setPlannedItems(prev => prev.map(item => {
+            if (item.type === 'place') {
+              const updatedPlace = updatedPlaces.find((p: any) => p.id === item.data.id);
+              if (updatedPlace) {
+                return { ...item, date: updatedPlace.date };
+              }
+            }
+            return item;
+          }));
+
+          console.log('Auto-distributed dates for selected route:', updatedPlaces.map((p: any) => ({ id: p.id, date: p.date })));
+        } else {
+          console.log('Dates already correctly distributed, skipping redistribution');
+        }
+      }
+    }
+  }, [selectedDateRange, selectedRoute, selectedRoutePlaces, setSelectedRoutePlaces, setPlannedItems, setSelectedDateRange]);
+
   // Определяем, что показывать в списке и на карте
   const getDisplayData = () => {
 
@@ -382,7 +502,8 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
               city_id_for_grouping: cityId, // Используем найденный cityId
               time: null,
               orderIndex: place.order || index,
-              dates: []
+              dates: [],
+              date: (place as any).date || '' // Добавляем дату из place
             });
           });
         }
@@ -620,7 +741,7 @@ export const PilgrimagePlannerMain: React.FC<PilgrimagePlannerMainProps> = ({
                 availableCities={availableCities}
                 language={language}
                 t={t}
-                onUpdateDateTime={handleUpdatePlannedItemDateTime}
+                onUpdateDateTime={handleUpdateDateTimeWithFlag}
                 onRemoveItem={handleRemovePlannedItem}
                 onRemovePreviewItem={handleRemovePreviewItem}
                 onAddPlacesForCity={handleAddPlacesForCity}

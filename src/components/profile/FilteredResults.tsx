@@ -122,7 +122,7 @@ export function FilteredResults({
   }
 
   return (
-    <div className="bg-white rounded-lg shadow-sm border p-4 h-full">
+    <div className="bg-[#FFF8E7] rounded-lg shadow-sm border border-[#FF9800]/20 p-4 h-full">
       <h3 className="text-lg font-semibold mb-4">
         {t('found_results', { defaultValue: 'Найденные результаты' })}
       </h3>

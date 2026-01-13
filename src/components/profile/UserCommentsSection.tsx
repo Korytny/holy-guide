@@ -100,7 +100,7 @@ const UserCommentsSection: React.FC<UserCommentsSectionProps> = ({ onCommentsAnd
     };
 
     return (
-        <div className="bg-white rounded-2xl shadow-xl p-6 md:p-8">
+        <div className="bg-[#FFF8E7] rounded-2xl shadow-xl p-6 md:p-8">
             <h2 className="text-2xl font-semibold mb-6 pb-4 border-b text-center text-gray-900">{t('my_comments')}</h2>
             
             {loadingComments ? (

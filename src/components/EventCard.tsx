@@ -20,80 +20,96 @@ const EventCard: React.FC<EventCardProps> = ({ event, className }) => {
   const { language, t } = useLanguage();
   const { auth, isFavorite, toggleFavorite } = useAuth();
   const { fonts } = useFont();
-  
+
   const eventName = getLocalizedText(event.name, language);
   const eventDescription = getLocalizedText(event.description, language);
   const isEventFavorite = auth.isAuthenticated && auth.user ? isFavorite('event', event.id) : false;
 
    const handleFavoriteClick = (e: React.MouseEvent) => {
-    e.preventDefault(); 
-    e.stopPropagation(); 
+    e.preventDefault();
+    e.stopPropagation();
     // toggleFavorite handles the auth check
     if (event.id) {
       toggleFavorite('event', event.id);
     }
   };
-  
+
   return (
-     <div 
+     <Link
+        to={`/events/${event.id}`}
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 h-full flex flex-col", 
+            "block group rounded-xl shadow-lg overflow-hidden transition-shadow duration-200 h-full flex flex-col",
+            "bg-[#FFF8E7]", // Cream background from design
             className
         )}
+        style={{ maxWidth: '400px', width: '100%' }}
     >
-      {/* Image Section */}
-      <div className="relative">
-         <Link to={`/events/${event.id}`} className="absolute inset-0 z-0"></Link> 
-        <img 
-          src={event.imageUrl || '/placeholder.svg'} 
-          alt={eventName} 
-          className="w-full h-48 object-cover transition-transform duration-300 group-hover:scale-105"
+      {/* Image Section with Orange Gradient */}
+      <div className="relative h-56 overflow-hidden">
+        {/* Orange gradient overlay - fades out on hover */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#FF5722] to-[#FF9800] opacity-20 z-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-0" />
+        <img
+          src={event.imageUrl || '/placeholder.svg'}
+          alt={eventName}
+          className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />
-        {/* Favorite Button - Always visible */} 
+
+        {/* Favorite Button - Red circle with white heart */}
         {event.id && (
-            <Button 
-                variant="ghost" 
-                size="icon"
-                className="absolute top-2 right-2 rounded-full bg-black/40 hover:bg-black/60 text-white z-10 h-8 w-8"
-                onClick={handleFavoriteClick}
-                aria-label={isEventFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
+            <button
+              className={cn(
+                "absolute top-3 right-3 h-10 w-10 rounded-full z-10 flex items-center justify-center transition-all",
+                isEventFavorite
+                  ? "bg-[#FF3B30] text-white"
+                  : "bg-white/80 hover:bg-white text-[#FF3B30]"
+              )}
+              onClick={handleFavoriteClick}
+              aria-label={isEventFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
             >
-                <Heart 
-                    size={16} 
-                    className={cn("transition-colors", isEventFavorite ? "fill-red-500 text-red-500" : "text-white")}
-                />
-            </Button>
+              <Heart
+                size={18}
+                className={cn(
+                  "transition-colors",
+                  isEventFavorite ? "fill-white text-white" : ""
+                )}
+              />
+            </button>
         )}
-        {/* Removed date badge from top */}
       </div>
-      {/* Content Section */} 
-      <Link to={`/events/${event.id}`} className="p-3 flex-grow flex flex-col justify-between">
-           <div> 
-             <h3 className={cn(
-               "text-base font-bold mb-1 truncate text-[#09332A]",
-               fonts.heading.className
-             )} title={eventName}>{eventName}</h3>
-             <p className={cn(
-               "text-sm text-black line-clamp-3 mb-3",
-               fonts.body.className
-             )}>
-                 {eventDescription || t('no_description_available')}
-             </p>
-           </div>
-          {/* Footer with date info */} 
-          {event.date && (
-              <div className="flex items-center mt-1">
-                  <Badge variant="outline" className="text-xs px-1.5 py-0.5 flex items-center gap-1 border-[#09332A] text-[#09332A]">
-                      <Calendar size={12} className="flex-shrink-0" />
-                      <span>{new Date(event.date).toLocaleDateString()}</span>
-                  </Badge>
-                  <span className="ml-2 text-blue-600 hover:underline cursor-pointer">
-                    {t('explore_on_map')}
-                  </span>
-              </div>
-          )}
-      </Link>
-    </div>
+
+      {/* Content Section */}
+      <div className="p-5 flex-grow flex flex-col">
+        {/* Title */}
+        <h3 className={cn(
+          "text-2xl font-bold mb-2 text-[#333333]",
+          fonts.heading.className
+        )} title={eventName}>{eventName}</h3>
+
+        {/* Description */}
+        <p className={cn(
+          "text-sm text-[#666666] line-clamp-3 mb-4 leading-relaxed",
+          fonts.body.className
+        )}>
+             {eventDescription || t('no_description_available')}
+        </p>
+
+        {/* Event Date Badge */}
+        <div className="mt-auto pt-2">
+            <div className="flex items-center justify-center py-3 bg-[#FFE0B2] rounded-lg">
+                <Calendar size={20} className="text-[#FF9800] mr-2"/>
+                <span className={cn(
+                    "text-sm font-medium text-[#333333]",
+                    fonts.subheading.className
+                )}>
+                    {event.date
+                        ? new Date(event.date).toLocaleDateString()
+                        : t('event_date_label')
+                    }
+                </span>
+            </div>
+        </div>
+      </div>
+    </Link>
   );
 };
 

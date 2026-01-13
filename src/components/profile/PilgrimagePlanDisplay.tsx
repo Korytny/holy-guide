@@ -4,7 +4,7 @@ import { DragDropContext, Droppable, Draggable, DropResult, DraggableProvided, D
 import { Language, PlannedItem, City, Place, Event, Route } from '../../types';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Trash2, PlusCircle, GripVertical, Search, Dice5, ChevronDown } from 'lucide-react';
+import { Trash2, PlusCircle, GripVertical, Search, Dice5, ChevronDown, Calendar } from 'lucide-react';
 import { getLocalizedText } from '../../utils/languageUtils';
 import { cn } from '@/lib/utils';
 
@@ -51,6 +51,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
   const searchTimeout = useRef<NodeJS.Timeout>();
   const [searchResultsForCity, setSearchResultsForCity] = useState<Record<string, Place[]>>({});
   const [collapsedCities, setCollapsedCities] = useState<Set<string>>(new Set());
+  const [expandedDateFields, setExpandedDateFields] = useState<Set<string>>(new Set()); // Track which date fields are expanded
 
   // Унифицируем данные для отображения в PlannedItem[]
   const displayItems = useMemo(() => {
@@ -65,6 +66,18 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
         newSet.delete(cityId);
       } else {
         newSet.add(cityId);
+      }
+      return newSet;
+    });
+  };
+
+  const toggleDateFieldExpand = (itemId: string) => {
+    setExpandedDateFields(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(itemId)) {
+        newSet.delete(itemId);
+      } else {
+        newSet.add(itemId);
       }
       return newSet;
     });
@@ -255,8 +268,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
             newOrderedItems.push(...group.childItems);
           }
         });
-
-              } else {
+      } else {
         // В обычном режиме собираем полный список в правильном порядке
         newOrderedItems = [];
         groupedItems.forEach(group => {
@@ -267,8 +279,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
             newOrderedItems.push(...group.childItems);
           }
         });
-
-              }
+      }
     }
 
     // Обновляем orderIndex для всех элементов в финальном массиве
@@ -338,9 +349,27 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
 
   return (
     <DragDropContext onDragEnd={handleOnDragEnd}>
-      <div className="border rounded-md p-0 bg-white h-full">
+      <div className="rounded-md p-0 bg-[#FFF8E7] h-full">
         {groupedItems.length === 0 && displayItems.length === 0 ? (
-          <div className="p-4 text-gray-500">{t('plan_results_placeholder')}</div>
+          <div className="p-6">
+            <div className="bg-[#FFE0B2] rounded-lg p-6 space-y-4">
+              <h4 className="text-lg font-semibold text-gray-900 mb-4">Планировщик паломничества</h4>
+              <div className="space-y-3">
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF9800] rounded-full flex items-center justify-center text-white font-bold">1</div>
+                  <p className="text-sm text-gray-700">Выбор по критериям — используйте фильтры слева для поиска мест по типам, датам и городам</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF9800] rounded-full flex items-center justify-center text-white font-bold">2</div>
+                  <p className="text-sm text-gray-700">Сохраненные маршруты — выберите готовый маршрут из списка ниже или загрузите ранее сохраненный план</p>
+                </div>
+                <div className="flex items-start gap-3">
+                  <div className="flex-shrink-0 w-8 h-8 bg-[#FF9800] rounded-full flex items-center justify-center text-white font-bold">3</div>
+                  <p className="text-sm text-gray-700">Маршрут из избранного — нажмите кнопку "Найти в избранном" чтобы добавить любимые места в план</p>
+                </div>
+              </div>
+            </div>
+          </div>
         ) : (
           <Droppable droppableId="all-cities" type="CITY_GROUP">
             {(providedOuter: DroppableProvided) => (
@@ -351,26 +380,26 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                 {groupedItems.map((group, cityIndex) => (
                   <Draggable key={group.cityItem.data.id} draggableId={group.cityItem.data.id} index={cityIndex}>
                     {(providedCity: DraggableProvided) => (
-                      <div 
-                        ref={providedCity.innerRef} 
-                        {...providedCity.draggableProps} 
-                        className="mb-2 border rounded-md shadow-sm"
+                      <div
+                        ref={providedCity.innerRef}
+                        {...providedCity.draggableProps}
+                        className="mb-2 rounded-md shadow-sm"
                       >
-                        <div className="flex items-center justify-between p-2 bg-blue-50 hover:bg-blue-100 rounded-t-md">
+                        <div className="flex items-center justify-between p-2 bg-[#FFE0B2] hover:bg-[#FFCC80] rounded-t-md">
                           <div className="flex items-center flex-1 gap-3">
                             <div {...providedCity.dragHandleProps} className="cursor-grab">
                               <GripVertical size={20} className="text-gray-500" />
                             </div>
-                            <button 
+                            <button
                               onClick={() => toggleCityCollapse(group.cityItem.data.id)}
-                              className="flex items-center gap-2 hover:bg-blue-200 rounded px-2 py-1 transition-colors"
+                              className="flex items-center gap-2 hover:bg-[#FFD54F] rounded px-2 py-1 transition-colors"
                             >
-                              <ChevronDown 
-                                size={16} 
-                                className={`text-blue-700 transition-transform ${collapsedCities.has(group.cityItem.data.id) ? 'rotate-0' : 'rotate-180'}`}
+                              <ChevronDown
+                                size={16}
+                                className={`text-[#E65100] transition-transform ${collapsedCities.has(group.cityItem.data.id) ? 'rotate-0' : 'rotate-180'}`}
                               />
-                              <span className="font-semibold text-blue-700">
-                                <Link 
+                              <span className="font-semibold text-[#E65100]">
+                                <Link
                                   to={`/cities/${group.cityItem.data.id}`}
                                   target="_blank"
                                   className="hover:underline"
@@ -480,11 +509,11 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                           
                           <div className="flex items-center gap-1">
                             {onAddPlacesForCity && (
-                              <Button 
-                                  variant="ghost" 
-                                  size="icon" 
-                                  onClick={() => onAddPlacesForCity!(group.cityItem.data.id)} 
-                                  className="text-blue-600 hover:text-blue-800 h-8 w-8"
+                              <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  onClick={() => onAddPlacesForCity!(group.cityItem.data.id)}
+                                  className="text-[#E65100] hover:text-[#BF360C] h-8 w-8"
                                   title={t('add_random_place_for_city_tooltip', {defaultValue: 'Add random place for this city'})}
                               >
                                   <Dice5 size={18} />
@@ -506,16 +535,51 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                         {!collapsedCities.has(group.cityItem.data.id) && (
                           <Droppable droppableId={`city-droppable-${group.cityItem.data.id}`} type="ITEM_IN_CITY">
                             {(providedInner: DroppableProvided) => (
-                              <div ref={providedInner.innerRef} {...providedInner.droppableProps} className="p-2 bg-white rounded-b-md min-h-[30px]">
+                              <div ref={providedInner.innerRef} {...providedInner.droppableProps} className="p-2 rounded-b-md min-h-[30px]">
                                 {group.childItems.length > 0 ? group.childItems.map((item, itemIndex) => {
                                   const draggableId = `${item.type}-${item.data.id}-${item.orderIndex}`;
                                   return (
                                     <Draggable key={draggableId} draggableId={draggableId} index={itemIndex}>
-                                      {(providedItem: DraggableProvided) => (
-                                        <div 
-                                          ref={providedItem.innerRef} 
-                                          {...providedItem.draggableProps} 
-                                          className="flex items-center p-1.5 mb-1 bg-gray-50 hover:bg-gray-100 rounded shadow-xs"
+                                      {(providedItem: DraggableProvided) => {
+                                        // Определяем цвет плашки в зависимости от типа места
+                                        let plaqueBg = 'bg-[#FFE0B2]';
+                                        let plaqueHover = 'hover:bg-[#FFCC80]';
+                                        let plaqueBorder = '';
+
+                                        if (item.type === 'place') {
+                                          const place = item.data as Place;
+                                          if (place.type === 1) { // temple - синий
+                                            plaqueBg = 'bg-blue-100';
+                                            plaqueHover = 'hover:bg-blue-200';
+                                            plaqueBorder = 'border-l-4 border-blue-400';
+                                          } else if (place.type === 2) { // samadhi - красный
+                                            plaqueBg = 'bg-red-100';
+                                            plaqueHover = 'hover:bg-red-200';
+                                            plaqueBorder = 'border-l-4 border-red-400';
+                                          } else if (place.type === 3) { // kunda - зеленый
+                                            plaqueBg = 'bg-green-100';
+                                            plaqueHover = 'hover:bg-green-200';
+                                            plaqueBorder = 'border-l-4 border-green-400';
+                                          } else if (place.type === 4) { // sacred_site - оранжевый
+                                            plaqueBg = 'bg-orange-100';
+                                            plaqueHover = 'hover:bg-orange-200';
+                                            plaqueBorder = 'border-l-4 border-orange-400';
+                                          }
+                                        } else if (item.type === 'event') {
+                                          plaqueBg = 'bg-purple-100';
+                                          plaqueHover = 'hover:bg-purple-200';
+                                          plaqueBorder = 'border-l-4 border-purple-400';
+                                        } else if (item.type === 'route') {
+                                          plaqueBg = 'bg-emerald-100';
+                                          plaqueHover = 'hover:bg-emerald-200';
+                                          plaqueBorder = 'border-l-4 border-emerald-400';
+                                        }
+
+                                        return (
+                                        <div
+                                          ref={providedItem.innerRef}
+                                          {...providedItem.draggableProps}
+                                          className={`flex items-center p-1.5 mb-1 ${plaqueBg} ${plaqueHover} rounded shadow-xs ${plaqueBorder}`}
                                         >
                                           <div {...providedItem.dragHandleProps} className="cursor-grab pr-3 flex items-center">
                                             <GripVertical size={16} className="text-gray-400" />
@@ -541,7 +605,7 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                                         case 1: return "text-blue-600 hover:text-blue-800"; // temple
                                                         case 2: return "text-red-600 hover:text-red-800"; // samadhi
                                                         case 3: return "text-green-600 hover:text-green-800"; // kunda
-                                                        case 4: return "text-yellow-600 hover:text-yellow-800"; // sacred_site
+                                                        case 4: return "text-orange-600 hover:text-orange-800"; // sacred_site
                                                         default: return "text-indigo-600 hover:text-indigo-800";
                                                       }
                                                     })() :
@@ -554,13 +618,25 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                               );
                                             })()}
                                           </div>
-                                          <Input 
-                                            type="date" 
-                                            value={item.date || ''} 
-                                            onChange={(e) => onUpdateDateTime(item.data.id, item.type, e.target.value, item.time || '')} 
-                                            className="w-auto p-1 text-xs ml-2 h-7"
-                                            placeholder={t('date_placeholder')} 
-                                          />
+                                          {item.date || expandedDateFields.has(`${item.type}-${item.data.id}`) ? (
+                                            <Input
+                                              type="date"
+                                              value={item.date || ''}
+                                              onChange={(e) => onUpdateDateTime(item.data.id, item.type, e.target.value, item.time || '')}
+                                              className="w-auto p-1 text-xs ml-2 h-7"
+                                              placeholder={t('date_placeholder')}
+                                            />
+                                          ) : (
+                                            <Button
+                                              variant="ghost"
+                                              size="icon"
+                                              onClick={() => toggleDateFieldExpand(`${item.type}-${item.data.id}`)}
+                                              className="ml-2 text-[#E65100] hover:text-[#BF360C] h-7 w-7"
+                                              title={t('set_date', {defaultValue: 'Set date'})}
+                                            >
+                                              <Calendar size={14} />
+                                            </Button>
+                                          )}
                                           {item.type === 'event' && (
                                             <Input
                                               type="time"
@@ -580,7 +656,8 @@ export const PilgrimagePlanDisplay: React.FC<PilgrimagePlanDisplayProps> = ({
                                             <Trash2 size={14} />
                                           </Button>
                                         </div>
-                                      )}
+                                        );
+                                      }}
                                     </Draggable>
                                   );
                                 }) : (

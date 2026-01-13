@@ -100,7 +100,8 @@ const PlaceDetail = () => {
 
   return (
     <Layout hideNavbar={true}>
-      <div className="app-container py-6">
+      <div className="bg-gradient-to-b from-orange-50 to-orange-100 min-h-screen">
+        <div className="app-container py-6">
                  {/* Back Button */}
                  <div className="flex justify-between items-center mb-6">
                     <button
@@ -141,7 +142,8 @@ const PlaceDetail = () => {
                 {id && (
                     <CommentsSection entityType="place" entityId={id} />
                 )}
-            </div>
+        </div>
+      </div>
         </Layout>
     );
 };

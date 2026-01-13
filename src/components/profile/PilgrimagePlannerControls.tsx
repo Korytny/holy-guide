@@ -34,6 +34,14 @@ export const PLACE_SUBTYPES_OPTIONS: { value: PlaceSubtype; labelKey: string; Ic
   { value: 'sacred_site', labelKey: 'place_type_sacred_site', Icon: Sparkles },
 ];
 
+// Цвета для каждого типа места
+const PLACE_TYPE_COLORS: Record<PlaceSubtype, { bg: string; border: string; text: string; hover: string }> = {
+  temple: { bg: 'bg-blue-100', border: 'border-blue-400', text: 'text-blue-700', hover: 'hover:bg-blue-200' },
+  samadhi: { bg: 'bg-red-100', border: 'border-red-400', text: 'text-red-700', hover: 'hover:bg-red-200' },
+  kunda: { bg: 'bg-green-100', border: 'border-green-400', text: 'text-green-700', hover: 'hover:bg-green-200' },
+  sacred_site: { bg: 'bg-orange-100', border: 'border-orange-400', text: 'text-orange-700', hover: 'hover:bg-orange-200' },
+};
+
 const EVENT_SUBTYPES_OPTIONS: { value: EventSubtype; labelKey: string; Icon: React.ElementType }[] = [
   { value: "festival", labelKey: "event_type_festival", Icon: PartyPopper },
   { value: "practice", labelKey: "event_type_practice", Icon: Zap },
@@ -80,9 +88,9 @@ interface PilgrimagePlannerControlsProps {
     isLoadingData?: boolean; 
   }
   
-  const ORANGE_BUTTON_CLASS = "bg-saffron hover:bg-saffron/90 text-white"; 
-  const BEIGE_BACKGROUND_CLASS = "bg-orange-50";
-  const CARD_BACKGROUND_CLASS = 'bg-card'; 
+  const ORANGE_BUTTON_CLASS = "bg-[#FFB74D] hover:bg-[#FFA726] text-white";
+  const BEIGE_BACKGROUND_CLASS = "bg-[#FFF8E7]";
+  const CARD_BACKGROUND_CLASS = 'bg-[#FFE0B2]'; 
   
   export const PilgrimagePlannerControls: React.FC<PilgrimagePlannerControlsProps> = ({
     availableCities,
@@ -228,7 +236,9 @@ interface PilgrimagePlannerControlsProps {
                               const nameB = getLocalizedText(b.name, language);
                               return nameA.localeCompare(nameB, language);
                             })
-                            .map(city => (
+                            .map(city => {
+                            const isSelected = filterSelectedCityIds.includes(city.id);
+                            return (
                             <CarouselItem key={city.id} className="pl-1 basis-auto">
                               <ToggleGroup type="multiple" value={filterSelectedCityIds} onValueChange={() => {}} className="m-0 p-0">
                                 <ToggleGroupItem
@@ -236,16 +246,17 @@ interface PilgrimagePlannerControlsProps {
                                   onClick={() => toggleFilter(filterSelectedCityIds, city.id, onFilterSelectedCityIdsChange)}
                                   variant="outline"
                                   className={`px-3 py-1.5 text-sm ${fonts.body.className} ${
-                                    filterSelectedCityIds.includes(city.id)
-                                    ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground' 
-                                    : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'
+                                    isSelected
+                                    ? 'bg-[#FFE0B2] border-[#FFB74D] text-[#E65100] hover:bg-[#FFCC80] data-[state=on]:bg-[#FFE0B2] data-[state=on]:text-[#E65100]'
+                                    : 'border-gray-300 bg-white text-gray-700 hover:bg-[#FFF8E1]'
                                   }`}
                                 >
                                   {getLocalizedText(city.name, language)}
                                 </ToggleGroupItem>
                               </ToggleGroup>
                             </CarouselItem>
-                          ))}
+                          );
+                          })}
                         </CarouselContent>
                         <CarouselPrevious className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
                         <CarouselNext className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
@@ -253,9 +264,9 @@ interface PilgrimagePlannerControlsProps {
                     ) : (
                       <ToggleGroup
                         type="multiple"
-                        className="flex-wrap justify-start gap-1" 
-                        value={filterSelectedCityIds} 
-                        onValueChange={onFilterSelectedCityIdsChange} 
+                        className="flex-wrap justify-start gap-1"
+                        value={filterSelectedCityIds}
+                        onValueChange={onFilterSelectedCityIdsChange}
                       >
                         {availableCities
                           .slice()
@@ -272,9 +283,9 @@ interface PilgrimagePlannerControlsProps {
                                 value={city.id}
                                 variant="outline"
                                 className={`px-2 py-1 text-sm ${fonts.body.className} ${
-                                  isSelected 
-                                  ? 'bg-primary text-primary-foreground hover:bg-primary/90 data-[state=on]:bg-primary data-[state=on]:text-primary-foreground' 
-                                  : 'border-input bg-transparent hover:bg-accent hover:text-accent-foreground'
+                                  isSelected
+                                  ? 'bg-[#FFE0B2] border-[#FFB74D] text-[#E65100] hover:bg-[#FFCC80] data-[state=on]:bg-[#FFE0B2] data-[state=on]:text-[#E65100]'
+                                  : 'border-gray-300 bg-white text-gray-700 hover:bg-[#FFF8E1]'
                                 }`}
                               >
                                 {getLocalizedText(city.name, language)}
@@ -292,37 +303,53 @@ interface PilgrimagePlannerControlsProps {
                   {isMobile ? (
                     <Carousel opts={{ align: "start", loop: false, dragFree: true }} className="w-full">
                       <CarouselContent className="-ml-1 py-1">
-                        {PLACE_SUBTYPES_OPTIONS.map(opt => (
-                          <CarouselItem key={opt.value} className="pl-1 basis-auto">
-                            <Button 
-                              variant={selectedPlaceSubtypes.includes(opt.value) ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => toggleFilter(selectedPlaceSubtypes, opt.value, onSelectedPlaceSubtypesChange)}
-                              className={`text-xs px-3 py-1.5 ${fonts.body.className}`}
-                            >
-                              <opt.Icon className="mr-1.5 h-4 w-4" />
-                              {t(opt.labelKey)}
-                            </Button>
-                          </CarouselItem>
-                        ))}
+                        {PLACE_SUBTYPES_OPTIONS.map(opt => {
+                          const isSelected = selectedPlaceSubtypes.includes(opt.value);
+                          const colors = PLACE_TYPE_COLORS[opt.value];
+                          return (
+                            <CarouselItem key={opt.value} className="pl-1 basis-auto">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleFilter(selectedPlaceSubtypes, opt.value, onSelectedPlaceSubtypesChange)}
+                                className={`text-xs px-3 py-1.5 ${fonts.body.className} ${
+                                  isSelected
+                                    ? `${colors.bg} ${colors.border} ${colors.text} ${colors.hover}`
+                                    : 'bg-white border-gray-300 text-gray-700 hover:bg-[#FFF8E1]'
+                                }`}
+                              >
+                                <opt.Icon className={`mr-1.5 h-4 w-4 ${isSelected ? colors.text : 'text-gray-500'}`} />
+                                {t(opt.labelKey)}
+                              </Button>
+                            </CarouselItem>
+                          );
+                        })}
                       </CarouselContent>
                       <CarouselPrevious className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
                       <CarouselNext className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
                     </Carousel>
                   ) : (
                     <div className="flex flex-wrap gap-1">
-                      {PLACE_SUBTYPES_OPTIONS.map(opt => (
-                        <Button 
-                          key={opt.value} 
-                          variant={selectedPlaceSubtypes.includes(opt.value) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleFilter(selectedPlaceSubtypes, opt.value, onSelectedPlaceSubtypesChange)}
-                          className={`text-xs px-2 py-1 ${fonts.body.className}`}
-                        >
-                          <opt.Icon className="mr-1 h-3 w-3" />
-                          {t(opt.labelKey)}
-                        </Button>
-                      ))}
+                      {PLACE_SUBTYPES_OPTIONS.map(opt => {
+                        const isSelected = selectedPlaceSubtypes.includes(opt.value);
+                        const colors = PLACE_TYPE_COLORS[opt.value];
+                        return (
+                          <Button
+                            key={opt.value}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleFilter(selectedPlaceSubtypes, opt.value, onSelectedPlaceSubtypesChange)}
+                            className={`text-xs px-2 py-1 ${fonts.body.className} ${
+                              isSelected
+                                ? `${colors.bg} ${colors.border} ${colors.text} ${colors.hover}`
+                                : 'bg-white border-gray-300 text-gray-700 hover:bg-[#FFF8E1]'
+                            }`}
+                          >
+                            <opt.Icon className={`mr-1 h-3 w-3 ${isSelected ? colors.text : 'text-gray-500'}`} />
+                            {t(opt.labelKey)}
+                          </Button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -333,37 +360,51 @@ interface PilgrimagePlannerControlsProps {
                   {isMobile ? (
                     <Carousel opts={{ align: "start", loop: false, dragFree: true }} className="w-full">
                       <CarouselContent className="-ml-1 py-1">
-                        {EVENT_SUBTYPES_OPTIONS.map(opt => (
-                          <CarouselItem key={opt.value} className="pl-1 basis-auto">
-                            <Button 
-                              variant={selectedEventSubtypes.includes(opt.value) ? 'default' : 'outline'}
-                              size="sm"
-                              onClick={() => toggleFilter(selectedEventSubtypes, opt.value, onSelectedEventSubtypesChange)}
-                              className={`text-xs px-3 py-1.5 ${fonts.body.className}`}
-                            >
-                              <opt.Icon className="mr-1.5 h-4 w-4" />
-                              {t(opt.labelKey)}
-                            </Button>
-                          </CarouselItem>
-                        ))}
+                        {EVENT_SUBTYPES_OPTIONS.map(opt => {
+                          const isSelected = selectedEventSubtypes.includes(opt.value);
+                          return (
+                            <CarouselItem key={opt.value} className="pl-1 basis-auto">
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => toggleFilter(selectedEventSubtypes, opt.value, onSelectedEventSubtypesChange)}
+                                className={`text-xs px-3 py-1.5 ${fonts.body.className} ${
+                                  isSelected
+                                    ? 'bg-[#FFE0B2] border-[#FFB74D] text-[#E65100] hover:bg-[#FFCC80]'
+                                    : 'bg-white border-gray-300 text-gray-700 hover:bg-[#FFF8E1]'
+                                }`}
+                              >
+                                <opt.Icon className="mr-1.5 h-4 w-4" />
+                                {t(opt.labelKey)}
+                              </Button>
+                            </CarouselItem>
+                          );
+                        })}
                       </CarouselContent>
                       <CarouselPrevious className="absolute -left-3 sm:-left-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
                       <CarouselNext className="absolute -right-3 sm:-right-4 top-1/2 -translate-y-1/2 z-10 bg-background/80 hover:bg-background border-slate-300 disabled:opacity-30 h-8 w-8" />
                     </Carousel>
                   ) : (
                     <div className="flex flex-wrap gap-2">
-                      {EVENT_SUBTYPES_OPTIONS.map(opt => (
-                        <Button 
-                          key={opt.value} 
-                          variant={selectedEventSubtypes.includes(opt.value) ? 'default' : 'outline'}
-                          size="sm"
-                          onClick={() => toggleFilter(selectedEventSubtypes, opt.value, onSelectedEventSubtypesChange)}
-                          className={`text-xs ${fonts.body.className}`}
-                        >
-                          <opt.Icon className="mr-1.5 h-4 w-4" />
-                          {t(opt.labelKey)}
-                        </Button>
-                      ))}
+                      {EVENT_SUBTYPES_OPTIONS.map(opt => {
+                        const isSelected = selectedEventSubtypes.includes(opt.value);
+                        return (
+                          <Button
+                            key={opt.value}
+                            variant="outline"
+                            size="sm"
+                            onClick={() => toggleFilter(selectedEventSubtypes, opt.value, onSelectedEventSubtypesChange)}
+                            className={`text-xs ${fonts.body.className} ${
+                              isSelected
+                                ? 'bg-[#FFE0B2] border-[#FFB74D] text-[#E65100] hover:bg-[#FFCC80]'
+                                : 'bg-white border-gray-300 text-gray-700 hover:bg-[#FFF8E1]'
+                            }`}
+                          >
+                            <opt.Icon className="mr-1.5 h-4 w-4" />
+                            {t(opt.labelKey)}
+                          </Button>
+                        );
+                      })}
                     </div>
                   )}
                 </div>
@@ -423,10 +464,10 @@ interface PilgrimagePlannerControlsProps {
   
           <div className="flex-shrink-0 pt-2 border-t border-black/10">
             <div className="space-y-2">
-              <Button onClick={onSearch} className="w-full" disabled={isLoadingData}>
+              <Button onClick={onSearch} className={`w-full ${ORANGE_BUTTON_CLASS} font-semibold`} disabled={isLoadingData}>
                 {isLoadingData ? t('loading_short_button_text', { defaultValue: 'Loading...' }) : t('search_button', { defaultValue: 'Search' })}
               </Button>
-              
+
               <div className="flex flex-col sm:flex-row sm:gap-1">
                 { (currentLoadedGoalId || showPlanNameInput) ? (
                   <div className="flex-1 min-w-0 flex flex-col gap-1">
@@ -438,10 +479,9 @@ interface PilgrimagePlannerControlsProps {
                       onChange={(e) => onGoalNameChange(e.target.value)}
                       className={`${fonts.body.className} text-sm h-8`}
                     />
-                    <Button 
+                    <Button
                       size="sm"
-                      variant="outline"
-                      className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
+                      className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2 ${ORANGE_BUTTON_CLASS} font-semibold`}
                       onClick={() => {
                               onSaveOrUpdateGoal(goalNameValue);
                           if (showPlanNameInput && !currentLoadedGoalId) {
@@ -454,30 +494,28 @@ interface PilgrimagePlannerControlsProps {
                     </Button>
                   </div>
                 ) : (
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`}
-                    onClick={() => setShowPlanNameInput(true)} 
+                  <Button
+                    size="sm"
+                    className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2 ${ORANGE_BUTTON_CLASS} font-semibold`}
+                    onClick={() => setShowPlanNameInput(true)}
                   >
                     {t(saveButtonTextKey)}
                   </Button>
                 )}
-                
-                <Button 
-                  size="sm" 
-                  variant="outline" 
-                  className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2`} 
+
+                <Button
+                  size="sm"
+                  className={`flex-1 min-w-0 ${fonts.subheading.className} text-sm px-2 ${ORANGE_BUTTON_CLASS} font-semibold`}
                   onClick={onAddFavoritesToPlan}
                 >
                   {t('find_from_favorites')}
                 </Button>
-  
-                <Button 
+
+                <Button
                   size="sm"
-                  variant="outline" 
-                  onClick={onFullReset} 
-                  className={`flex-1 min-w-0 border-destructive text-destructive hover:bg-destructive/10 ${fonts.subheading.className} text-sm px-2`}
+                  variant="outline"
+                  onClick={onFullReset}
+                  className={`flex-1 min-w-0 border-[#FFB74D] text-[#FFB74D] hover:bg-[#FFF8E7] ${fonts.subheading.className} text-sm px-2 font-semibold`}
                 >
                     {t('clear_short_button_text', {defaultValue: 'Clear'})}
                 </Button>

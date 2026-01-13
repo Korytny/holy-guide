@@ -177,7 +177,8 @@ const CityDetail: React.FC = (): JSX.Element => {
 
   // REMOVED Layout wrapper from the main return statement
   return (
-      <div className="app-container py-6">
+      <div className="bg-gradient-to-b from-orange-50 to-orange-100 min-h-screen">
+        <div className="app-container py-6">
         {/* Back Button */}
         <div className="flex justify-between items-center mb-6">
             <button
@@ -219,7 +220,7 @@ const CityDetail: React.FC = (): JSX.Element => {
         </div>
 
                 {/* Map Section - Added spacing */}
-                <div className="mt-8 bg-white rounded-xl shadow-sm p-6 mb-10">
+                <div className="mt-8">
                     <CityMapSection places={places} />
                 </div>
 
@@ -228,6 +229,7 @@ const CityDetail: React.FC = (): JSX.Element => {
           <CommentsSection entityType="city" entityId={id} />
         )}
 
+        </div>
       </div>
   );
 };

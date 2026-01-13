@@ -1,5 +1,5 @@
 {
-  "app_title": "Pilgrim",
+  "app_title": "HolySpots",
   "no_date": "No date",
     "explore": "Explore",
     "back_to_cities": "Back to Cities",
@@ -178,7 +178,7 @@
     "no_items_for_this_category": "No items for this category yet.",
     "no_items_for_this_group": "No items in this group yet.",
     "no_items_for_this_city": "No items planned for this city yet.",
-    "no_route_items_for_map": "Add a specific place in any city. Drag and drop Places in a City or cities themselves to create a route from start to finish.",
+    "no_route_items_for_map": "<strong>Add objects to your route in three ways:</strong>\n\n1️⃣ By criteria — select cities, place types, and dates\n\n2️⃣ Designed routes — choose a pre-made route from the list\n\n3️⃣ From favorites — add your saved places",
     "date_placeholder": "Select date",
     "time_placeholder": "Select time",
     "object": "Object",

@@ -22,7 +22,7 @@ const Navbar = ({ className = '' }: NavbarProps) => {
   // Removed handleSignOut function
 
   return (
-    <div className={`bg-white shadow-sm border-b ${className}`}>
+    <div className={`bg-gradient-to-r from-[#FFF8E7] to-[#FFE0B2] shadow-md ${className}`}>
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-full relative">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
@@ -31,7 +31,7 @@ const Navbar = ({ className = '' }: NavbarProps) => {
           </div>
 
           <div className="absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-            <h1 className={`text-xl ${fonts.heading.className} cursor-pointer text-[#09332A]`} onClick={() => navigate('/')}>
+            <h1 className={`text-xl font-bold ${fonts.heading.className} cursor-pointer text-gray-900 hover:text-gray-700 transition-colors`} onClick={() => navigate('/')}>
               {t('app_title')}
             </h1>
           </div>
@@ -40,20 +40,20 @@ const Navbar = ({ className = '' }: NavbarProps) => {
             {auth.isAuthenticated ? (
               <Button
                 variant="ghost"
-                className={`flex items-center gap-2 ${fonts.subheading.className}`}
+                className={`flex items-center gap-2 text-gray-900 hover:text-gray-700 hover:bg-white/50 transition-colors ${fonts.subheading.className}`}
                 onClick={() => navigate('/profile')}
               >
                 <User size={18} />
-                <span className="hidden sm:inline">{t("profile")}</span>
+                <span className="hidden sm:inline font-medium">{t("profile")}</span>
               </Button>
             ) : (
-              <Button 
-                variant="ghost" 
-                className={`flex items-center gap-2 ${fonts.subheading.className}`}
+              <Button
+                variant="ghost"
+                className={`flex items-center gap-2 text-gray-900 hover:text-gray-700 hover:bg-white/50 transition-colors ${fonts.subheading.className}`}
                 onClick={() => navigate('/auth')}
               >
                 <User size={18} />
-                {t("sign_in")}
+                <span className="font-medium">{t("sign_in")}</span>
               </Button>
             )}
           </div>

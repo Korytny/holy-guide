@@ -111,7 +111,8 @@ const RouteDetail = () => {
 
   return (
     <Layout hideNavbar={true}>
-      <div className="app-container py-6">
+      <div className="bg-gradient-to-b from-orange-50 to-orange-100 min-h-screen">
+        <div className="app-container py-6">
          {/* Back Button */}
           <div className="flex justify-between items-center mb-6">
             <button
@@ -148,10 +149,11 @@ const RouteDetail = () => {
                   />
                 </div>
         
-        {/* Comments Section */} 
+        {/* Comments Section */}
         {id && (
            <CommentsSection entityType="route" entityId={id} />
         )}
+        </div>
       </div>
     </Layout>
   );

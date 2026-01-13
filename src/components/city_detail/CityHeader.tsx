@@ -50,82 +50,45 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
     const cityName = cleanName(getLocalizedText(city.name, language));
 
     return (
-        <div className="relative w-full h-64 md:h-96"> 
-            <img 
-                src={city.imageUrl} 
+        <div className="relative w-full h-80 md:h-96">
+            <img
+                src={city.imageUrl}
                 alt={cityName}
                 className="absolute inset-0 w-full h-full object-cover rounded-xl shadow-lg"
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent rounded-xl"></div>
-            
-             
-            {/* Favorite Button */}
+            {/* Warm orange-pink gradient overlay */}
+            <div className="absolute inset-0 bg-gradient-to-b from-orange-400/30 via-pink-300/20 to-black/50 rounded-xl"></div>
+
+            {/* Favorite Button - Red */}
             {city && (
-              <Button 
-                variant="ghost" 
+              <Button
+                variant="ghost"
                 size="icon"
-                className="absolute top-4 right-4 rounded-full bg-black/40 hover:bg-black/60 text-white z-10"
-                onClick={() => toggleFavorite('city', city.id)} 
+                className={cn(
+                  "absolute top-4 right-4 rounded-full z-10",
+                  isCityFavorite
+                    ? "bg-red-500 hover:bg-red-600 text-white"
+                    : "bg-white/80 hover:bg-white text-red-500"
+                )}
+                onClick={() => toggleFavorite('city', city.id)}
                 aria-label={isCityFavorite ? t('remove_from_favorites') : t('add_to_favorites')}
               >
-                <Heart size={20} className={isCityFavorite ? "fill-red-500 text-red-500" : ""} />
+                <Heart size={20} className={isCityFavorite ? "fill-white" : ""} />
               </Button>
             )}
-             
-            {/* City Name & Country */}
-            <div className="absolute bottom-0 left-0 right-0 p-4 md:p-6 pointer-events-none">
-                <div className="bg-black/60 rounded-lg px-4 py-3 w-full">
-                    <h1 className={cn(
-                      "text-2xl md:text-3xl font-bold text-white mb-2 text-center",
-                      fonts.heading.className
-                    )}>
-                      {cityName}
-                    </h1>
-                    <div className="flex justify-center gap-2 pointer-events-auto">
-                        {places.length > 0 && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTabSelect('places', 'places-content');
-                            }}
-                            className="focus:outline-none"
-                          >
-                            <Badge variant="secondary" className="bg-white/90 text-black hover:bg-white cursor-pointer">
-                              <MapPin size={14} className="mr-1" />
-                              {places.length} {t('places')}
-                            </Badge>
-                          </button>
-                        )}
-                        {routes.length > 0 && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTabSelect('routes', 'routes-content');
-                            }}
-                            className="focus:outline-none"
-                          >
-                            <Badge variant="secondary" className="bg-white/90 text-black hover:bg-white cursor-pointer">
-                              <RouteIcon size={14} className="mr-1" />
-                              {routes.length} {t('routes')}
-                            </Badge>
-                          </button>
-                        )}
-                        {events.length > 0 && (
-                          <button 
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              onTabSelect('events', 'events-content');
-                            }}
-                            className="focus:outline-none"
-                          >
-                            <Badge variant="secondary" className="bg-white/90 text-black hover:bg-white cursor-pointer">
-                              <CalendarDays size={14} className="mr-1" />
-                              {events.length} {t('events')}
-                            </Badge>
-                          </button>
-                        )}
-                    </div>
-                </div>
+
+            {/* City Name - Centered */}
+            <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                <h1 className={cn(
+                  "text-5xl md:text-6xl lg:text-7xl font-bold text-white text-center px-4",
+                  fonts.heading.className
+                )}
+                style={{
+                  textShadow: '2px 2px 8px rgba(0, 0, 0, 0.6)',
+                  letterSpacing: '0.02em'
+                }}>
+                  {cityName}
+                </h1>
             </div>
         </div>
     );

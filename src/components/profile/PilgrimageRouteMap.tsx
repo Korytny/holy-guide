@@ -124,8 +124,13 @@ const PilgrimageRouteMap: React.FC<PilgrimageRouteMapProps> = ({
   if (itemsForMap.length === 0) {
 
     return (
-      <div className="h-full flex items-center justify-center text-center">
-        <p>{t('no_route_items_for_map', { defaultValue: 'Нет элементов для отображения маршрута на карте.'})}</p>
+      <div className="h-full flex items-center justify-center text-center p-3">
+        <div className="max-w-2xl">
+          <p
+            className="text-gray-700 whitespace-pre-line text-left"
+                            dangerouslySetInnerHTML={{ __html: t('no_route_items_for_map', { defaultValue: 'Нет элементов для отображения маршрута на карте.'}) }}
+                          />
+        </div>
       </div>
     );
   }
