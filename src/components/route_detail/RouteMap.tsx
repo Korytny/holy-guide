@@ -75,7 +75,7 @@ const RouteMap: React.FC<RouteMapProps> = ({ places, maintainZoom = false, route
     }
 
     return (
-        <div className="h-full flex flex-col mb-10 bg-white rounded-xl shadow-sm p-0 w-full max-w-none min-h-[400px]">
+        <div className="h-full flex flex-col mb-10 rounded-xl shadow-sm p-0 w-full max-w-none min-h-[400px]">
             <div className="flex-grow rounded-none overflow-hidden w-full h-full min-h-[400px]">
                 <CityMapView
                     locations={mapLocations}

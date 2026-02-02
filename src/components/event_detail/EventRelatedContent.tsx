@@ -37,8 +37,8 @@ const EventRelatedContent: React.FC<EventRelatedContentProps> = ({
                 <TabsTrigger
                     value="places"
                     className={cn(
-                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
-                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-white",
+                        "border-gray-200 bg-[#FFF3E0] hover:border-[#FFB74D] hover:bg-white",
                         fonts.subheading.className
                     )}
                 >
@@ -60,8 +60,8 @@ const EventRelatedContent: React.FC<EventRelatedContentProps> = ({
                 <TabsTrigger
                     value="routes"
                     className={cn(
-                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
-                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-white",
+                        "border-gray-200 bg-[#FFF3E0] hover:border-[#FFB74D] hover:bg-white",
                         fonts.subheading.className
                     )}
                 >

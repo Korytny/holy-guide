@@ -80,7 +80,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         )}
       </div>
 
-      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-6 pointer-events-none transform translate-y-[40px]">
+      <div className="absolute inset-0 z-10 flex flex-col items-center justify-center text-center p-6 pointer-events-none transform translate-y-[180px]">
         {isTextLoading ? (
            <div className="space-y-2 pointer-events-auto">
              <Skeleton className="h-8 w-64 mx-auto bg-gray-400/50" />
@@ -89,8 +89,8 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
         ) : textError ? (
            <p className="text-red-500 pointer-events-auto">{textError}</p>
         ) : titleData ? (
-           <div className="pointer-events-auto backdrop-blur-md bg-white/20 p-8 rounded-2xl shadow-2xl border border-white/30">
-             <h1 className={`text-4xl font-bold sm:text-5xl lg:text-6xl mb-4 ${fonts.heading.className}`}
+           <div className="pointer-events-auto backdrop-blur-md bg-white/20 p-5 rounded-2xl shadow-2xl border border-white/30">
+             <h1 className={`text-3xl font-bold sm:text-4xl lg:text-5xl mb-3 ${fonts.heading.className}`}
                  style={{
                    color: '#FFF8E7',
                    textShadow: `
@@ -105,7 +105,7 @@ const HeroSection: React.FC<HeroSectionProps> = ({ imageCloudItems, isCloudLoadi
                  }}>
                {getLocalizedString(titleData.name)}
              </h1>
-             <p className={`mt-4 text-lg text-[#FFE0B2] max-w-xl mx-auto font-medium ${fonts.subheading.className}`}
+             <p className={`mt-3 text-base text-[#FFE0B2] max-w-2xl mx-auto font-medium ${fonts.subheading.className}`}
                 style={{
                   textShadow: '1px 1px 4px rgba(0, 0, 0, 0.7)',
                   letterSpacing: '0.025em'

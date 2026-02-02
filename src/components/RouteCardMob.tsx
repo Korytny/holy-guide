@@ -49,7 +49,7 @@ const RouteCardMob: React.FC<RouteCardMobProps> = ({ route, className, onRouteCl
   return (
     <div
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer",
+            "block group bg-[#FFF8E7] rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200 cursor-pointer",
             className
         )}
         onClick={handleCardClick}

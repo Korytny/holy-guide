@@ -54,7 +54,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
     <Link
         to={`/cities/${city.id}`}
         className={cn(
-            "block group bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200",
+            "block group bg-[#FFF8E7] rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow duration-200",
             className
         )}
     >

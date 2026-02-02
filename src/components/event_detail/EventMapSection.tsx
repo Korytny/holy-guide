@@ -39,7 +39,7 @@ const EventMapSection: React.FC<EventMapSectionProps> = ({ places }) => {
     }
 
     return (
-        <div className="mb-10 bg-white rounded-xl shadow-sm p-6 md:p-8">
+        <div className="mb-10 bg-gradient-to-b from-orange-50 to-orange-100 rounded-xl shadow-sm p-6 md:p-8">
             <h2 className={cn(
               "text-xl md:text-2xl font-bold mb-6 text-[#09332A]",
               fonts.heading.className

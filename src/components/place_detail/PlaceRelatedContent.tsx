@@ -37,8 +37,8 @@ const PlaceRelatedContent: React.FC<PlaceRelatedContentProps> = ({
                 <TabsTrigger
                     value="routes"
                     className={cn(
-                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
-                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-white",
+                        "border-gray-200 bg-[#FFF3E0] hover:border-[#FFB74D] hover:bg-white",
                         fonts.subheading.className
                     )}
                 >
@@ -60,8 +60,8 @@ const PlaceRelatedContent: React.FC<PlaceRelatedContentProps> = ({
                 <TabsTrigger
                     value="events"
                     className={cn(
-                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-[#FFF3E0]",
-                        "border-gray-200 bg-white hover:border-[#FFB74D] hover:bg-[#FFF8E1]",
+                        "flex items-center justify-center gap-2 min-w-[160px] py-3 px-6 rounded-xl border-2 transition-all data-[state=active]:border-[#FF9800] data-[state=active]:bg-white",
+                        "border-gray-200 bg-[#FFF3E0] hover:border-[#FFB74D] hover:bg-white",
                         fonts.subheading.className
                     )}
                 >
@@ -86,7 +86,7 @@ const PlaceRelatedContent: React.FC<PlaceRelatedContentProps> = ({
                    {relatedRoutes.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">{t('no_routes_found')}</div>
                 ) : (
-                    <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2'}`}>
+                    <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {relatedRoutes.map(route => (
                             <RelatedRouteCardComponent key={route.id} route={route} />
                         ))}
@@ -98,7 +98,7 @@ const PlaceRelatedContent: React.FC<PlaceRelatedContentProps> = ({
                   {relatedEvents.length === 0 ? (
                     <div className="text-center py-10 text-gray-500">{t('no_events_found')}</div>
                 ) : (
-                    <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'sm:grid-cols-2'}`}>
+                    <div className={`grid gap-6 ${isSmallScreen ? 'grid-cols-1' : 'md:grid-cols-2 lg:grid-cols-3'}`}>
                         {relatedEvents.map(event => (
                             <RelatedEventCardComponent key={event.id} event={event} />
                         ))}
