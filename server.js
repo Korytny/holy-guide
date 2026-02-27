@@ -52,7 +52,7 @@ const server = http.createServer((req, res) => {
   });
 });
 
-server.listen(PORT, () => {
+server.listen(PORT, '0.0.0.0', () => {
   console.log(`SPA server running on port ${PORT}`);
   console.log('All routes will serve index.html for client-side routing');
 });
