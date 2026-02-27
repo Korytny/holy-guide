@@ -24,7 +24,7 @@ const CityAbout: React.FC<CityAboutProps> = ({ city }) => {
         : [];
 
     return (
-        <div className="bg-white rounded-xl shadow-sm p-6 md:p-8">
+        <div className="bg-[#FFF8E7] rounded-xl shadow-sm p-6 md:p-8">
              <h2 className={cn(
                "text-xl md:text-2xl font-bold mb-4 text-[#09332A]",
                fonts.heading.className

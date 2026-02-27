@@ -564,8 +564,80 @@ export const usePilgrimagePlannerHandlers = ({
   }, [plannedItems, t, setPlannedItems]);
 
   const handleDistributeDates = useCallback(() => {
-    distributeDatesForItems(plannedItems);
-  }, [plannedItems, selectedDateRange]);
+    // Если выбран маршрут, распределяем даты для его мест
+    if (selectedRoute && selectedRoutePlaces.length > 0) {
+      distributeDatesForItems(selectedRoutePlaces.map(place => ({
+        type: 'place' as const,
+        data: place,
+        city_id_for_grouping: place.cityId,
+        time: null,
+        orderIndex: 0,
+        date: place.date || null
+      })));
+
+      // Обновляем selectedRoutePlaces с распределенными датами
+      if (!selectedDateRange || !selectedDateRange.from) {
+        toast({
+          title: t('please_select_date_range_first'),
+          variant: "saffron"
+        });
+        return;
+      }
+
+      const startDate = selectedDateRange.from;
+      const endDate = selectedDateRange.to || selectedDateRange.from;
+      const intervalDays = eachDayOfInterval({ start: startDate, end: endDate });
+      if (intervalDays.length === 0) return;
+
+      const updatedPlaces = selectedRoutePlaces.map((place, index) => ({ ...place }));
+      const itemsCount = updatedPlaces.length;
+      const daysCount = intervalDays.length;
+
+      if (itemsCount <= daysCount) {
+        const step = daysCount / itemsCount;
+        updatedPlaces.forEach((place, itemIndex) => {
+          const dayIndex = Math.min(Math.floor(itemIndex * step), daysCount - 1);
+          const targetDate = intervalDays[dayIndex];
+          place.date = format(targetDate, 'yyyy-MM-dd');
+        });
+      } else {
+        const itemsPerDay = Math.ceil(itemsCount / daysCount);
+        let currentItemIndex = 0;
+
+        for (let dayIndex = 0; dayIndex < daysCount && currentItemIndex < itemsCount; dayIndex++) {
+          const itemsForThisDay = Math.min(itemsPerDay, itemsCount - currentItemIndex);
+          const targetDate = intervalDays[dayIndex];
+          const formattedDate = format(targetDate, 'yyyy-MM-dd');
+
+          for (let i = 0; i < itemsForThisDay && currentItemIndex < itemsCount; i++) {
+            updatedPlaces[currentItemIndex].date = formattedDate;
+            currentItemIndex++;
+          }
+        }
+      }
+
+      setSelectedRoutePlaces(updatedPlaces);
+
+      // Также обновляем plannedItems для синхронизации
+      setPlannedItems(prev => prev.map(item => {
+        if (item.type === 'place' && selectedRoutePlaces.some(p => p.id === item.data.id)) {
+          const updatedPlace = updatedPlaces.find(p => p.id === item.data.id);
+          if (updatedPlace) {
+            return { ...item, date: updatedPlace.date };
+          }
+        }
+        return item;
+      }));
+
+      toast({
+        title: t('dates_distributed_for_route', { defaultValue: 'Dates distributed for route places' }),
+        variant: "default"
+      });
+    } else {
+      // Обычное распределение для plannedItems
+      distributeDatesForItems(plannedItems);
+    }
+  }, [plannedItems, selectedRoute, selectedRoutePlaces, selectedDateRange, t, setPlannedItems, setSelectedRoutePlaces]);
 
   const handleStageCityForPlanning = useCallback((city: City) => {
     setStagedForPlanningCities(prev => [...prev, city]);
@@ -657,15 +729,81 @@ export const usePilgrimagePlannerHandlers = ({
   const handleDateRangeChange = useCallback((range: any) => {
     console.log('handleDateRangeChange called with:', range);
 
-    // Сначала обновляем состояние диапазона
-    setSelectedDateRange(range);
-
     // Перераспределяем даты только когда есть полный диапазон дат (начало и конец)
     if (range && range.from && range.to !== undefined) {
-      console.log('Valid date range, redistributing dates:', range);
+      console.log('Valid date range, redistributing dates:', range, 'selectedRoute:', selectedRoute, 'selectedRoutePlaces length:', selectedRoutePlaces?.length);
 
-      // Используем таймаут чтобы гарантировать что состояние обновится
-      setTimeout(() => {
+      // Если выбран маршрут, перераспределяем даты для его мест
+      if (selectedRoute && selectedRoutePlaces && selectedRoutePlaces.length > 0) {
+        const startDate = range.from;
+        const endDate = range.to || range.from;
+        const intervalDays = eachDayOfInterval({ start: startDate, end: endDate });
+        if (intervalDays.length === 0) return;
+
+        const updatedPlaces = selectedRoutePlaces.map((place, index) => ({ ...place }));
+        const itemsCount = updatedPlaces.length;
+        const daysCount = intervalDays.length;
+
+        if (itemsCount <= daysCount) {
+          const step = daysCount / itemsCount;
+          updatedPlaces.forEach((place, itemIndex) => {
+            const dayIndex = Math.min(Math.floor(itemIndex * step), daysCount - 1);
+            const targetDate = intervalDays[dayIndex];
+            place.date = format(targetDate, 'yyyy-MM-dd');
+          });
+        } else {
+          const itemsPerDay = Math.ceil(itemsCount / daysCount);
+          let currentItemIndex = 0;
+
+          for (let dayIndex = 0; dayIndex < daysCount && currentItemIndex < itemsCount; dayIndex++) {
+            const itemsForThisDay = Math.min(itemsPerDay, itemsCount - currentItemIndex);
+            const targetDate = intervalDays[dayIndex];
+            const formattedDate = format(targetDate, 'yyyy-MM-dd');
+
+            for (let i = 0; i < itemsForThisDay && currentItemIndex < itemsCount; i++) {
+              updatedPlaces[currentItemIndex].date = formattedDate;
+              currentItemIndex++;
+            }
+          }
+        }
+
+        setSelectedRoutePlaces(updatedPlaces);
+        console.log('Updated route places with dates:', updatedPlaces.map(p => ({ id: p.id, name: p.name, date: p.date })));
+
+        // Также обновляем plannedItems для синхронизации
+        setPlannedItems(prev => {
+          const updated = prev.map(item => {
+            if (item.type === 'place') {
+              const updatedPlace = updatedPlaces.find(p => p.id === item.data.id);
+              if (updatedPlace) {
+                return { ...item, date: updatedPlace.date };
+              }
+            }
+            return item;
+          });
+          console.log('Updated plannedItems with dates');
+          return updated;
+        });
+
+        toast({
+          title: t('dates_auto_distributed', {
+            defaultValue: 'Dates have been automatically distributed for route places.'
+          }),
+          variant: "default"
+        });
+      } else if (showSearchResults && (filteredPlaces.length > 0 || filteredEvents.length > 0)) {
+        // Обрабатываем результаты поиска отдельно
+        const { places: placesWithDates, events: eventsWithDates } = distributeDatesForFilteredItems(filteredPlaces, filteredEvents, range);
+        setFilteredPlaces(placesWithDates);
+        setFilteredEvents(eventsWithDates);
+
+        toast({
+          title: t('dates_auto_distributed', {
+            defaultValue: 'Dates have been automatically distributed for search results.'
+          }),
+          variant: "default"
+        });
+      } else {
         // Используем функциональное обновление чтобы получить актуальное состояние
         setPlannedItems(currentItems => {
           if (currentItems.length > 0) {
@@ -684,27 +822,14 @@ export const usePilgrimagePlannerHandlers = ({
           }
           return currentItems;
         });
-
-        // Обрабатываем результаты поиска отдельно
-        if (showSearchResults && (filteredPlaces.length > 0 || filteredEvents.length > 0)) {
-          // Перераспределяем даты для результатов поиска
-          const { places: placesWithDates, events: eventsWithDates } = distributeDatesForFilteredItems(filteredPlaces, filteredEvents, range);
-          setFilteredPlaces(placesWithDates);
-          setFilteredEvents(eventsWithDates);
-
-          // Показываем уведомление о перераспределении дат
-          toast({
-            title: t('dates_auto_distributed', {
-              defaultValue: 'Dates have been automatically distributed for search results.'
-            }),
-            variant: "default"
-          });
-        }
-      }, 0);
+      }
     } else {
       console.log('Skipping date redistribution - incomplete date range');
     }
-  }, [setSelectedDateRange, showSearchResults, filteredPlaces, filteredEvents, autoDistributeDatesForExistingItems, distributeDatesForFilteredItems, toast, t]);
+
+    // Всегда обновляем состояние диапазона
+    setSelectedDateRange(range);
+  }, [selectedRoute, selectedRoutePlaces, showSearchResults, filteredPlaces, filteredEvents, autoDistributeDatesForExistingItems, distributeDatesForFilteredItems, toast, t, setPlannedItems, setSelectedRoutePlaces, setSelectedDateRange]);
 
   const handleUpdatePlannedItemDateTime = useCallback((itemId: string, itemType: string, newDate: string, newTime: string) => {
     // В режиме поиска обновляем отфильтрованные результаты
@@ -722,6 +847,24 @@ export const usePilgrimagePlannerHandlers = ({
         }
         return item;
       }));
+
+      // Также обновляем selectedRoutePlaces если выбран маршрут
+      if (selectedRoute && itemType === 'place') {
+        setSelectedRoutePlaces(prev => prev.map(place => {
+          if (place.id === itemId) {
+            return { ...place, date: newDate };
+          }
+          return place;
+        }));
+      }
+
+      // И обновляем plannedItems для синхронизации
+      setPlannedItems(prev => prev.map(item => {
+        if (item.data.id === itemId && item.type === itemType) {
+          return { ...item, date: newDate, time: newTime };
+        }
+        return item;
+      }));
     } else {
       // В обычном режиме обновляем plannedItems
       setPlannedItems(prev => prev.map(item => {
@@ -731,7 +874,7 @@ export const usePilgrimagePlannerHandlers = ({
         return item;
       }));
     }
-  }, [setPlannedItems, setFilteredPlaces, setFilteredEvents, showSearchResults]);
+  }, [setPlannedItems, setFilteredPlaces, setFilteredEvents, setSelectedRoutePlaces, showSearchResults, selectedRoute]);
 
   const handleClearPlan = useCallback(() => {
     setPlannedItems([]);

@@ -134,7 +134,7 @@ const PlaceDetail = () => {
                 </div>
 
                 {/* Map Section */}
-                <div className="bg-white rounded-xl shadow-sm p-6 mb-10">
+                <div className="mb-10">
                     <PlaceMap place={place} />
                 </div>
 

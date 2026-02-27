@@ -22,7 +22,7 @@ const Navbar = ({ className = '' }: NavbarProps) => {
   // Removed handleSignOut function
 
   return (
-    <div className={`bg-gradient-to-r from-[#FFF8E7] to-[#FFE0B2] shadow-md ${className}`}>
+    <div className={`bg-[#FFF8E7] shadow-md ${className}`}>
       <div className="max-w-7xl mx-auto px-2 sm:px-4 lg:px-8 h-full relative">
         <div className="flex h-14 sm:h-16 items-center justify-between">
           <div className="flex items-center gap-2 sm:gap-4">
