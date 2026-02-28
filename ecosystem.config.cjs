@@ -1,9 +1,10 @@
 module.exports = {
   apps: [{
     name: 'holy-guide',
-    script: 'spa-server.js',
+    script: 'npx',
+    args: 'serve /home/deployer/projects/holy-guide/dist -l 8082',
     cwd: '/home/deployer/projects/holy-guide',
-    interpreter: 'node',
+    interpreter: 'none',
     watch: false,
     max_memory_restart: '500M',
     env: {
@@ -12,6 +13,7 @@ module.exports = {
     error_file: '/home/deployer/projects/holy-guide/logs/err.log',
     out_file: '/home/deployer/projects/holy-guide/logs/out.log',
     log_file: '/home/deployer/projects/holy-guide/logs/combined.log',
-    time: true
+    time: true,
+    instances: 1
   }]
 };
