@@ -10,6 +10,7 @@ import {
   DropdownMenuSubContent,
 } from '@/components/ui/dropdown-menu'
 import { Button } from '@/components/ui/button'
+import { Type } from 'lucide-react'
 
 export function FontSwitcher() {
   const { fonts, setFont, availableFonts } = useFont()
@@ -28,7 +29,10 @@ export function FontSwitcher() {
           className={`flex items-center gap-2 text-sm ${fonts.subheading.className} hover:text-primary transition-colors`}
           onClick={() => document.getElementById('font-menu')?.click()}
         >
-          {language === 'ru' ? 'Шрифт' : language === 'hi' ? 'फॉन्ट' : 'Font'}
+          <Type size={16} className="text-gray-600 sm:hidden" />
+          <span className="hidden sm:inline">
+            {language === 'ru' ? 'Шрифт' : language === 'hi' ? 'फॉन्ट' : 'Font'}
+          </span>
         </button>
       </DropdownMenuTrigger>
       <DropdownMenuContent className="w-56">
@@ -39,7 +43,7 @@ export function FontSwitcher() {
             </DropdownMenuSubTrigger>
             <DropdownMenuSubContent>
               {availableFonts.map((font) => (
-                <DropdownMenuItem 
+                <DropdownMenuItem
                   key={`${type.id}-${font.name}`}
                   className={`${font.className} ${fonts[type.id].name === font.name ? 'bg-accent' : ''}`}
                   onSelect={() => setFont(font.name, type.id as 'heading' | 'subheading' | 'body')}

@@ -29,9 +29,9 @@ const LanguageSwitcher: React.FC = () => {
       <DropdownMenuTrigger asChild>
         {/* Use a Button as the trigger */}
         <Button variant="ghost" className={`flex items-center gap-2 text-sm ${fonts.subheading.className}`}>
-          <Globe size={16} className="text-gray-600" />
+          <Globe size={16} className="text-gray-600 hidden sm:inline" />
           <span className="hidden sm:inline">{currentLanguage?.name}</span>
-          <span className="sm:hidden">{currentLanguage?.flag}</span>
+          <span className="sm:hidden text-lg">{currentLanguage?.flag}</span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-40"> {/* Align to end */}
