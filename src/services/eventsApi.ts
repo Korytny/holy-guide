@@ -99,7 +99,7 @@ export const getEventsByCityId = async (cityId: string): Promise<Event[]> => {
   try {
     const { data: directEventsData, error: directEventsError } = await supabase
       .from('events')
-      .select('id') 
+      .select('id')
       .eq('city_id', cityId);
 
     if (directEventsError) console.error(`[eventsApi] Error fetching direct event IDs for city ${cityId}:`, directEventsError.message);
@@ -117,14 +117,34 @@ export const getEventsByCityId = async (cityId: string): Promise<Event[]> => {
     } else if (spotsInCity && spotsInCity.length > 0) {
       const spotIdsInCity = spotsInCity.map(s => s.id);
       console.log(`[eventsApi] Found spot IDs in city ${cityId}:`, spotIdsInCity);
-      const { data: spotEventsLinks, error: spotEventsLinksError } = await supabase
-        .from('spot_event')
-        .select('event_id')
-        .in('spot_id', spotIdsInCity);
-      if (spotEventsLinksError) {
-        console.error(`[eventsApi] Error fetching event links for spots:`, spotEventsLinksError.message);
-      } else if (spotEventsLinks && spotEventsLinks.length > 0) {
-        eventIdsFromSpots = spotEventsLinks.map(se => se.event_id);
+      
+      // Split spotIds into batches of 30 to avoid URL length limits
+      const BATCH_SIZE = 30;
+      const batches: string[][] = [];
+      for (let i = 0; i < spotIdsInCity.length; i += BATCH_SIZE) {
+        batches.push(spotIdsInCity.slice(i, i + BATCH_SIZE));
+      }
+
+      // Fetch spot_event links for each batch in parallel
+      const batchResults = await Promise.all(
+        batches.map(batch =>
+          supabase
+            .from('spot_event')
+            .select('event_id')
+            .in('spot_id', batch)
+        )
+      );
+
+      // Combine all results
+      const allSpotEventsLinks = batchResults.flatMap(result => result.data || []);
+      const linkErrors = batchResults.filter(result => result.error);
+      
+      if (linkErrors.length > 0) {
+        console.error(`[eventsApi] Error fetching some event links for spots:`, linkErrors);
+      }
+      
+      if (allSpotEventsLinks && allSpotEventsLinks.length > 0) {
+        eventIdsFromSpots = allSpotEventsLinks.map(se => se.event_id);
         console.log(`[eventsApi] Found event IDs from spots for city ${cityId}:`, eventIdsFromSpots);
       } else {
         console.log('[eventsApi] No event links found for spots in city ', cityId);
@@ -132,12 +152,12 @@ export const getEventsByCityId = async (cityId: string): Promise<Event[]> => {
     } else {
       console.log(`[eventsApi] No spots found in city ${cityId}.`);
     }
-    
+
     const allRelevantEventIds = [...new Set([...directEventIds, ...eventIdsFromSpots])];
     console.log(`[eventsApi] All unique relevant event IDs for city ${cityId}:`, allRelevantEventIds);
 
     if (allRelevantEventIds.length === 0) return [];
-    
+
     const finalEvents = await getEventsByIds(allRelevantEventIds);
     console.log("[eventsApi] Final events for city ${cityId} after all processing:", finalEvents);
     return finalEvents;

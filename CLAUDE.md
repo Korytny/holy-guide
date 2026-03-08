@@ -278,3 +278,171 @@ bun run build
 - **Валюта и оплаты**: Информация о местной валюте и способах пожертвований
 
 *Этот файл создан для помощи в разработке и поддержке проекта HolySpots. Пожалуйста, обновляйте его при значительных изменениях в проекте.*
+
+---
+
+## 🔧 Решение Проблемы с Маршрутами и Событиями (Март 2026)
+
+### 📋 Описание проблемы
+**Симптомы:**
+- В городах с большим количеством объектов (108 spots) не загружались маршруты и события
+- В городах с малым количеством объектов — всё работало
+- Ошибки в консоли браузера: `ERR_FAILED 502 (Bad Gateway)` и CORS errors
+- curl запросы к прокси работали, браузер блокировал запросы
+
+### 🔍 Причина проблемы
+
+#### Архитектура базы данных:
+```
+spots (объекты/места)          routes (маршруты)
+├── id                         ├── id
+├── city (ссылка на город)     └── name
+└── name
+          ↓
+    spot_route (связующая таблица)
+    ├── spot_id (ссылка на spots)
+    └── route_id (ссылка на routes)
+```
+
+#### Запрос который вызывал проблему:
+```sql
+SELECT route_id FROM spot_route 
+WHERE spot_id IN (uuid1, uuid2, uuid3, ..., uuid108)
+```
+
+**URL запроса:**
+```
+/spot_route?select=route_id&spot_id=in.(uuid1,uuid2,uuid3,...,uuid108)
+```
+
+**Длина URL:** ~4000 символов (108 UUID × ~36 символов + запятые)
+
+**Проблема:** nginx proxy отбрасывал запросы с длинными URL → 502 Bad Gateway → браузер показывал CORS ошибку (потому что не получал ответ от сервера)
+
+### ✅ Решение
+
+#### 1. Исправление кода API (пакетные запросы)
+
+**Файл:** `src/services/routesApi.ts`
+
+**Было:**
+```typescript
+const { data: joinData, error: joinError } = await supabase
+  .from('spot_route')
+  .select('route_id')
+  .in('spot_id', spotIds); // 108 ID в одном запросе → URL ~4000 символов
+```
+
+**Стало:**
+```typescript
+// Split spotIds into batches of 30 to avoid URL length limits
+const BATCH_SIZE = 30;
+const batches: string[][] = [];
+for (let i = 0; i < spotIds.length; i += BATCH_SIZE) {
+  batches.push(spotIds.slice(i, i + BATCH_SIZE));
+}
+
+// Fetch spot_route links for each batch in parallel
+const batchResults = await Promise.all(
+  batches.map(batch => 
+    supabase
+      .from('spot_route')
+      .select('route_id')
+      .in('spot_id', batch)
+  )
+);
+
+// Combine all results
+const allJoinData = batchResults.flatMap(result => result.data || []);
+```
+
+**Аналогично исправлено:** `src/services/eventsApi.ts` (функция `getEventsByCityId`)
+
+#### 2. Настройка CORS заголовков в nginx proxy
+
+**Сервер:** `sb.vedareader.ru:8443` (прокси на `rxvckkqqunyqtxjyabub.supabase.co`)
+
+**Конфиг nginx (Nginx Proxy Manager → Custom):**
+```nginx
+more_set_headers 'Access-Control-Allow-Origin: $http_origin';
+more_set_headers 'Access-Control-Allow-Credentials: true';
+more_set_headers 'Access-Control-Allow-Methods: GET, POST, PUT, DELETE, PATCH, OPTIONS';
+more_set_headers 'Access-Control-Allow-Headers: DNT,User-Agent,X-Requested-With,If-Modified-Since,Cache-Control,Content-Type,Range,Authorization,Origin,Accept,apikey,Prefer,X-Client-Info';
+more_set_headers 'Access-Control-Expose-Headers: Content-Range,Content-Length,Accept-Ranges';
+more_set_headers 'Access-Control-Max-Age: 1728000';
+```
+
+#### 3. Исправление spa-server.js
+
+**Файл:** `spa-server.js`
+
+**Проблема:** Ошибка `ERR_INVALID_URL` при парсинге host с обратными слэшами
+
+**Было:**
+```javascript
+const url = new URL(req.url, `http://${req.headers.host}`);
+```
+
+**Стало:**
+```javascript
+// Fix host header - remove backslashes
+let host = req.headers.host || 'localhost:8082';
+host = host.replace(/\\/g, '');
+
+let url;
+try {
+  url = new URL(req.url, 'http://' + host);
+} catch (e) {
+  url = new URL(req.url || '/', 'http://localhost:8082');
+}
+```
+
+### 📊 Результат
+
+| До | После |
+|----|-------|
+| ❌ Маршруты не загружались в городах с 100+ объектами | ✅ Работает в любом городе |
+| ❌ Ошибки 502 Bad Gateway | ✅ Все запросы возвращают 200 |
+| ❌ CORS errors в браузере | ✅ CORS заголовки присутствуют |
+| ❌ 1 запрос с URL ~4000 символов | ✅ 4 запроса с URL ~1000 символов каждый |
+
+### 🛠️ Диагностика (полезные команды)
+
+#### Проверка CORS заголовков:
+```bash
+curl -v -X OPTIONS 'https://sb.vedareader.ru:8443/rest/v1/routes' \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Access-Control-Request-Headers: apikey,Authorization' \
+  2>&1 | grep -i 'access-control'
+```
+
+#### Проверка длинного запроса:
+```bash
+curl -s 'https://sb.vedareader.ru:8443/rest/v1/spot_route?select=route_id&spot_id=in.(uuid1,uuid2,...)' \
+  -H 'apikey: YOUR_KEY' \
+  -w '\nHTTP: %{http_code}\n' -o /dev/null
+```
+
+#### Перезагрузка nginx:
+```bash
+docker exec docker_app_1 nginx -s reload
+```
+
+#### Пересборка приложения:
+```bash
+cd ~/projects/holy-guide
+npm run build
+pm2 restart holy-guide
+```
+
+### 📚 Уроки на будущее
+
+1. **URL length limits:** При использовании `.in()` с большим количеством ID разбивайте на пакеты по 20-30 элементов
+2. **CORS debugging:** Если curl работает а браузер блокирует — проверяйте CORS заголовки и preflight OPTIONS запросы
+3. **nginx proxy buffers:** Для длинных URL может потребоваться `large_client_header_buffers 16 128k;` (но лучше решать на уровне кода)
+4. **Batch queries:** `Promise.all()` для параллельных запросов улучшает производительность
+
+---
+
+*Последнее обновление: 2026-03-08*
+*Статус: Маршруты и события работают во всех городах*

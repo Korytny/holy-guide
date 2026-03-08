@@ -30,9 +30,6 @@ export const getRoutesByCityId = async (cityId: string): Promise<Route[]> => {
     return [];
   }
   try {
-    // This logic seems complex and potentially inefficient.
-    // A direct query using foreign relationships or RPC might be better if performance is an issue.
-    
     // First get all spots in this city
     const { data: spots, error: spotsError } = await supabase
       .from('spots')
@@ -46,19 +43,37 @@ export const getRoutesByCityId = async (cityId: string): Promise<Route[]> => {
 
     const spotIds = spots.map(s => s.id);
 
-    // Then get distinct route IDs associated with these spots
-    const { data: joinData, error: joinError } = await supabase
-      .from('spot_route')
-      .select('route_id')
-      .in('spot_id', spotIds);
-      
-    if (joinError || !joinData?.length) {
-       if (joinError) console.error('Error fetching spot_route links:', joinError);
+    // Split spotIds into batches of 30 to avoid URL length limits
+    const BATCH_SIZE = 30;
+    const batches: string[][] = [];
+    for (let i = 0; i < spotIds.length; i += BATCH_SIZE) {
+      batches.push(spotIds.slice(i, i + BATCH_SIZE));
+    }
+
+    // Fetch spot_route links for each batch in parallel
+    const batchResults = await Promise.all(
+      batches.map(batch => 
+        supabase
+          .from('spot_route')
+          .select('route_id')
+          .in('spot_id', batch)
+      )
+    );
+
+    // Combine all results
+    const allJoinData = batchResults.flatMap(result => result.data || []);
+    const joinErrors = batchResults.filter(result => result.error);
+    
+    if (joinErrors.length > 0) {
+      console.error('Error fetching some spot_route links:', joinErrors);
+    }
+
+    if (allJoinData.length === 0) {
       return [];
     }
 
     // Get unique route IDs
-    const routeIds = [...new Set(joinData.map(item => item.route_id))];
+    const routeIds = [...new Set(allJoinData.map(item => item.route_id))];
     if (routeIds.length === 0) return [];
 
     // Finally fetch full route data
