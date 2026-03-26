@@ -10,6 +10,14 @@ import { cn } from "@/lib/utils";
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 
+// Get image URL - handle both full URLs and relative paths
+const getImageUrl = (imageUrl: string | undefined) => {
+  if (!imageUrl) return '/placeholder.svg';
+  if (imageUrl.startsWith('http')) return imageUrl;
+  // Relative path - construct direct URL to storage via proxy
+  return 'https://sb.productmind.ru/storage/v1/object/public/' + imageUrl;
+};
+
 interface RouteCardProps {
   route: Route;
   className?: string;
@@ -71,7 +79,7 @@ const RouteCard: React.FC<RouteCardProps> = ({ route, className, onAddToPlan, on
         {/* Orange gradient overlay - fades out on hover */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#FF5722] to-[#FF9800] opacity-20 z-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-0" />
         <img
-          src={route.imageUrl || '/placeholder.svg'}
+          src={getImageUrl(route.imageUrl)}
           alt={routeName}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />

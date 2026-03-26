@@ -77,6 +77,7 @@ const CityDetail: React.FC = (): JSX.Element => {
           name: getLocalizedText(cityData.name, language),
           country: cityData.country
         });
+        
         setCity(cityData);
         setPlaces(placesData);
         setOriginalPlaces(placesData);

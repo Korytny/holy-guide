@@ -2,6 +2,16 @@ import { supabase } from '../integrations/supabase/client';
 import { City, CityFromDB, LocalizedText, Json } from '../types';
 import { getLocalizedText } from '../utils/languageUtils';
 
+// Convert Supabase Storage URLs to proxy URLs and fix double slashes
+const convertImageUrlToProxy = (url: string): string => {
+  if (!url) return url;
+  // Convert direct Supabase URLs to proxy URLs and fix double slashes
+  return url.replace(
+    /https:\/\/rxvckkqqunyqtxjyabub\.supabase\.co\/storage\/v1\/object\/public\//g,
+    'https://sb.productmind.ru/storage/v1/object/public/'
+  ).replace(/\/+/g, '/'); // Fix double slashes
+};
+
 const transformCity = (dbCity: CityFromDB): City => {
   const parseText = (text: Json | undefined): LocalizedText => {
     if (!text) return { en: '' };
@@ -32,18 +42,18 @@ const transformCity = (dbCity: CityFromDB): City => {
 
   const hasValidImages = Array.isArray(dbCity.images) && dbCity.images.length > 0;
   const fallbackImage = '/placeholder.svg';
-  
+
   return {
     id: dbCity.id,
     name: parseText(dbCity.name),
-    imageUrl: dbCity.image_url || (hasValidImages ? dbCity.images[0] : fallbackImage),
+    imageUrl: convertImageUrlToProxy(dbCity.image_url || (hasValidImages ? dbCity.images[0] : fallbackImage)),
     country: dbCity.country,
     eventsCount: dbCity.events_count || 0,
     routesCount: dbCity.routes_count || 0,
     spotsCount: dbCity.spots_count || 0,
     favoritesCount: dbCity.favorites_count || 0,
     info: parseInfo(dbCity.info),
-    images: hasValidImages ? dbCity.images : [fallbackImage],
+    images: hasValidImages ? dbCity.images.map(convertImageUrlToProxy) : [fallbackImage],
     createdAt: dbCity.created_at ? new Date(dbCity.created_at) : new Date(),
     updatedAt: dbCity.updated_at ? new Date(dbCity.updated_at) : new Date()
   };

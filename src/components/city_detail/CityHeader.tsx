@@ -1,7 +1,7 @@
 import React, { useCallback, useMemo } from 'react';
 import { useFont } from '../../context/FontContext';
 import { cn } from "@/lib/utils";
-import { City, Place, Route, Event } from '../../types'; // Adjust path
+import { City, Place, Route, Event } from '../../types';
 import { useLanguage } from '../../context/LanguageContext'; // Adjust path
 import { useAuth } from '../../context/AuthContext'; // Adjust path
 import { Button } from '@/components/ui/button';
@@ -49,10 +49,18 @@ const CityHeader: React.FC<CityHeaderProps> = ({ city, places, routes, events, o
     };
     const cityName = cleanName(getLocalizedText(city.name, language));
 
+    // Get image URL - handle both full URLs and relative paths
+    const getImageUrl = useCallback(() => {
+        if (!city?.imageUrl) return '/placeholder.svg';
+        if (city.imageUrl.startsWith('http')) return city.imageUrl;
+        // Relative path - construct direct URL to storage via proxy
+        return 'https://sb.productmind.ru/storage/v1/object/public/' + city.imageUrl;
+    }, [city?.imageUrl]);
+
     return (
         <div className="relative w-full h-80 md:h-96">
             <img
-                src={city.imageUrl}
+                src={getImageUrl()}
                 alt={cityName}
                 className="absolute inset-0 w-full h-full object-cover rounded-xl shadow-lg"
             />

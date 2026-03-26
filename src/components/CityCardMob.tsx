@@ -33,6 +33,13 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
 
   const infoDescription = city.info?.[language] || city.info?.en || '' ;
 
+  // Convert image URL to use proxy and fix double slashes
+  const imageUrl = city.imageUrl
+    ? city.imageUrl
+        .replace('https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/', 'https://sb.productmind.ru/storage/v1/object/public/')
+        .replace(/\/+/g, '/')
+    : '/placeholder.svg';
+
   // Helper to create minimal stat badges
   const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | string | undefined }) => {
       let numCount = typeof count === 'string' ? parseInt(count, 10) : count;
@@ -62,7 +69,7 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
         {/* Image Section */}
         <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
-            src={city.imageUrl || '/placeholder.svg'}
+            src={imageUrl}
             alt={cityName}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

@@ -9,6 +9,14 @@ import { Heart, MapPin } from 'lucide-react'; // MapPin for type
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils";
 
+// Get image URL - handle both full URLs and relative paths
+const getImageUrl = (imageUrl: string | undefined) => {
+  if (!imageUrl) return '/placeholder.svg';
+  if (imageUrl.startsWith('http')) return imageUrl;
+  // Relative path - construct direct URL to storage via proxy
+  return 'https://sb.productmind.ru/storage/v1/object/public/' + imageUrl;
+};
+
 interface PlaceCardMobProps {
   place: Place;
   className?: string;
@@ -54,7 +62,7 @@ const PlaceCardMob: React.FC<PlaceCardMobProps> = ({ place, className }) => {
         {/* Image Section */}
         <div className="relative flex-shrink-0 w-24 h-24 rounded-lg overflow-hidden">
           <img
-            src={place.imageUrl || '/placeholder.svg'}
+            src={getImageUrl(place.imageUrl)}
             alt={placeName}
             className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-105"
           />

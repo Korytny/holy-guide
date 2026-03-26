@@ -33,6 +33,14 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
   // Make sure to get the localized info description
   const infoDescription = getLocalizedText(city.info, language) || t('no_description_available');
 
+  // Get image URL - handle both full URLs and relative paths
+  const getImageUrl = () => {
+    if (!city.imageUrl) return '/placeholder.svg';
+    if (city.imageUrl.startsWith('http')) return city.imageUrl;
+    // Relative path - construct direct URL to storage via proxy
+    return 'https://sb.productmind.ru/storage/v1/object/public/' + city.imageUrl;
+  };
+
   return (
     <Link
         to={`/cities/${city.id}`}
@@ -48,7 +56,7 @@ const CityCard: React.FC<CityCardProps> = ({ city, className }) => {
         {/* Orange gradient overlay - fades out on hover */}
         <div className="absolute inset-0 bg-gradient-to-b from-[#FF5722] to-[#FF9800] opacity-20 z-10 pointer-events-none transition-opacity duration-300 group-hover:opacity-0" />
         <img
-          src={city.imageUrl || '/placeholder.svg'}
+          src={getImageUrl()}
           alt={cityName}
           className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
         />

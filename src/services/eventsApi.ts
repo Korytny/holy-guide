@@ -1,6 +1,15 @@
 import { supabase } from '../integrations/supabase/client';
 import { Event, EventType, Language, LocalizedText } from '../types';
 
+// Convert Supabase Storage URLs to proxy URLs
+const convertImageUrlToProxy = (url: string): string => {
+  if (!url) return url;
+  return url.replace(
+    /https:\/\/rxvckkqqunyqtxjyabub\.supabase\.co\/storage\/v1\/object\/public\//g,
+    'https://sb.productmind.ru/storage/v1/object/public/'
+  );
+};
+
 export interface EventFilters {
   cityId?: string;
   eventCategory?: string;
@@ -21,13 +30,15 @@ const mapDbEventToEvent = (dbEvent: any): Event => {
   if (dbEvent.event_category) {
     event.eventTypeField = dbEvent.event_category as EventType;
   }
-  if (dbEvent.info) { 
-    event.description = dbEvent.info; 
+  if (dbEvent.info) {
+    event.description = dbEvent.info;
   }
   if (dbEvent.images && Array.isArray(dbEvent.images) && dbEvent.images.length > 0) {
-    event.imageUrl = dbEvent.images[0]; 
-  } else if (typeof dbEvent.images === 'string') { 
-    event.imageUrl = dbEvent.images;
+    event.imageUrl = convertImageUrlToProxy(dbEvent.images[0]);
+    event.images = dbEvent.images.map(convertImageUrlToProxy);
+  } else if (typeof dbEvent.images === 'string') {
+    event.imageUrl = convertImageUrlToProxy(dbEvent.images);
+    event.images = [convertImageUrlToProxy(dbEvent.images)];
   }
   return event as Event;
 };

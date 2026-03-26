@@ -1,5 +1,15 @@
 import type { City, Place, Route, Event, LocalizedText } from '../types';
 
+// Convert Supabase Storage URLs to proxy URLs
+const convertImageUrlToProxy = (url: string): string => {
+  if (!url) return url;
+  // Convert direct Supabase URLs to proxy URLs
+  return url.replace(
+    /https:\/\/rxvckkqqunyqtxjyabub\.supabase\.co\/storage\/v1\/object\/public\//g,
+    'https://sb.productmind.ru/storage/v1/object/public/'
+  );
+};
+
 // Helper to parse localized text which might be JSON string or object
 const parseLocalizedText = (field: any): LocalizedText => {
   if (!field) return { en: '' }; // Return empty object if no field
@@ -56,7 +66,7 @@ const isLocalizedTextEmpty = (text: LocalizedText): boolean => {
 export function transformCity(dbCity: any): City {
   const fallbackImage = '/placeholder.svg';
   const images = dbCity.images || [];
-  const mainImageUrl = dbCity.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage);
+  const mainImageUrl = convertImageUrlToProxy(dbCity.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage));
   const infoObject = typeof dbCity.info === 'object' && dbCity.info !== null ? dbCity.info : {};
 
   return {
@@ -68,8 +78,8 @@ export function transformCity(dbCity: any): City {
     routesCount: dbCity.routes_count || 0,
     spotsCount: dbCity.spots_count || 0,
     // Keep full info for City, as it might have structure beyond just description
-    info: infoObject, 
-    images: images,
+    info: infoObject,
+    images: (images || []).map(convertImageUrlToProxy),
     createdAt: new Date(dbCity.created_at || Date.now()),
     updatedAt: new Date(dbCity.updated_at || Date.now())
   };
@@ -78,13 +88,13 @@ export function transformCity(dbCity: any): City {
 export function transformPlace(dbPlace: any): Place {
   const fallbackImage = '/placeholder.svg';
   const images = dbPlace.images || [];
-  const mainImageUrl = dbPlace.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage);
+  const mainImageUrl = convertImageUrlToProxy(dbPlace.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage));
 
   return {
     id: dbPlace.id,
     name: parseLocalizedText(dbPlace.name),
     // Assume 'info' field contains the localized description for Places
-    description: parseLocalizedText(dbPlace.info), 
+    description: parseLocalizedText(dbPlace.info),
     imageUrl: mainImageUrl,
     cityId: dbPlace.city || '',
     location: {
@@ -93,11 +103,11 @@ export function transformPlace(dbPlace: any): Place {
     },
     // We don't include the raw 'info' field in the transformed Place type anymore
     // if its sole purpose was the description.
-    images: images,
+    images: (images || []).map(convertImageUrlToProxy),
     type: dbPlace.type,
     // Preserve order field if it exists (for route places)
     order: dbPlace.order,
-    // Other raw fields like city, coordinates, point, created_at are omitted 
+    // Other raw fields like city, coordinates, point, created_at are omitted
     // unless explicitly needed in the Place type for frontend logic.
   };
 }
@@ -105,7 +115,7 @@ export function transformPlace(dbPlace: any): Place {
 export function transformRoute(dbRoute: any): Omit<Route, 'places' | 'events'> {
   const fallbackImage = '/placeholder.svg';
   const images = dbRoute.images || [];
-  const mainImageUrl = dbRoute.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage);
+  const mainImageUrl = convertImageUrlToProxy(dbRoute.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage));
 
   return {
     id: dbRoute.id,
@@ -114,17 +124,17 @@ export function transformRoute(dbRoute: any): Omit<Route, 'places' | 'events'> {
     description: parseLocalizedText(dbRoute.info),
     imageUrl: mainImageUrl,
     city_id: dbRoute.city_id || [],
-    placeIds: dbRoute.spots || [], 
+    placeIds: dbRoute.spots || [],
     eventIds: dbRoute.events || [],
     // Omit raw info field
-    images: images
+    images: (images || []).map(convertImageUrlToProxy),
   };
 }
 
 export function transformEvent(dbEvent: any): Omit<Event, 'places' | 'routes'> {
    const fallbackImage = '/placeholder.svg';
    const images = dbEvent.images || [];
-   const mainImageUrl = dbEvent.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage);
+   const mainImageUrl = convertImageUrlToProxy(dbEvent.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage));
 
   return {
     id: dbEvent.id,
@@ -138,7 +148,7 @@ export function transformEvent(dbEvent: any): Omit<Event, 'places' | 'routes'> {
     date: dbEvent.date || dbEvent.time,
     time: dbEvent.time,
     // Omit raw info field
-    images: images,
+    images: (images || []).map(convertImageUrlToProxy),
     eventTypeField: dbEvent.type
   };
 }
