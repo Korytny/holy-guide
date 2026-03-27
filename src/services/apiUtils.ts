@@ -1,8 +1,17 @@
 import type { City, Place, Route, Event, LocalizedText } from '../types';
 
-// Convert Supabase Storage URLs to proxy URLs
+// Convert Supabase Storage URLs to proxy URLs and handle relative paths
 const convertImageUrlToProxy = (url: string): string => {
   if (!url) return url;
+  
+  // If it's already a full http URL, return as is
+  if (url.startsWith('http')) return url;
+  
+  // If it's a relative path (holyspots/filename.jpg), construct full URL via proxy
+  if (!url.includes('://')) {
+    return 'https://sb.productmind.ru/storage/v1/object/public/' + url;
+  }
+  
   // Convert direct Supabase URLs to proxy URLs
   return url.replace(
     /https:\/\/rxvckkqqunyqtxjyabub\.supabase\.co\/storage\/v1\/object\/public\//g,
@@ -115,7 +124,8 @@ export function transformPlace(dbPlace: any): Place {
 export function transformRoute(dbRoute: any): Omit<Route, 'places' | 'events'> {
   const fallbackImage = '/placeholder.svg';
   const images = dbRoute.images || [];
-  const mainImageUrl = convertImageUrlToProxy(dbRoute.image_url || (Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage));
+  // routes table doesn't have image_url column, use first image from images array
+  const mainImageUrl = convertImageUrlToProxy(Array.isArray(images) && images.length > 0 ? images[0] : fallbackImage);
 
   return {
     id: dbRoute.id,

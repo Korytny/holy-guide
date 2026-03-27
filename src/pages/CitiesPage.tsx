@@ -37,12 +37,21 @@ const CitiesPage = () => {
         try {
           const citiesData = await getCities();
           setAllCities(citiesData);
+          
+          // Get image URLs for hero section - handle both full URLs and relative paths
+          const getImageUrl = (imageUrl: string | undefined) => {
+            if (!imageUrl) return '/placeholder.svg';
+            if (imageUrl.startsWith('http')) return imageUrl;
+            // Relative path - construct direct URL to storage via proxy
+            return 'https://sb.productmind.ru/storage/v1/object/public/' + imageUrl;
+          };
+          
           const items = citiesData
             .filter(city => city.imageUrl)
             .slice(0, 25)
             .map(city => ({
               id: city.id,
-              imageUrl: city.imageUrl as string,
+              imageUrl: getImageUrl(city.imageUrl) as string,
               alt: getLocalizedText(city.name, language) || 'City',
               link: `/cities/${city.id}`
             }));

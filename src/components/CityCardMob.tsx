@@ -10,6 +10,14 @@ import { Heart, MapPin, Route as RouteIcon, CalendarDays } from 'lucide-react';
 import { getLocalizedText } from '../utils/languageUtils';
 import { cn } from "@/lib/utils";
 
+// Get image URL - handle both full URLs and relative paths
+const getImageUrl = (imageUrl: string | undefined) => {
+  if (!imageUrl) return '/placeholder.svg';
+  if (imageUrl.startsWith('http')) return imageUrl;
+  // Relative path - construct direct URL to storage via proxy
+  return 'https://sb.productmind.ru/storage/v1/object/public/' + imageUrl;
+};
+
 interface CityCardMobProps {
   city: City;
   className?: string;
@@ -33,12 +41,8 @@ const CityCardMob: React.FC<CityCardMobProps> = ({ city, className }) => {
 
   const infoDescription = city.info?.[language] || city.info?.en || '' ;
 
-  // Convert image URL to use proxy and fix double slashes
-  const imageUrl = city.imageUrl
-    ? city.imageUrl
-        .replace('https://rxvckkqqunyqtxjyabub.supabase.co/storage/v1/object/public/', 'https://sb.productmind.ru/storage/v1/object/public/')
-        .replace(/\/+/g, '/')
-    : '/placeholder.svg';
+  // Get image URL
+  const imageUrl = getImageUrl(city.imageUrl);
 
   // Helper to create minimal stat badges
   const StatBadge = ({ icon: Icon, count }: { icon: React.ElementType, count: number | string | undefined }) => {
